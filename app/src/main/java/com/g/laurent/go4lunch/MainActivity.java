@@ -33,20 +33,8 @@ public class MainActivity extends AppCompatActivity {
 
         ButterKnife.bind(this);
 
-        /*image.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-               if(count==0){
-                   image.setColorFilter(getResources().getColor(R.color.colorIconSelected));
-                   count = 1;
-               } else {
-                   image.setColorFilter(getResources().getColor(R.color.colorIconNotSelected));
-                   count = 0;
-               }
-
-            }
-        });*/
-
+        Intent intent = new Intent(this,MapsActivity.class);
+        startActivity(intent);
 
     }
 

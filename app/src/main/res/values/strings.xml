@@ -13,5 +13,8 @@
     <string name="connection_succeed">Authentification réussie !</string>
     <string name="button_login_text_logged">Afficher le profil</string>
     <string name="button_login_text_not_logged">Connexion</string>
+    <string name="workmates">Workmates</string>
+    <string name="map_view">Map View</string>
+    <string name="list_view">List View</string>
 
 </resources>
