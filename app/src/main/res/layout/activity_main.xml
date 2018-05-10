@@ -1,18 +1,53 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:id="@+id/window_sign_in"
     tools:context=".MainActivity">
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Hello World!"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+    <!-- BUTTONS CONTAINER -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="bottom"
+        android:orientation="vertical"
+        android:layout_margin="@dimen/default_large_margin">
 
-</android.support.constraint.ConstraintLayout>
+        <ImageView
+            android:id="@+id/imagetest"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/baseline_map_white_18"
+            />
+
+        <!-- BUTTON CONNECT WITH GOOGLE -->
+        <Button
+            android:id="@+id/main_activity_button_login_google"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/connect_with_google"
+            android:textColor="#fff"
+            android:background="@color/colorGoogleButton"
+            android:textSize="@dimen/default_text_size"
+            android:drawableStart="@drawable/ic_google"
+            android:layout_margin="@dimen/default_large_margin"
+            android:padding="@dimen/default_large_margin"/>
+
+        <!-- BUTTON CONNECT WITH FACEBOOK -->
+        <Button
+            android:id="@+id/main_activity_button_login_facebook"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/connect_with_facebook"
+            android:textColor="#fff"
+            android:background="@color/colorFacebookButton"
+            android:textSize="@dimen/default_text_size"
+            android:drawableStart="@drawable/ic_facebook"
+            android:layout_margin="@dimen/default_large_margin"
+            android:padding="@dimen/default_large_margin"/>
+
+    </LinearLayout>
+
+</android.support.design.widget.CoordinatorLayout>

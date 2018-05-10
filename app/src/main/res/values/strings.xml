@@ -2,4 +2,16 @@
     <string name="app_name">Go4Lunch</string>
     <string name="title_activity_maps">Map</string>
     <string name="radius">500</string>
+    <string name="connect_with_google">Sign in with Google</string>
+    <string name="connect_with_facebook">Sign in with Facebook</string>
+
+
+    <string name="error_not_connected">Vous devez vous connecter !</string>
+    <string name="error_authentication_canceled">Authentification annulée&#8230;</string>
+    <string name="error_no_internet">Aucune connexion internet !</string>
+    <string name="error_unknown_error">Une erreur inconnue s\'est produite&#8230;</string>
+    <string name="connection_succeed">Authentification réussie !</string>
+    <string name="button_login_text_logged">Afficher le profil</string>
+    <string name="button_login_text_not_logged">Connexion</string>
+
 </resources>

@@ -1,50 +1,133 @@
 package com.g.laurent.go4lunch;
 
-import android.Manifest;
 import android.content.Intent;
-import android.content.pm.PackageManager;
-import android.support.annotation.NonNull;
-import android.support.v4.app.ActivityCompat;
-import android.support.v4.app.FragmentActivity;
+import android.support.design.widget.CoordinatorLayout;
+import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.util.Log;
+import android.view.View;
+import android.widget.ImageView;
 
-import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.location.places.PlaceDetectionClient;
-import com.google.android.gms.location.places.PlaceLikelihood;
-import com.google.android.gms.location.places.PlaceLikelihoodBufferResponse;
-import com.google.android.gms.location.places.Places;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
+import com.firebase.ui.auth.AuthUI;
+import com.firebase.ui.auth.ErrorCodes;
+import com.firebase.ui.auth.IdpResponse;
 
-import static android.content.ContentValues.TAG;
+import java.util.Collections;
+import butterknife.BindView;
+import butterknife.ButterKnife;
+import butterknife.OnClick;
 
-public class MainActivity extends FragmentActivity
-        implements GoogleApiClient.OnConnectionFailedListener {
+public class MainActivity extends AppCompatActivity {
 
+    private static final int RC_SIGN_IN = 123;
+    private static final String GOOGLE_SIGN_IN = "google";
+    private static final String FACEBOOK_SIGN_IN = "facebook";
+    @BindView(R.id.window_sign_in) CoordinatorLayout window_sign_in;
 
-
-
+    int count = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        ButterKnife.bind(this);
 
+        /*image.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+               if(count==0){
+                   image.setColorFilter(getResources().getColor(R.color.colorIconSelected));
+                   count = 1;
+               } else {
+                   image.setColorFilter(getResources().getColor(R.color.colorIconNotSelected));
+                   count = 0;
+               }
 
-        Intent intent = new Intent(this,MapsActivity.class);
+            }
+        });*/
 
-        startActivity(intent);
-        //getNumberResults();
 
     }
 
+    @OnClick(R.id.main_activity_button_login_google)
+    public void onClickLoginButtonGoogle() {
+        this.startSignInActivity(GOOGLE_SIGN_IN);
+    }
+
+    @OnClick(R.id.main_activity_button_login_facebook)
+    public void onClickLoginButtonFacebook() {
+        this.startSignInActivity(FACEBOOK_SIGN_IN);
+    }
+
+    private void startSignInActivity(String sign_in){
+
+        switch(sign_in){
+
+            case GOOGLE_SIGN_IN:
+
+                startActivityForResult(
+                        AuthUI.getInstance()
+                                .createSignInIntentBuilder()
+                                .setTheme(R.style.LoginTheme)
+                                .setAvailableProviders(
+                                        Collections.singletonList(new AuthUI.IdpConfig.Builder(AuthUI.GOOGLE_PROVIDER).build())) // SUPPORT GOOGLE
+                                .setIsSmartLockEnabled(false, true)
+                                .setLogo(R.drawable.ic_google)
+                                .build(),
+                        RC_SIGN_IN);
+
+                break;
+
+            case FACEBOOK_SIGN_IN:
+
+                startActivityForResult(
+                        AuthUI.getInstance()
+                                .createSignInIntentBuilder()
+                                .setTheme(R.style.LoginTheme)
+                                .setAvailableProviders(
+                                        Collections.singletonList(new AuthUI.IdpConfig.Builder(AuthUI.FACEBOOK_PROVIDER).build())) // FACEBOOK
+                                .setIsSmartLockEnabled(false, true)
+                                .setLogo(R.drawable.ic_facebook)
+                                .build(),
+                        RC_SIGN_IN);
+
+                break;
+        }
+    }
 
     @Override
-    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
-        System.out.println("eeee    connexion failed !!! ");
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        this.handleResponseAfterSignIn(requestCode, resultCode, data);
     }
+
+    private void showSnackBar(CoordinatorLayout coordinatorLayout, String message){
+        Snackbar.make(coordinatorLayout, message, Snackbar.LENGTH_SHORT).show();
+    }
+
+    private void handleResponseAfterSignIn(int requestCode, int resultCode, Intent data){
+
+        IdpResponse response = IdpResponse.fromResultIntent(data);
+
+        if (requestCode == RC_SIGN_IN) {
+            if (resultCode == RESULT_OK) { // SUCCESS
+                showSnackBar(this.window_sign_in, getString(R.string.connection_succeed));
+
+                // Launch MapsActivity
+                Intent intent = new Intent(this,MapsActivity.class);
+                startActivity(intent);
+
+            } else { // ERRORS
+                if (response == null) {
+                    showSnackBar(this.window_sign_in, getString(R.string.error_authentication_canceled));
+                } else if (response.getErrorCode() == ErrorCodes.NO_NETWORK) {
+                    showSnackBar(this.window_sign_in, getString(R.string.error_no_internet));
+                } else if (response.getErrorCode() == ErrorCodes.UNKNOWN_ERROR) {
+                    showSnackBar(this.window_sign_in, getString(R.string.error_unknown_error));
+                }
+            }
+        }
+    }
+
 }
