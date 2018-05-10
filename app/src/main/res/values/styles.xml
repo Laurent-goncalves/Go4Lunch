@@ -12,7 +12,7 @@
 
 
 
-<!-- STYLE SIGN-IN ACTIVITY -->
+    <!-- STYLE SIGN-IN ACTIVITY -->
     <style name="LoginTheme" parent="AppTheme">
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
