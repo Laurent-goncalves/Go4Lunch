@@ -5,13 +5,10 @@ import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.view.View;
-import android.widget.ImageView;
-
+import android.support.v7.widget.Toolbar;
 import com.firebase.ui.auth.AuthUI;
 import com.firebase.ui.auth.ErrorCodes;
 import com.firebase.ui.auth.IdpResponse;
-
 import java.util.Collections;
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -19,6 +16,7 @@ import butterknife.OnClick;
 
 public class MainActivity extends AppCompatActivity {
 
+    private Toolbar toolbar;
     private static final int RC_SIGN_IN = 123;
     private static final String GOOGLE_SIGN_IN = "google";
     private static final String FACEBOOK_SIGN_IN = "facebook";
@@ -119,3 +117,59 @@ public class MainActivity extends AppCompatActivity {
     }
 
 }
+
+
+
+/* protected void configureToolbar(String title){
+        // Assign toolbar
+        toolbar = findViewById(R.id.activity_main_toolbar);
+        // Sets the Toolbar
+        setSupportActionBar(toolbar);
+
+        this.title_tb = title;
+
+        try {
+            runOnUiThread(new Runnable() {
+
+                @Override
+                public void run() {
+
+                    if (toolbar != null && title_toolbar != null) {
+                        title_toolbar.setText(title_tb);
+
+                        if (getSupportActionBar() != null) {
+                            switch (title_tb) {
+
+                                case "MyNews":
+                                    icon_search.setVisibility(View.VISIBLE);
+                                    icon_menu.setVisibility(View.VISIBLE);
+                                    icon_notif.setVisibility(View.VISIBLE);
+                                    setIconOnClickListener();
+                                    // Disable the Up button
+                                    getSupportActionBar().setDisplayHomeAsUpEnabled(false);
+                                    break;
+                                case "Search Articles":
+                                    icon_search.setVisibility(View.GONE);
+                                    icon_menu.setVisibility(View.GONE);
+                                    icon_notif.setVisibility(View.GONE);
+                                    // Enable the Up button
+                                    getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+                                    break;
+                                case "Notifications":
+                                    icon_search.setVisibility(View.GONE);
+                                    icon_menu.setVisibility(View.GONE);
+                                    icon_notif.setVisibility(View.GONE);
+                                    // Enable the Up button
+                                    getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+                                    break;
+                            }
+                        }
+                    }
+
+                }
+            });
+        } catch (Throwable throwable) {
+            throwable.printStackTrace();
+        }
+
+    }*/
