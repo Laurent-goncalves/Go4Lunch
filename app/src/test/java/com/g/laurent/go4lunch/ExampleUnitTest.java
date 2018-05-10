@@ -1,6 +1,5 @@
 package com.g.laurent.go4lunch;
 
-import android.test.mock.MockContext;
 import com.g.laurent.go4lunch.Models.List_Search_Nearby;
 import com.google.android.gms.maps.model.LatLng;
 import junit.framework.Assert;
