@@ -1,5 +1,6 @@
 package com.g.laurent.go4lunch.Models;
 
+import com.g.laurent.go4lunch.Utils.Search_Nearby.Geometry;
 import com.g.laurent.go4lunch.Utils.Search_Nearby.OpeningHours;
 import com.g.laurent.go4lunch.Utils.Search_Nearby.Photo;
 
@@ -8,19 +9,49 @@ import java.util.List;
 public class Place_Nearby {
 
     private String name_restaurant;
+    private String id;
+    private Geometry geometry;
     private OpeningHours openingHours;
     private List<Photo> photos;
     private Double rating;
     private List<String> types;
     private String address;
+    private List<Workmates> mWorkmatesList;
 
-    public Place_Nearby(String name_restaurant, OpeningHours openingHours, List<Photo> photos, Double rating, List<String> types, String address) {
+
+    public Place_Nearby(String name_restaurant, String id, Geometry geometry, OpeningHours openingHours, List<Photo> photos, Double rating, List<String> types, String address) {
         this.name_restaurant = name_restaurant;
+        this.id=id;
+        this.geometry=geometry;
         this.openingHours = openingHours;
         this.photos = photos;
         this.rating = rating;
         this.types = types;
         this.address = address;
+    }
+
+    public List<Workmates> getWorkmatesList() {
+        return mWorkmatesList;
+    }
+
+    public void setWorkmatesList(List<Workmates> workmatesList) {
+        mWorkmatesList = workmatesList;
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    public Geometry getGeometry() {
+        return geometry;
+    }
+
+    public void setGeometry(Geometry geometry) {
+        this.geometry = geometry;
     }
 
     public String getName_restaurant() {

@@ -1,11 +1,17 @@
 package com.g.laurent.go4lunch;
 
+import android.app.SearchManager;
+import android.content.Context;
 import android.content.Intent;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.widget.SearchView;
+
 import com.firebase.ui.auth.AuthUI;
 import com.firebase.ui.auth.ErrorCodes;
 import com.firebase.ui.auth.IdpResponse;
@@ -22,8 +28,6 @@ public class MainActivity extends AppCompatActivity {
     private static final String FACEBOOK_SIGN_IN = "facebook";
     @BindView(R.id.window_sign_in) CoordinatorLayout window_sign_in;
 
-    int count = 0;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -34,6 +38,20 @@ public class MainActivity extends AppCompatActivity {
         Intent intent = new Intent(this,MapsActivity.class);
         startActivity(intent);
 
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.options_menu, menu);
+
+        // Associate searchable configuration with the SearchView
+        SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
+        SearchView searchView = (SearchView) menu.findItem(R.id.search).getActionView();
+        if (searchManager != null)
+            searchView.setSearchableInfo(searchManager.getSearchableInfo(getComponentName()));
+
+        return true;
     }
 
     @OnClick(R.id.main_activity_button_login_google)

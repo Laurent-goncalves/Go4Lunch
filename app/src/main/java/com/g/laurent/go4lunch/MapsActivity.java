@@ -1,5 +1,6 @@
 package com.g.laurent.go4lunch;
 
+import android.app.FragmentTransaction;
 import android.app.SearchManager;
 import android.content.Context;
 import android.content.pm.PackageManager;
@@ -8,28 +9,24 @@ import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
-import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.graphics.drawable.DrawableCompat;
+import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.View;
 import android.widget.Button;
 import android.widget.SearchView;
-import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.places.Place;
 import com.google.android.gms.location.places.PlaceDetectionClient;
 import com.google.android.gms.location.places.PlaceLikelihood;
 import com.google.android.gms.location.places.PlaceLikelihoodBufferResponse;
 import com.google.android.gms.location.places.Places;
-import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import butterknife.BindView;
@@ -37,7 +34,7 @@ import butterknife.ButterKnife;
 import static android.content.ContentValues.TAG;
 
 
-public class MapsActivity extends FragmentActivity implements OnMapReadyCallback,GoogleApiClient.OnConnectionFailedListener {
+public class MapsActivity extends AppCompatActivity {//implements OnMapReadyCallback,GoogleApiClient.OnConnectionFailedListener {
 
     private GoogleMap mMap;
     private GoogleApiClient mGoogleApiClient;
@@ -62,18 +59,11 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_maps);
         ButterKnife.bind(this);
-        BUTTON_SELECTED=BUTTON_MAP_SELECTED;
-
-        // Obtain the SupportMapFragment and get notified when the map is ready to be used.
-
-        /*SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
-                .findFragmentById(R.id.map);
-        mapFragment.getMapAsync(this);*/
 
         lastKnownPlace=findLastPlaceHighestLikelihood(savedInstanceState);
 
-
         configure_tabs();
+        configure_and_show_MapsFragment();
 
         /*mGoogleApiClient = new GoogleApiClient
                 .Builder(this)
@@ -84,20 +74,36 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     }
 
-/*    @Override
+    private void configure_and_show_MapsFragment(){
+        MapsFragment mapsFragment = new MapsFragment();
+        FragmentTransaction fragmentTransaction = getFragmentManager().beginTransaction();
+        fragmentTransaction.replace(R.id.fragment_map_view, mapsFragment);
+        fragmentTransaction.commit();
+    }
+
+    private void configure_and_show_ListRestoFragment(){
+        ListRestoFragment listRestoFragment = new ListRestoFragment();
+        FragmentTransaction fragmentTransaction = getFragmentManager().beginTransaction();
+        fragmentTransaction.replace(R.id.fragment_map_view, listRestoFragment);
+        fragmentTransaction.commit();
+    }
+
+
+    @Override
     public boolean onCreateOptionsMenu(Menu menu) {
+
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.options_menu, menu);
 
         // Associate searchable configuration with the SearchView
         SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
         SearchView searchView = (SearchView) menu.findItem(R.id.search).getActionView();
+
         if (searchManager != null) {
             searchView.setSearchableInfo(searchManager.getSearchableInfo(getComponentName()));
         }
-
         return true;
-    }*/
+    }
 
     /**
      * Manipulates the map once available.
@@ -108,7 +114,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
      * it inside the SupportMapFragment. This method will only be triggered once the user has
      * installed Google Play services and returned to the app.
      */
-    @Override
+
+/*    @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
 
@@ -120,17 +127,15 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
 
 
- /*     // Prompt the user for permission.
+      // Prompt the user for permission.
         getLocationPermission();
 
         // Turn on the My Location layer and the related control on the map.
         updateLocationUI();
 
         getNumberResults();
-*/
 
-
-    }
+    }*/
 
     private void configure_tabs(){
 
@@ -148,6 +153,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     setButtonAsSelected(false, buttonList);
                     setButtonAsSelected(false, buttonMates);
                     BUTTON_SELECTED=BUTTON_MAP_SELECTED;
+                    configure_and_show_MapsFragment();
                 }
             }
         });
@@ -161,6 +167,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     setButtonAsSelected(true, buttonList);
                     setButtonAsSelected(false, buttonMates);
                     BUTTON_SELECTED=BUTTON_LIST_SELECTED;
+                    configure_and_show_ListRestoFragment();
                 }
             }
         });
@@ -204,11 +211,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 DrawableCompat.setTint(wrapDrawable[0], getResources().getColor(R.color.colorIconNotSelected));
             }
         }
-    }
-
-    @Override
-    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
-        System.out.println("eeee    connexion failed !!! ");
     }
 
     public LatLng getNumberResults() {

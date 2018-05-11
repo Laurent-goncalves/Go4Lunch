@@ -1,6 +1,5 @@
 package com.g.laurent.go4lunch.Models;
 
-import android.util.Log;
 import com.g.laurent.go4lunch.Utils.Maps_API_stream;
 import com.g.laurent.go4lunch.Utils.Search_Nearby.Result;
 import com.g.laurent.go4lunch.Utils.Search_Nearby.SearchNearby;
@@ -12,7 +11,7 @@ import io.reactivex.observers.DisposableObserver;
 
 public class List_Search_Nearby {
 
-    List<Place_Nearby> list_places_nearby;
+    private List<Place_Nearby> list_places_nearby;
 
     public List_Search_Nearby(LatLng latLng, String radius) {
 
@@ -29,6 +28,7 @@ public class List_Search_Nearby {
             for(Result result : ListResults){
 
                 list_places_nearby.add(new Place_Nearby(result.getName(),
+                        result.getId(),
                         result.getOpeningHours(),
                         result.getPhotos(),
                         result.getRating(),
