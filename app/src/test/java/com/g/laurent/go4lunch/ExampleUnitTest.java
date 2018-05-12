@@ -3,6 +3,7 @@ package com.g.laurent.go4lunch;
 import com.g.laurent.go4lunch.Models.List_Search_Nearby;
 import com.google.android.gms.maps.model.LatLng;
 import junit.framework.Assert;
+import org.junit.Rule;
 import org.junit.Test;
 
 
@@ -17,6 +18,27 @@ public class ExampleUnitTest {
         waiting_time(3000);
 
         Assert.assertTrue(list_Search_Nearby.getList_places_nearby().size() > 0);
+
+    }
+
+
+
+    @Test
+    public void TEST_save_data_firebase() {
+
+
+
+
+/*
+        FirebaseApp.initializeApp(context);
+        DatabaseReference mDatabase;
+        mDatabase = FirebaseDatabase.getInstance().getReference();
+
+        mDatabase.child("users").child("resto1").setValue(new Place_Nearby("Resto 1", "ID1",null,null,null,3.3,null,"rue du Périgord"));
+        mDatabase.child("users").child("resto2").setValue(new Place_Nearby("Resto 2", "ID2",null,null,null,2.1,null,"rue Rivoli"));
+*/
+
+        Assert.assertTrue(1>0);
 
     }
 

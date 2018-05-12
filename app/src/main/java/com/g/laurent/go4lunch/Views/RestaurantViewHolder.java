@@ -16,30 +16,28 @@ import butterknife.ButterKnife;
 
 public class RestaurantViewHolder extends RecyclerView.ViewHolder {
 
-    @BindView(R.id.name_restaurant) private TextView name_resto;
-    @BindView(R.id.address_restaurant) private TextView address_resto;
-    @BindView(R.id.hours_opening_restaurant) private TextView opening_hours;
-    @BindView(R.id.distance_restaurant) private TextView distance;
-    @BindView(R.id.distance_restaurant) private LinearLayout linearLayout_workmates;
-    @BindView(R.id.number_workmates) private TextView workmates_num;
-    @BindView(R.id.rating_restaurant) private RatingBar rating;
-    @BindView(R.id.image_restaurant) private ImageView picture_resto;
+    @BindView(R.id.name_restaurant) TextView name_resto;
+    @BindView(R.id.address_restaurant) TextView address_resto;
+    @BindView(R.id.hours_opening_restaurant) TextView opening_hours;
+    @BindView(R.id.distance_restaurant) TextView distance;
+    @BindView(R.id.number_workmates_restaurant) LinearLayout linearLayout_workmates;
+    @BindView(R.id.number_workmates) TextView workmates_num;
+    @BindView(R.id.rating_restaurant) RatingBar rating;
+    @BindView(R.id.image_restaurant) ImageView picture_resto;
+    private View view;
     private Place_Nearby place_nearby;
     private LatLng current_loc;
-    private View view;
 
-    public RestaurantViewHolder(View itemView, LatLng current_loc, Place_Nearby place_nearby) {
+    public RestaurantViewHolder(View itemView) {
         super(itemView);
-        this.place_nearby=place_nearby;
-        this.current_loc=current_loc;
         this.view=itemView;
         ButterKnife.bind(this, itemView);
-
-        if(place_nearby!=null)
-            configure_restaurant();
     }
 
-    private void configure_restaurant(){
+    public void configure_restaurant(LatLng current_loc, Place_Nearby place_nearby){
+
+        this.place_nearby=place_nearby;
+        this.current_loc=current_loc;
 
         // Name restaurant
         name_resto.setText(place_nearby.getName_restaurant());
@@ -69,11 +67,11 @@ public class RestaurantViewHolder extends RecyclerView.ViewHolder {
     private void apply_picture_restaurant() {
 
         if(place_nearby.getPhotos()!=null){
-
-            Glide.with(view)
-                    .load(place_nearby.getPhotos().get(0))
-                    .into(picture_resto);
-
+            if(place_nearby.getPhotos().get(0)!=null) {
+                Glide.with(view)
+                        .load(place_nearby.getPhotos().get(0))
+                        .into(picture_resto);
+            }
         }
     }
 

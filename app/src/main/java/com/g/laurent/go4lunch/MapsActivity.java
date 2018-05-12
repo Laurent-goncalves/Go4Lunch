@@ -19,6 +19,9 @@ import android.view.MenuInflater;
 import android.view.View;
 import android.widget.Button;
 import android.widget.SearchView;
+
+import com.g.laurent.go4lunch.Models.List_Search_Nearby;
+import com.g.laurent.go4lunch.Models.Place_Nearby;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.places.Place;
 import com.google.android.gms.location.places.PlaceDetectionClient;
@@ -29,6 +32,12 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.FirebaseApp;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+
+import java.util.List;
+
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import static android.content.ContentValues.TAG;
@@ -36,6 +45,8 @@ import static android.content.ContentValues.TAG;
 
 public class MapsActivity extends AppCompatActivity {//implements OnMapReadyCallback,GoogleApiClient.OnConnectionFailedListener {
 
+    private FirebaseDatabase database;
+    private DatabaseReference ref;
     private GoogleMap mMap;
     private GoogleApiClient mGoogleApiClient;
     private PlaceDetectionClient mPlaceDetectionClient;
@@ -62,16 +73,38 @@ public class MapsActivity extends AppCompatActivity {//implements OnMapReadyCall
 
         lastKnownPlace=findLastPlaceHighestLikelihood(savedInstanceState);
 
+
+
+
         configure_tabs();
+        configure_and_show_ListRestoFragment();
+        /*
         configure_and_show_MapsFragment();
 
-        /*mGoogleApiClient = new GoogleApiClient
+        mGoogleApiClient = new GoogleApiClient
                 .Builder(this)
                 .addApi(Places.GEO_DATA_API)
                 .addApi(Places.PLACE_DETECTION_API)
                 .enableAutoManage(this, this)
                 .build();*/
 
+    }
+
+    public void update_list_nearby_places_firebase(List_Search_Nearby list_search_nearby){
+
+        FirebaseApp.initializeApp(getApplicationContext());
+        DatabaseReference mDatabase;
+        mDatabase = FirebaseDatabase.getInstance().getReference().child("restaurants");
+        List<Place_Nearby> place_nearbyList;
+        int count = 0;
+
+        if(list_search_nearby!=null) {
+            place_nearbyList = list_search_nearby.getList_places_nearby();
+            for(Place_Nearby place : place_nearbyList) {
+                mDatabase.child("resto" + count).setValue(place);
+                count++;
+            }
+        }
     }
 
     private void configure_and_show_MapsFragment(){

@@ -29,6 +29,7 @@ public class List_Search_Nearby {
 
                 list_places_nearby.add(new Place_Nearby(result.getName(),
                         result.getId(),
+                        result.getGeometry(),
                         result.getOpeningHours(),
                         result.getPhotos(),
                         result.getRating(),
@@ -65,5 +66,9 @@ public class List_Search_Nearby {
 
     public List<Place_Nearby> getList_places_nearby() {
         return list_places_nearby;
+    }
+
+    public void setList_places_nearby(List<Place_Nearby> list_places_nearby) {
+        this.list_places_nearby = list_places_nearby;
     }
 }

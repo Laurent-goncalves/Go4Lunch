@@ -57,6 +57,7 @@ dependencies {
     implementation 'com.google.firebase:firebase-core:15.0.0'
     implementation 'com.firebaseui:firebase-ui-database:3.3.1'
     implementation 'com.firebaseui:firebase-ui-firestore:3.3.1'
+    implementation 'com.google.firebase:firebase-database:15.0.0'
 
     // http requests
     implementation 'com.google.code.gson:gson:2.8.2'
@@ -67,7 +68,12 @@ dependencies {
     implementation 'com.squareup.retrofit2:adapter-rxjava2:2.3.0'
     implementation 'com.squareup.okhttp3:logging-interceptor:3.8.0'
 
+    // For tests
+    implementation 'junit:junit:4.12'
+    implementation 'org.mockito:mockito-core:2.13.0'
+    androidTestImplementation 'com.android.support.test:rules:1.0.2'
     androidTestImplementation 'com.android.support.test:runner:1.0.2'
     androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
+    androidTestImplementation 'com.android.support.test.espresso:espresso-contrib:3.0.2'
 }
 apply plugin: 'com.google.gms.google-services'
