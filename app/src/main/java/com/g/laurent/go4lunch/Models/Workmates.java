@@ -5,11 +5,16 @@ public class Workmates {
     private String name;
     private Boolean chosen;
     private String resto_id;
+    private String resto_type;
+    private String resto_name;
 
-    public Workmates(String name, Boolean chosen, String resto_id) {
+    public Workmates(String name, Boolean chosen, String resto_id, String resto_name, String resto_type) {
         this.name = name;
         this.chosen = chosen;
         this.resto_id = resto_id;
+        this.resto_type=resto_type;
+        this.resto_name=resto_name;
+
     }
 
     public String getName() {

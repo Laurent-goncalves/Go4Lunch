@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".RestoFragment">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <!-- PICTURE RESTAURANT -->
+            <ImageView
+                android:id="@+id/picture_of_restaurant"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_alignParentTop="true"/>
+
+
+            <!-- INFO RESTAURANT -->
+            <LinearLayout
+                android:id="@+id/area_info_resto"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/picture_of_restaurant"
+                android:background="@color/colorPrimary"
+                android:orientation="vertical">
+
+                <!-- NAME & RATING RESTAURANT -->
+                <LinearLayout
+                    android:background="@color/colorPrimary"
+                    android:id="@+id/area_name_resto"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:id="@+id/name_resto"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textColor="@android:color/white"
+                        android:textSize="20sp"/>
+
+                    <RatingBar
+                        android:id="@+id/rating_restaurant_detail"
+                        android:theme="@style/RatingBar"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:isIndicator="false"
+                        android:max="5"
+                        android:scaleX=".4"
+                        android:scaleY=".4"/>
+
+                </LinearLayout>
+
+                <!-- ADDRESS RESTAURANT -->
+                <TextView
+                    android:id="@+id/address_resto"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textColor="@android:color/white"
+                    android:textSize="14sp"/>
+
+            </LinearLayout>
+
+            <!-- BUTTON VALID RESTAURANT -->
+            <de.hdodenhof.circleimageview.CircleImageView
+                android:id="@+id/valid_restaurant"
+                android:layout_width="60dp"
+                android:layout_height="60dp"
+                android:layout_alignBottom="@+id/picture_of_restaurant"
+                android:layout_alignParentEnd="true"
+                android:layout_marginBottom="-35dp"
+                android:layout_marginEnd="35dp"
+                android:src="@drawable/baseline_check_circle_white_36" />
+
+        </RelativeLayout>
+
+        <!-- BUTTONS  -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <!-- BUTTON CALL -->
+            <Button
+                android:id="@+id/call_button"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:paddingBottom="@dimen/default_margin"
+                android:paddingTop="@dimen/default_margin"
+                android:text="@string/call"
+                android:background="@color/colorPrimary"
+                android:drawableTop="@drawable/baseline_call_white_24"/>
+
+            <!-- BUTTON LIKE -->
+            <Button
+                android:id="@+id/like_button"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:paddingBottom="@dimen/default_margin"
+                android:paddingTop="@dimen/default_margin"
+                android:text="@string/like"
+                android:background="@color/colorPrimary"
+                android:drawableTop="@drawable/baseline_star_white_24"/>
+
+            <!-- BUTTONS WEBSITE -->
+            <Button
+                android:id="@+id/website_button"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:paddingBottom="@dimen/default_margin"
+                android:paddingTop="@dimen/default_margin"
+                android:text="@string/website"
+                android:background="@color/colorPrimary"
+                android:drawableTop="@drawable/baseline_public_white_24"/>
+
+        </LinearLayout>
+
+        <!--  LINE SEPARATOR  -->
+        <View
+            android:id="@+id/line_separator_resto"
+            android:layout_width="wrap_content"
+            android:layout_height="1dp"
+            android:layout_marginTop="10dp"
+            android:layout_marginStart="10dp"
+            android:layout_marginEnd="10dp"
+            android:background="#c0c0c0"/>
+
+        <!-- LIST WORKMATES JOINING  -->
+        <android.support.v7.widget.RecyclerView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:id="@+id/list_workmates_joining_resto">
+        </android.support.v7.widget.RecyclerView>
+
+    </LinearLayout>
+
+
+</FrameLayout>

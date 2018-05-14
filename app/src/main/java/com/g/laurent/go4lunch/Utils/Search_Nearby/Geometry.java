@@ -11,7 +11,7 @@ public class Geometry {
     private Location location;
     @SerializedName("viewport")
     @Expose
-    private Viewport viewport;
+    private transient Viewport viewport;
 
     public Location getLocation() {
         return location;

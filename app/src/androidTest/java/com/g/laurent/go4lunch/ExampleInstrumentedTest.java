@@ -6,6 +6,9 @@ import android.support.test.filters.LargeTest;
 import android.support.test.runner.AndroidJUnit4;
 import android.support.test.rule.ActivityTestRule;
 import com.g.laurent.go4lunch.Models.List_Search_Nearby;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.location.places.GeoDataApi;
+import com.google.android.gms.location.places.Places;
 import com.google.android.gms.maps.model.LatLng;
 
 import junit.framework.Assert;
@@ -43,12 +46,12 @@ public class ExampleInstrumentedTest {
 
         // get a list of nearby places
         LatLng currentloc = new LatLng(48.866667,2.333333);
-        List_Search_Nearby list_search_nearby = new List_Search_Nearby(currentloc,"500");
+        List_Search_Nearby list_search_nearby = new List_Search_Nearby(currentloc,"500",null);
         waiting_time(3000);
         int count_init = list_search_nearby.getList_places_nearby().size();
 
         // Write list of nearby places in Firebase database
-        mActivityTestRule.getActivity().update_list_nearby_places_firebase(list_search_nearby);
+        mActivityTestRule.getActivity().update_list_nearby_places_firebase(list_search_nearby.getList_places_nearby());
         waiting_time(1000);
 
         // Retrieve list of nearby places in Firebase database
@@ -61,6 +64,8 @@ public class ExampleInstrumentedTest {
         Assert.assertTrue(count_init==count_final);
     }
 
+
+
     private void waiting_time(int time){
         try {
             Thread.sleep(time);
@@ -70,3 +75,5 @@ public class ExampleInstrumentedTest {
     }
 
 }
+
+

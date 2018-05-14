@@ -1,10 +1,14 @@
 package com.g.laurent.go4lunch;
 
+import android.app.AlarmManager;
 import android.app.FragmentTransaction;
+import android.app.PendingIntent;
 import android.app.SearchManager;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.res.ColorStateList;
+import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.support.annotation.NonNull;
@@ -19,32 +23,46 @@ import android.view.MenuInflater;
 import android.view.View;
 import android.widget.Button;
 import android.widget.SearchView;
-
+import com.g.laurent.go4lunch.Models.AlarmReceiver;
+import com.g.laurent.go4lunch.Models.CallbackMapsActivity;
+import com.g.laurent.go4lunch.Models.Callback_DetailResto;
 import com.g.laurent.go4lunch.Models.List_Search_Nearby;
 import com.g.laurent.go4lunch.Models.Place_Nearby;
+import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.common.api.ResultCallback;
 import com.google.android.gms.location.places.Place;
 import com.google.android.gms.location.places.PlaceDetectionClient;
 import com.google.android.gms.location.places.PlaceLikelihood;
 import com.google.android.gms.location.places.PlaceLikelihoodBufferResponse;
+import com.google.android.gms.location.places.PlacePhotoMetadataBuffer;
+import com.google.android.gms.location.places.PlacePhotoMetadataResult;
+import com.google.android.gms.location.places.PlacePhotoResult;
 import com.google.android.gms.location.places.Places;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
+import java.io.ByteArrayOutputStream;
+import java.util.Calendar;
 import java.util.List;
-
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import static android.content.ContentValues.TAG;
 
 
-public class MapsActivity extends AppCompatActivity {//implements OnMapReadyCallback,GoogleApiClient.OnConnectionFailedListener {
+public class MapsActivity extends AppCompatActivity implements CallbackMapsActivity,AlarmReceiver.callbackAlarm, GoogleApiClient.OnConnectionFailedListener, Callback_DetailResto {//implements OnMapReadyCallback,GoogleApiClient.OnConnectionFailedListener {
 
+    private FirebaseStorage storage;
+    private StorageReference storageRef;
     private FirebaseDatabase database;
     private DatabaseReference ref;
     private GoogleMap mMap;
@@ -52,15 +70,21 @@ public class MapsActivity extends AppCompatActivity {//implements OnMapReadyCall
     private PlaceDetectionClient mPlaceDetectionClient;
     private static final int PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION = 1;
     private boolean mLocationPermissionGranted = true;
+    private List_Search_Nearby mList_search_nearby;
     private LatLng lastKnownPlace;
     private Place currentPlace;
     private LatLng currentPlaceLatLng;
-    private final static String EXTRA_LAST_LATITUDE = "last_latitude";
-    private final static String EXTRA_LAST_LONGITUDE = "last_longitude";
+    private List<Place_Nearby> list_search_nearby;
+    int count_id;
+    private final static String EXTRA_LAT_CURRENT = "latitude_current_location";
+    private final static String EXTRA_LONG_CURRENT = "longitude_current_location";
     private final static String BUTTON_MAP_SELECTED = "button_map_selected";
     private final static String BUTTON_LIST_SELECTED = "button_list_view_selected";
     private final static String BUTTON_MATES_SELECTED = "button_workmates_selected";
+    private final static String EXTRA_PLACE_ID = "placeId_resto";
     private String BUTTON_SELECTED;
+    private CallbackMapsActivity mCallbackMapsActivity;
+    private Callback_DetailResto mCallback_detailResto;
     @BindView(R.id.map_view_button) Button buttonMap;
     @BindView(R.id.list_view_button) Button buttonList;
     @BindView(R.id.workmates_button) Button buttonMates;
@@ -70,14 +94,31 @@ public class MapsActivity extends AppCompatActivity {//implements OnMapReadyCall
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_maps);
         ButterKnife.bind(this);
-
+        mCallbackMapsActivity=this;
+        mCallback_detailResto = this;
         lastKnownPlace=findLastPlaceHighestLikelihood(savedInstanceState);
 
+        mGoogleApiClient = new GoogleApiClient
+                .Builder(this)
+                .addApi(Places.GEO_DATA_API)
+                .addApi(Places.PLACE_DETECTION_API)
+                .enableAutoManage(this, this)
+                .build();
+
+        currentPlaceLatLng=new LatLng(48.866667,2.333333);
 
 
 
+       // create_new_list_nearby_places();
+
+        storage = FirebaseStorage.getInstance();
+        storageRef = storage.getReference();
+
+        create_new_list_nearby_places();
         configure_tabs();
-        configure_and_show_ListRestoFragment();
+        //configureAlarmManager();
+        //configure_and_show_ListRestoFragment();
+
         /*
         configure_and_show_MapsFragment();
 
@@ -90,21 +131,86 @@ public class MapsActivity extends AppCompatActivity {//implements OnMapReadyCall
 
     }
 
-    public void update_list_nearby_places_firebase(List_Search_Nearby list_search_nearby){
 
+
+    @Override
+    public void create_new_list_nearby_places() {
+        mList_search_nearby = new List_Search_Nearby(currentPlaceLatLng,"500",mCallbackMapsActivity);
+    }
+
+    private ResultCallback<PlacePhotoResult> mDisplayPhotoResultCallback
+            = new ResultCallback<PlacePhotoResult>() {
+        @Override
+        public void onResult(PlacePhotoResult placePhotoResult) {
+            if (!placePhotoResult.getStatus().isSuccess()) {
+                return;
+            }
+
+            // if success, store the bitmap picture on Firebase storage
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            placePhotoResult.getBitmap().compress(Bitmap.CompressFormat.JPEG, 100, baos);
+
+            byte[] data = baos.toByteArray();
+
+            // Create a reference
+            String placeId = list_search_nearby.get(count_id).getPlaceId();
+            StorageReference mountainsRef = storageRef.child(placeId + ".jpg");
+            count_id++;
+
+            UploadTask uploadTask = mountainsRef.putBytes(data);
+            uploadTask.addOnFailureListener(new OnFailureListener() {
+                @Override
+                public void onFailure(@NonNull Exception exception) {
+                }
+            }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                @Override
+                public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                }
+            });
+        }
+    };
+
+
+    private void getPlacePhotosAsync(final String placeId) {
+
+        Places.GeoDataApi.getPlacePhotos(mGoogleApiClient, placeId)
+            .setResultCallback(new ResultCallback<PlacePhotoMetadataResult>() {
+
+                @Override
+                public void onResult(PlacePhotoMetadataResult photos) {
+                    if (!photos.getStatus().isSuccess())
+                        return;
+
+                    PlacePhotoMetadataBuffer photoMetadataBuffer = photos.getPhotoMetadata();
+                    if (photoMetadataBuffer.getCount() > 0) {
+                        photoMetadataBuffer.get(0)
+                                .getScaledPhoto(mGoogleApiClient, 100,100)
+                                .setResultCallback(mDisplayPhotoResultCallback);
+                    }
+                    photoMetadataBuffer.release();
+                }
+            });
+    }
+
+    public void update_list_nearby_places_firebase(List<Place_Nearby> list_search_nearby){
+
+        this.list_search_nearby=list_search_nearby;
         FirebaseApp.initializeApp(getApplicationContext());
         DatabaseReference mDatabase;
         mDatabase = FirebaseDatabase.getInstance().getReference().child("restaurants");
-        List<Place_Nearby> place_nearbyList;
+        mDatabase.removeValue();
+        count_id=0;
         int count = 0;
 
         if(list_search_nearby!=null) {
-            place_nearbyList = list_search_nearby.getList_places_nearby();
-            for(Place_Nearby place : place_nearbyList) {
+            for(Place_Nearby place : list_search_nearby) {
                 mDatabase.child("resto" + count).setValue(place);
+                getPlacePhotosAsync(place.getPlaceId());
                 count++;
             }
         }
+       /* Toast toast = Toast.makeText(getApplicationContext(),"FireBase mis à jour",Toast.LENGTH_SHORT);
+        toast.show();*/
     }
 
     private void configure_and_show_MapsFragment(){
@@ -115,12 +221,60 @@ public class MapsActivity extends AppCompatActivity {//implements OnMapReadyCall
     }
 
     private void configure_and_show_ListRestoFragment(){
+        Bundle bundle = new Bundle();
+
+        bundle.putDouble(EXTRA_LAT_CURRENT,currentPlaceLatLng.latitude);
+        bundle.putDouble(EXTRA_LONG_CURRENT,currentPlaceLatLng.longitude);
+
         ListRestoFragment listRestoFragment = new ListRestoFragment();
+        listRestoFragment.setArguments(bundle);
         FragmentTransaction fragmentTransaction = getFragmentManager().beginTransaction();
         fragmentTransaction.replace(R.id.fragment_map_view, listRestoFragment);
         fragmentTransaction.commit();
     }
 
+    @Override
+    public void configure_and_show_restofragment(String placeId) {
+
+        // Create new bundle
+        Bundle bundle = new Bundle();
+        bundle.putString(EXTRA_PLACE_ID,placeId);
+
+        // Create new fragment and transaction
+        RestoFragment restoFragment = new RestoFragment();
+        restoFragment.setArguments(bundle);
+        FragmentTransaction fragmentTransaction = getFragmentManager().beginTransaction();
+
+        // Replace whatever is in the fragment_container view with this fragment,
+        // and add the transaction to the back stack if needed
+        fragmentTransaction.replace(R.id.fragment_map_view, restoFragment);
+        fragmentTransaction.addToBackStack(null);
+
+        // Commit the transaction
+        fragmentTransaction.commit();
+    }
+
+    private void configureAlarmManager(){
+
+        // Configuration of alarm for saving feeling each day
+        AlarmReceiver.callbackAlarm mcallbackAlarm=this;
+        AlarmReceiver alarmReceiver = new AlarmReceiver();
+        alarmReceiver.createCallbackAlarm(mcallbackAlarm);
+
+        Intent alarmIntent = new Intent(getApplicationContext(), alarmReceiver.getClass());
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(getApplicationContext(), 0, alarmIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+
+        // Set the alarm to start at 12:00 p.m.
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTimeInMillis(System.currentTimeMillis());
+        calendar.set(Calendar.HOUR_OF_DAY, 12);
+        calendar.set(Calendar.MINUTE,0);
+
+        // Create alarm to ring it every day at noon
+        AlarmManager manager = (AlarmManager) getApplicationContext().getSystemService(Context.ALARM_SERVICE);
+        if(manager!=null)
+            manager.setRepeating(AlarmManager.RTC,calendar.getTimeInMillis(), AlarmManager.INTERVAL_DAY, pendingIntent);
+    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -284,8 +438,8 @@ public class MapsActivity extends AppCompatActivity {//implements OnMapReadyCall
     @Override
     public void onSaveInstanceState(Bundle outState) {
         if(lastKnownPlace!=null){
-            outState.putFloat(EXTRA_LAST_LATITUDE, (float) lastKnownPlace.latitude);
-            outState.putFloat(EXTRA_LAST_LONGITUDE, (float) lastKnownPlace.longitude);
+            outState.putFloat(EXTRA_LAT_CURRENT, (float) lastKnownPlace.latitude);
+            outState.putFloat(EXTRA_LONG_CURRENT, (float) lastKnownPlace.longitude);
         }
         super.onSaveInstanceState(outState);
     }
@@ -315,8 +469,8 @@ public class MapsActivity extends AppCompatActivity {//implements OnMapReadyCall
         float longitude=0;
 
         if(savedInstanceState!=null){
-            latitude = savedInstanceState.getFloat(EXTRA_LAST_LATITUDE,0);
-            longitude = savedInstanceState.getFloat(EXTRA_LAST_LONGITUDE,0);
+            latitude = savedInstanceState.getFloat(EXTRA_LAT_CURRENT,0);
+            longitude = savedInstanceState.getFloat(EXTRA_LONG_CURRENT,0);
         }
 
         LatLng lastLatLng = null;
@@ -362,5 +516,23 @@ public class MapsActivity extends AppCompatActivity {//implements OnMapReadyCall
                     PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION);
         }
     }
+
+    @Override
+    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
+        System.out.println("eee PROBLEM " );
+    }
+
+
+
+    /*
+    private void configureOnClickRecyclerView(){
+        ItemClickSupport.addTo(recyclerView, R.layout.fragment_main_item)
+                .setOnItemClickListener(new ItemClickSupport.OnItemClickListener() {
+                    @Override
+                    public void onItemClicked(RecyclerView recyclerView, int position, View v) {
+                        updateUIWithUserInfo(position);
+                    }
+                });
+    }*/
 
 }

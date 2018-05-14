@@ -1,5 +1,6 @@
 package com.g.laurent.go4lunch.Models;
 
+import android.util.Log;
 import com.g.laurent.go4lunch.Utils.Maps_API_stream;
 import com.g.laurent.go4lunch.Utils.Search_Nearby.Result;
 import com.g.laurent.go4lunch.Utils.Search_Nearby.SearchNearby;
@@ -11,10 +12,12 @@ import io.reactivex.observers.DisposableObserver;
 
 public class List_Search_Nearby {
 
+    private CallbackMapsActivity mCallbackMapsActivity;
     private List<Place_Nearby> list_places_nearby;
 
-    public List_Search_Nearby(LatLng latLng, String radius) {
+    public List_Search_Nearby(LatLng latLng, String radius, CallbackMapsActivity mCallbackMapsActivity) {
 
+        this.mCallbackMapsActivity=mCallbackMapsActivity;
         list_places_nearby = new ArrayList<>();
         launch_request_search_nearby_places(latLng,radius);
     }
@@ -28,10 +31,9 @@ public class List_Search_Nearby {
             for(Result result : ListResults){
 
                 list_places_nearby.add(new Place_Nearby(result.getName(),
-                        result.getId(),
+                        result.getPlaceId(),
                         result.getGeometry(),
                         result.getOpeningHours(),
-                        result.getPhotos(),
                         result.getRating(),
                         result.getTypes(),
                         result.getVicinity()));
@@ -41,25 +43,24 @@ public class List_Search_Nearby {
 
     private void launch_request_search_nearby_places(LatLng latLng, String radius){
 
-        String location = String.valueOf(latLng.latitude) + "," + latLng.longitude;
+        String location = String.valueOf(latLng.latitude) + "," + String.valueOf(latLng.longitude);
 
         Disposable disposable = Maps_API_stream.streamFetchgetSearchNearbyPlaces("restaurant",radius, location).subscribeWith(new DisposableObserver<SearchNearby>() {
 
             @Override
             public void onNext(SearchNearby searchNearby) {
-                System.out.println("eee OKKK");
                 build_list_places_nearby(searchNearby);
+                mCallbackMapsActivity.update_list_nearby_places_firebase(list_places_nearby);
             }
 
             @Override
             public void onError(Throwable e) {
                 System.out.println("eee ERROR  " + e.toString());
-                //Log.e("TAG","On Error"+Log.getStackTraceString(e));
             }
 
             @Override
             public void onComplete() {
-                //Log.e("TAG", "On Complete !!");
+                Log.e("TAG", "On Complete !!");
             }
         });
     }

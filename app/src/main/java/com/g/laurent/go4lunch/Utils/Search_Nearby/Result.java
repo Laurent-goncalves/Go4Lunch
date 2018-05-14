@@ -9,7 +9,7 @@ public class Result {
 
     @SerializedName("geometry")
     @Expose
-    private transient Geometry geometry;
+    private Geometry geometry;
     @SerializedName("icon")
     @Expose
     private transient String icon;
@@ -27,7 +27,7 @@ public class Result {
     private List<Photo> photos = null;
     @SerializedName("place_id")
     @Expose
-    private transient String placeId;
+    private String placeId;
     @SerializedName("rating")
     @Expose
     private Double rating; // score

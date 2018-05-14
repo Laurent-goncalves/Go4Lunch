@@ -1,4 +1,4 @@
-package com.g.laurent.go4lunch.Views;
+package com.g.laurent.go4lunch.Views.Resto_List;
 
 import android.annotation.SuppressLint;
 import android.support.v7.widget.RecyclerView;
@@ -7,14 +7,21 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RatingBar;
 import android.widget.TextView;
-import com.bumptech.glide.Glide;
+
 import com.g.laurent.go4lunch.Models.Place_Nearby;
 import com.g.laurent.go4lunch.R;
+import com.g.laurent.go4lunch.Views.GlideApp;
+import com.g.laurent.go4lunch.Views.Resto_Details.RestoViewAdapter;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
+
+import java.lang.ref.WeakReference;
+
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-public class RestaurantViewHolder extends RecyclerView.ViewHolder {
+public class RestoViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
 
     @BindView(R.id.name_restaurant) TextView name_resto;
     @BindView(R.id.address_restaurant) TextView address_resto;
@@ -27,17 +34,25 @@ public class RestaurantViewHolder extends RecyclerView.ViewHolder {
     private View view;
     private Place_Nearby place_nearby;
     private LatLng current_loc;
+    private FirebaseStorage storage;
+    private StorageReference storageRef;
+    private WeakReference<ListViewAdapter.Listener> callbackWeakRef;
 
-    public RestaurantViewHolder(View itemView) {
+    public RestoViewHolder(View itemView) {
         super(itemView);
         this.view=itemView;
         ButterKnife.bind(this, itemView);
+
+        storage = FirebaseStorage.getInstance();
+        storageRef = storage.getReference();
     }
 
-    public void configure_restaurant(LatLng current_loc, Place_Nearby place_nearby){
+    public void configure_restaurant(LatLng current_loc, Place_Nearby place_nearby,ListViewAdapter.Listener callback){
 
         this.place_nearby=place_nearby;
         this.current_loc=current_loc;
+        this.callbackWeakRef = new WeakReference<>(callback);
+        this.view.setOnClickListener(this);
 
         // Name restaurant
         name_resto.setText(place_nearby.getName_restaurant());
@@ -59,20 +74,19 @@ public class RestaurantViewHolder extends RecyclerView.ViewHolder {
 
         // Put the picture of the resto
         apply_picture_restaurant();
-    }
 
+    }
 
     // ---------------------------------- PICTURE RESTO ----------------------------------------------
 
     private void apply_picture_restaurant() {
 
-        if(place_nearby.getPhotos()!=null){
-            if(place_nearby.getPhotos().get(0)!=null) {
-                Glide.with(view)
-                        .load(place_nearby.getPhotos().get(0))
-                        .into(picture_resto);
-            }
-        }
+        StorageReference storageReference = storageRef.child(place_nearby.getPlaceId() + ".jpg");
+
+        // Load the image using Glide
+        GlideApp.with(view)
+                    .load(storageReference)
+                    .into(picture_resto);
     }
 
     // ---------------------------------- WORKMATES JOINING ----------------------------------------------
@@ -80,9 +94,12 @@ public class RestaurantViewHolder extends RecyclerView.ViewHolder {
     @SuppressLint("SetTextI18n")
     private void define_workmates_number(){
 
-        if(place_nearby.getWorkmatesList().size()>0){
-            workmates_num.setText("(" + place_nearby.getWorkmatesList().size() + ")");
-        } else // if no workmates join this restaurant, don't display the symbol workmates and the number
+        if(place_nearby.getWorkmatesList()!=null) {
+            if (place_nearby.getWorkmatesList().size() > 0) {
+                workmates_num.setText("(" + place_nearby.getWorkmatesList().size() + ")");
+            } else // if no workmates join this restaurant, don't display the symbol workmates and the number
+                linearLayout_workmates.setVisibility(View.GONE);
+        } else
             linearLayout_workmates.setVisibility(View.GONE);
     }
 
@@ -91,8 +108,10 @@ public class RestaurantViewHolder extends RecyclerView.ViewHolder {
     private void display_opening_hours() {
         String opening = null;
         if (place_nearby.getOpeningHours() != null) {
-            if (place_nearby.getOpeningHours().getOpenNow())
-                opening = "Closed now";
+            if (place_nearby.getOpeningHours().getOpenNow()!=null){
+                if (place_nearby.getOpeningHours().getOpenNow())
+                    opening = "Closed now";
+            }
         }
         opening_hours.setText(opening);
     }
@@ -116,27 +135,27 @@ public class RestaurantViewHolder extends RecyclerView.ViewHolder {
 
         String distance;
 
-        double theta = lon1 - lon2;
-        double dist = Math.sin(deg2rad(lat1)) * Math.sin(deg2rad(lat2)) + Math.cos(deg2rad(lat1)) * Math.cos(deg2rad(lat2)) * Math.cos(deg2rad(theta));
-        dist = Math.acos(dist);
-        dist = rad2deg(dist);
-        dist = dist * 60 * 1.1515;
-        dist = dist * 1.609344;
+        Double latitude1 = lat1 * Math.PI / 180;
+        Double latitude2 = lat2 * Math.PI / 180;
+        Double longitude1 = lon1 * Math.PI / 180;
+        Double longitude2 = lon2 * Math.PI / 180;
 
-        if(dist < 1) {
-            dist = dist * 1000;
-            distance = dist + " m";
-        } else
-            distance = dist + " km";
+        Double Radius = 6371d;
+        Double d = 1000 * Radius * Math.acos(Math.cos(latitude1) * Math.cos(latitude2) *
+                Math.cos(longitude2 - longitude1) + Math.sin(latitude1) *
+                Math.sin(latitude2));
 
-            return distance;
+        distance = Math.round(d) + " m";
+
+        return distance;
     }
 
-    private static double deg2rad(double deg) {
-        return (deg * Math.PI / 180.0);
-    }
-
-    private static double rad2deg(double rad) {
-        return (rad * 180 / Math.PI);
+    @Override
+    public void onClick(View v) {
+        ListViewAdapter.Listener callback = callbackWeakRef.get();
+        if (callback != null){
+            callback.onClickShowRestoDetails(place_nearby.getPlaceId());
+        }
     }
 }
+

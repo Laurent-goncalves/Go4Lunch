@@ -9,7 +9,7 @@ import java.util.List;
 public class Place_Nearby {
 
     private String name_restaurant;
-    private String id;
+    private String placeId;
     private Geometry geometry;
     private OpeningHours openingHours;
     private List<Photo> photos;
@@ -19,12 +19,11 @@ public class Place_Nearby {
     private List<Workmates> mWorkmatesList;
 
 
-    public Place_Nearby(String name_restaurant, String id, Geometry geometry, OpeningHours openingHours, List<Photo> photos, Double rating, List<String> types, String address) {
+    public Place_Nearby(String name_restaurant, String placeId, Geometry geometry, OpeningHours openingHours, Double rating, List<String> types, String address) {
         this.name_restaurant = name_restaurant;
-        this.id=id;
+        this.placeId=placeId;
         this.geometry=geometry;
         this.openingHours = openingHours;
-        this.photos = photos;
         this.rating = rating;
         this.types = types;
         this.address = address;
@@ -38,12 +37,12 @@ public class Place_Nearby {
         mWorkmatesList = workmatesList;
     }
 
-    public String getId() {
-        return id;
+    public String getPlaceId() {
+        return placeId;
     }
 
-    public void setId(String id) {
-        this.id = id;
+    public void setPlaceId(String id) {
+        this.placeId = placeId;
     }
 
     public Geometry getGeometry() {

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="colorPrimary">#3F51B5</color>
-    <color name="colorPrimaryDark">#303F9F</color>
+    <color name="colorPrimary">#ff5722</color>
+    <color name="colorPrimaryDark">#c41b00</color>
     <color name="colorAccent">#FF4081</color>
     <color name="colorIconSelected">#ff5722</color>
     <color name="colorIconNotSelected">#000000</color>
@@ -9,5 +9,5 @@
     <color name="colorGoogleButton">#ff3939</color>
     <color name="colorFacebookButton">#45619d</color>
     <color name="colorStars">#ffca27</color>
-
+    <color name="colorGreen">#68efad</color>
 </resources>

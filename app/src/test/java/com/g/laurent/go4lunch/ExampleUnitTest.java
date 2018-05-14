@@ -1,6 +1,8 @@
 package com.g.laurent.go4lunch;
 
 import com.g.laurent.go4lunch.Models.List_Search_Nearby;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.location.places.Places;
 import com.google.android.gms.maps.model.LatLng;
 import junit.framework.Assert;
 import org.junit.Rule;
@@ -13,7 +15,7 @@ public class ExampleUnitTest {
 
         LatLng city = new LatLng(48.6102599, 2.474805);
         String radius = "500";
-        List_Search_Nearby list_Search_Nearby = new List_Search_Nearby(city,radius);
+        List_Search_Nearby list_Search_Nearby = new List_Search_Nearby(city,radius,null);
 
         waiting_time(3000);
 
