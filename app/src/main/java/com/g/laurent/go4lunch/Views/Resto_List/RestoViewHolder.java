@@ -1,23 +1,20 @@
 package com.g.laurent.go4lunch.Views.Resto_List;
 
 import android.annotation.SuppressLint;
+import android.content.Context;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.RatingBar;
 import android.widget.TextView;
-
 import com.g.laurent.go4lunch.Models.Place_Nearby;
 import com.g.laurent.go4lunch.R;
 import com.g.laurent.go4lunch.Views.GlideApp;
-import com.g.laurent.go4lunch.Views.Resto_Details.RestoViewAdapter;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
-
 import java.lang.ref.WeakReference;
-
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
@@ -29,7 +26,7 @@ public class RestoViewHolder extends RecyclerView.ViewHolder implements View.OnC
     @BindView(R.id.distance_restaurant) TextView distance;
     @BindView(R.id.number_workmates_restaurant) LinearLayout linearLayout_workmates;
     @BindView(R.id.number_workmates) TextView workmates_num;
-    @BindView(R.id.rating_restaurant) RatingBar rating;
+    @BindView(R.id.linearlayout_rating) LinearLayout rating;
     @BindView(R.id.image_restaurant) ImageView picture_resto;
     private View view;
     private Place_Nearby place_nearby;
@@ -37,6 +34,7 @@ public class RestoViewHolder extends RecyclerView.ViewHolder implements View.OnC
     private FirebaseStorage storage;
     private StorageReference storageRef;
     private WeakReference<ListViewAdapter.Listener> callbackWeakRef;
+    private Context context;
 
     public RestoViewHolder(View itemView) {
         super(itemView);
@@ -47,12 +45,13 @@ public class RestoViewHolder extends RecyclerView.ViewHolder implements View.OnC
         storageRef = storage.getReference();
     }
 
-    public void configure_restaurant(LatLng current_loc, Place_Nearby place_nearby,ListViewAdapter.Listener callback){
+    public void configure_restaurant(LatLng current_loc, Place_Nearby place_nearby,ListViewAdapter.Listener callback, Context context){
 
         this.place_nearby=place_nearby;
         this.current_loc=current_loc;
         this.callbackWeakRef = new WeakReference<>(callback);
         this.view.setOnClickListener(this);
+        this.context=context;
 
         // Name restaurant
         name_resto.setText(place_nearby.getName_restaurant());
@@ -70,13 +69,27 @@ public class RestoViewHolder extends RecyclerView.ViewHolder implements View.OnC
         define_workmates_number();
 
         // Score resto
-        rating.setRating(place_nearby.getRating().floatValue());
+        rating_calculation();
 
         // Put the picture of the resto
         apply_picture_restaurant();
-
     }
 
+    // ---------------------------------- RATING RESTO ----------------------------------------------
+    private void rating_calculation() {
+
+        int numStars = Math.round(place_nearby.getRating().floatValue());
+        rating.removeAllViews();
+
+        if(numStars>=1){
+            for (int i = 0; i < numStars-1; i++) {
+                ImageView imgView = new ImageView(context);
+                imgView.setImageResource(R.drawable.baseline_star_white_24);
+                imgView.setColorFilter(ContextCompat.getColor(context,(R.color.colorStars)));
+                rating.addView(imgView);
+            }
+        }
+    }
     // ---------------------------------- PICTURE RESTO ----------------------------------------------
 
     private void apply_picture_restaurant() {

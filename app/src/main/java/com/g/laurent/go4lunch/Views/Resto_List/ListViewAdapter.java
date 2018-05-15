@@ -39,7 +39,7 @@ public class ListViewAdapter extends RecyclerView.Adapter<RestoViewHolder> {
     @Override
     public void onBindViewHolder(@NonNull RestoViewHolder holder, int position) {
         if(list_search_nearby!=null){
-            holder.configure_restaurant(current_loc,list_search_nearby.get(position),callback);
+            holder.configure_restaurant(current_loc,list_search_nearby.get(position),callback,context);
         }
     }
 

@@ -200,13 +200,11 @@ public class MapsActivity extends AppCompatActivity implements CallbackMapsActiv
         mDatabase = FirebaseDatabase.getInstance().getReference().child("restaurants");
         mDatabase.removeValue();
         count_id=0;
-        int count = 0;
 
         if(list_search_nearby!=null) {
             for(Place_Nearby place : list_search_nearby) {
-                mDatabase.child("resto" + count).setValue(place);
+                mDatabase.child(place.getPlaceId()).setValue(place);
                 getPlacePhotosAsync(place.getPlaceId());
-                count++;
             }
         }
        /* Toast toast = Toast.makeText(getApplicationContext(),"FireBase mis à jour",Toast.LENGTH_SHORT);

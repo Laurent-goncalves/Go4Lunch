@@ -23,6 +23,7 @@ import butterknife.OnClick;
 public class MainActivity extends AppCompatActivity {
 
     private Toolbar toolbar;
+    private Intent intent;
     private static final int RC_SIGN_IN = 123;
     private static final String GOOGLE_SIGN_IN = "google";
     private static final String FACEBOOK_SIGN_IN = "facebook";
@@ -32,12 +33,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
         ButterKnife.bind(this);
-
-        Intent intent = new Intent(this,MapsActivity.class);
-        startActivity(intent);
-
     }
 
     @Override
@@ -95,7 +91,6 @@ public class MainActivity extends AppCompatActivity {
                                 .setLogo(R.drawable.ic_facebook)
                                 .build(),
                         RC_SIGN_IN);
-
                 break;
         }
     }
@@ -110,7 +105,7 @@ public class MainActivity extends AppCompatActivity {
         Snackbar.make(coordinatorLayout, message, Snackbar.LENGTH_SHORT).show();
     }
 
-    private void handleResponseAfterSignIn(int requestCode, int resultCode, Intent data){
+    public void handleResponseAfterSignIn(int requestCode, int resultCode, Intent data){
 
         IdpResponse response = IdpResponse.fromResultIntent(data);
 

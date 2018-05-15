@@ -1,16 +1,26 @@
 package com.g.laurent.go4lunch;
 
+import android.app.ListActivity;
+import android.content.res.ColorStateList;
+import android.graphics.drawable.Drawable;
+import android.os.Build;
 import android.os.Bundle;
 import android.app.Fragment;
+import android.support.annotation.NonNull;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.graphics.drawable.DrawableCompat;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.RatingBar;
 import android.widget.TextView;
+import android.widget.Toast;
+
+import com.g.laurent.go4lunch.Models.Workmates;
 import com.g.laurent.go4lunch.Views.GlideApp;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -34,7 +44,7 @@ public class RestoFragment extends Fragment {
 
     @BindView(R.id.picture_of_restaurant) ImageView picture_resto;
     @BindView(R.id.name_resto) TextView name_resto;
-    @BindView(R.id.rating_restaurant_detail) RatingBar rating_resto;
+    @BindView(R.id.rating_restaurant_detail) LinearLayout rating_resto;
     @BindView(R.id.address_resto) TextView address_resto;
     @BindView(R.id.valid_restaurant) CircleImageView button_valid;
     @BindView(R.id.call_button) Button call_button;
@@ -46,6 +56,8 @@ public class RestoFragment extends Fragment {
     private FirebaseStorage storage;
     private StorageReference storageRef;
     private List<String> list_workmates_id;
+    private String restau_name;
+    private FirebaseUser mCurrentUser;
 
     public RestoFragment() {
         // Required empty public constructor
@@ -59,6 +71,8 @@ public class RestoFragment extends Fragment {
         ButterKnife.bind(this,view);
         placeId = getArguments().getString(EXTRA_PLACE_ID,null);
         launch_search_restaurant_firebase();
+
+        mCurrentUser = FirebaseAuth.getInstance().getCurrentUser();
         return view;
     }
 
@@ -75,20 +89,18 @@ public class RestoFragment extends Fragment {
                         if(getIdRestaurant(datas)!=null){
                             if(getIdRestaurant(datas).equals(placeId)) {
                                 apply_picture_restaurant();
-                                name_resto.setText(getNameRestaurant(datas));
+                                getNameRestaurant(datas);
+                                name_resto.setText(restau_name);
                                 address_resto.setText(getAddress(datas));
-                                rating_resto.setRating(getRating(datas));
-                                list_workmates_id = getWorkmatesJoining(datas);
-                                setButtonAsSelected(did_I_validate_resto(list_workmates_id),button_valid);
+                                rating_calculation(datas);
 
+                                color_buttons();
+                                list_workmates_id = getWorkmatesJoining(datas);
+                                setOnClickListenerButtonRestoValid(button_valid);
+                                setButtonAsSelected(did_I_validate_resto(list_workmates_id),button_valid);
                             }
                         }
                     }
-
-
-
-
-
                 }
             }
 
@@ -97,20 +109,29 @@ public class RestoFragment extends Fragment {
                 System.out.println("eee Cancellation");
             }
         });
-
-
-
-
     }
 
-    private float getRating(DataSnapshot datas){
+    // ---------------------------------- RATING RESTO ----------------------------------------------
+    private void rating_calculation(DataSnapshot datas) {
+
+        Double rating = 0d;
+
         if(datas.child("rating")!=null) {
-            if(datas.child("rating").getValue()!=null){
-                Double rating = Double.parseDouble(datas.child("rating").getValue().toString());
-                return rating.floatValue();
+            if(datas.child("rating").getValue()!=null)
+                rating = Double.parseDouble(datas.child("rating").getValue().toString());
+        }
+
+        int numStars = Math.round(rating.floatValue());
+        rating_resto.removeAllViews();
+
+        if(numStars>=1){
+            for (int i = 0; i < numStars-1; i++) {
+                ImageView imgView = new ImageView(getActivity().getApplicationContext());
+                imgView.setImageResource(R.drawable.baseline_star_white_24);
+                imgView.setColorFilter(ContextCompat.getColor(getActivity().getApplicationContext(),(R.color.colorStars)));
+                rating_resto.addView(imgView);
             }
         }
-        return 0;
     }
 
     private String getIdRestaurant(DataSnapshot datas){
@@ -127,11 +148,11 @@ public class RestoFragment extends Fragment {
             return null;
     }
 
-    private String getNameRestaurant(DataSnapshot datas){
+    private void getNameRestaurant(DataSnapshot datas){
         if(datas.child("name_restaurant")!=null)
-            return (String) datas.child("name_restaurant").getValue();
+            restau_name= (String) datas.child("name_restaurant").getValue();
         else
-            return null;
+            restau_name= null;
     }
 
     private List<String> getWorkmatesJoining(DataSnapshot datas){
@@ -151,11 +172,18 @@ public class RestoFragment extends Fragment {
         return list_workmates;
     }
 
+    private void color_buttons(){
+        setColorPrimaryButtons(call_button);
+        setColorPrimaryButtons(like_button);
+        setColorPrimaryButtons(website_button);
+    }
+
     private Boolean did_I_validate_resto(List<String> list_workmates){
 
         Boolean answer = false;
 
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+
         if (user != null && list_workmates!=null) {
             // User is signed in
 
@@ -186,6 +214,18 @@ public class RestoFragment extends Fragment {
                 .into(picture_resto);
     }
 
+    private void setColorPrimaryButtons(Button button){
+
+        button.setTextColor(getResources().getColor(R.color.colorIconSelected));
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M)
+            button.setCompoundDrawableTintList(ColorStateList.valueOf(ContextCompat.getColor(getActivity().getApplicationContext(),(R.color.colorIconSelected))));
+        else {
+            Drawable[] wrapDrawable = button.getCompoundDrawables();
+            DrawableCompat.setTint(wrapDrawable[0], getResources().getColor(R.color.colorIconSelected));
+        }
+    }
+
     private void setButtonAsSelected(Boolean select, CircleImageView button){
 
         if(getActivity().getApplicationContext()!=null){
@@ -196,4 +236,25 @@ public class RestoFragment extends Fragment {
         }
     }
 
+    private void setOnClickListenerButtonRestoValid(CircleImageView button){
+
+        button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                DatabaseReference mDatabase;
+                mDatabase = FirebaseDatabase.getInstance().getReference();
+                Workmates new_user;
+
+                if(mCurrentUser!=null) {
+                    // Create new user
+                    new_user = new Workmates(mCurrentUser.getDisplayName(),mCurrentUser.getUid(),false, placeId, restau_name, null);
+                    // create or update the new_user on Firebase in folder "workmates"
+                    mDatabase.child("workmates").child(mCurrentUser.getUid()).setValue(new_user);
+                    // create or update the new_user on Firebase in folder from chosen restaurant
+                    mDatabase.child("restaurants").child(placeId).child("workmates_joining").child(mCurrentUser.getUid()).setValue(new_user);
+                }
+            }
+        });
+    }
 }
