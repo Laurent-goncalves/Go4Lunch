@@ -19,7 +19,7 @@ public class Place_Nearby {
     private List<Workmates> mWorkmatesList;
 
 
-    public Place_Nearby(String name_restaurant, String placeId, Geometry geometry, OpeningHours openingHours, Double rating, List<String> types, String address) {
+    public Place_Nearby(String name_restaurant, String placeId, Geometry geometry, OpeningHours openingHours, Double rating, List<String> types, String address,List<Workmates> mWorkmatesList) {
         this.name_restaurant = name_restaurant;
         this.placeId=placeId;
         this.geometry=geometry;
@@ -27,6 +27,7 @@ public class Place_Nearby {
         this.rating = rating;
         this.types = types;
         this.address = address;
+        this.mWorkmatesList=mWorkmatesList;
     }
 
     public List<Workmates> getWorkmatesList() {

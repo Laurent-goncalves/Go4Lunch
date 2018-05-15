@@ -1,12 +1,10 @@
 package com.g.laurent.go4lunch;
 
-import android.app.ListActivity;
 import android.content.res.ColorStateList;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Bundle;
 import android.app.Fragment;
-import android.support.annotation.NonNull;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.graphics.drawable.DrawableCompat;
 import android.support.v7.widget.RecyclerView;
@@ -16,10 +14,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.RatingBar;
 import android.widget.TextView;
-import android.widget.Toast;
-
 import com.g.laurent.go4lunch.Models.Workmates;
 import com.g.laurent.go4lunch.Views.GlideApp;
 import com.google.firebase.auth.FirebaseAuth;
@@ -31,7 +26,6 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
-import java.util.ArrayList;
 import java.util.List;
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -40,7 +34,7 @@ import de.hdodenhof.circleimageview.CircleImageView;
 /**
  * A simple {@link Fragment} subclass.
  */
-public class RestoFragment extends Fragment {
+public class RestoFragment extends BaseRestoFragment {
 
     @BindView(R.id.picture_of_restaurant) ImageView picture_resto;
     @BindView(R.id.name_resto) TextView name_resto;
@@ -50,13 +44,10 @@ public class RestoFragment extends Fragment {
     @BindView(R.id.call_button) Button call_button;
     @BindView(R.id.like_button) Button like_button;
     @BindView(R.id.website_button) Button website_button;
-    @BindView(R.id.list_workmates_joining_resto) RecyclerView list_workmates;
-    private String placeId;
+    @BindView(R.id.list_workmates_joining_resto) RecyclerView list_workmates_recycler;
     private static String EXTRA_PLACE_ID = "placeId_resto";
     private FirebaseStorage storage;
     private StorageReference storageRef;
-    private List<String> list_workmates_id;
-    private String restau_name;
     private FirebaseUser mCurrentUser;
 
     public RestoFragment() {
@@ -66,40 +57,42 @@ public class RestoFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
+        // Inflate the layout for this fragment and associate the views
         View view = inflater.inflate(R.layout.fragment_resto, container, false);
         ButterKnife.bind(this,view);
-        placeId = getArguments().getString(EXTRA_PLACE_ID,null);
-        launch_search_restaurant_firebase();
 
+        // Initialize variables
+        placeId = getArguments().getString(EXTRA_PLACE_ID,null);
         mCurrentUser = FirebaseAuth.getInstance().getCurrentUser();
+        storage = FirebaseStorage.getInstance();
+        storageRef = storage.getReference();
+
+        // Launch the search for restaurant details on Firebase storage
+        launch_search_restaurant_firebase();
         return view;
     }
 
     private void launch_search_restaurant_firebase() {
 
         DatabaseReference mDatabase;
-        mDatabase = FirebaseDatabase.getInstance().getReference().child("restaurants");
+        mDatabase = FirebaseDatabase.getInstance().getReference().child("restaurants").child(placeId);
         mDatabase.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                if(dataSnapshot!=null) {
+            public void onDataChange(DataSnapshot datas) {
+                if(datas!=null) {
 
-                    for (DataSnapshot datas : dataSnapshot.getChildren()){
-                        if(getIdRestaurant(datas)!=null){
-                            if(getIdRestaurant(datas).equals(placeId)) {
-                                apply_picture_restaurant();
-                                getNameRestaurant(datas);
-                                name_resto.setText(restau_name);
-                                address_resto.setText(getAddress(datas));
-                                rating_calculation(datas);
+                    resto = create_place_nearby_from_datas_firebase(datas);
 
-                                color_buttons();
-                                list_workmates_id = getWorkmatesJoining(datas);
-                                setOnClickListenerButtonRestoValid(button_valid);
-                                setButtonAsSelected(did_I_validate_resto(list_workmates_id),button_valid);
-                            }
-                        }
+                    // Create views
+                    if(resto!=null){
+
+                        apply_picture_restaurant();
+                        name_resto.setText(resto.getName_restaurant());
+                        address_resto.setText(resto.getAddress());
+                        getRating(datas);
+                        color_buttons();
+                        setOnClickListenerButtonRestoValid(button_valid);
+                        setButtonAsSelected(did_I_validate_resto(list_workmates),button_valid);
                     }
                 }
             }
@@ -112,16 +105,17 @@ public class RestoFragment extends Fragment {
     }
 
     // ---------------------------------- RATING RESTO ----------------------------------------------
-    private void rating_calculation(DataSnapshot datas) {
 
-        Double rating = 0d;
+    @Override
+    protected void getRating(DataSnapshot datas) {
 
-        if(datas.child("rating")!=null) {
-            if(datas.child("rating").getValue()!=null)
-                rating = Double.parseDouble(datas.child("rating").getValue().toString());
-        }
+        int numStars;
 
-        int numStars = Math.round(rating.floatValue());
+        if(rating!=null)
+            numStars = Math.round(rating.floatValue());
+        else
+            numStars = 0;
+
         rating_resto.removeAllViews();
 
         if(numStars>=1){
@@ -134,51 +128,13 @@ public class RestoFragment extends Fragment {
         }
     }
 
-    private String getIdRestaurant(DataSnapshot datas){
-        if(datas.child("placeId")!=null)
-            return (String) datas.child("placeId").getValue();
-        else
-            return null;
-    }
-
-    private String getAddress(DataSnapshot datas){
-        if(datas.child("address")!=null)
-            return (String) datas.child("address").getValue();
-        else
-            return null;
-    }
-
-    private void getNameRestaurant(DataSnapshot datas){
-        if(datas.child("name_restaurant")!=null)
-            restau_name= (String) datas.child("name_restaurant").getValue();
-        else
-            restau_name= null;
-    }
-
-    private List<String> getWorkmatesJoining(DataSnapshot datas){
-        List<String> list_workmates=new ArrayList<>();
-
-        if(datas.child("list_workmates")!=null){
-
-            for(DataSnapshot datas_child : datas.child("list_workmates").getChildren()) {
-
-                if (datas_child != null){
-                    if(datas_child.getValue()!=null)
-                        list_workmates.add(datas_child.getValue().toString());
-                }
-            }
-        }
-
-        return list_workmates;
-    }
-
     private void color_buttons(){
         setColorPrimaryButtons(call_button);
         setColorPrimaryButtons(like_button);
         setColorPrimaryButtons(website_button);
     }
 
-    private Boolean did_I_validate_resto(List<String> list_workmates){
+    private Boolean did_I_validate_resto(List<Workmates> list_workmates){
 
         Boolean answer = false;
 
@@ -188,24 +144,24 @@ public class RestoFragment extends Fragment {
             // User is signed in
 
             // Search user id among workmates who want to lunch at this resto
-            for(String id_user : list_workmates){
+            for(Workmates workmates : list_workmates){
 
-                if(id_user!=null){
-
-                    if(id_user.equals(user.getUid())) {
-                        answer = true;
-                        break;
+                if(workmates!=null){
+                    if(workmates.getId()!=null){
+                        if(workmates.getId().equals(user.getUid())) {
+                            answer = true;
+                            break;
+                        }
                     }
                 }
             }
         }
+
         return answer;
     }
 
     private void apply_picture_restaurant() {
 
-        storage = FirebaseStorage.getInstance();
-        storageRef = storage.getReference();
         StorageReference storageReference = storageRef.child(placeId + ".jpg");
 
         // Load the image using Glide
@@ -248,7 +204,7 @@ public class RestoFragment extends Fragment {
 
                 if(mCurrentUser!=null) {
                     // Create new user
-                    new_user = new Workmates(mCurrentUser.getDisplayName(),mCurrentUser.getUid(),false, placeId, restau_name, null);
+                    new_user = new Workmates(mCurrentUser.getDisplayName(),mCurrentUser.getUid(),true, placeId, resto.getName_restaurant(), "bar");
                     // create or update the new_user on Firebase in folder "workmates"
                     mDatabase.child("workmates").child(mCurrentUser.getUid()).setValue(new_user);
                     // create or update the new_user on Firebase in folder from chosen restaurant

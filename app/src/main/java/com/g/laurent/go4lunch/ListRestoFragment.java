@@ -30,7 +30,7 @@ import butterknife.ButterKnife;
 /**
  * A simple {@link Fragment} subclass.
  */
-public class ListRestoFragment extends Fragment implements ListViewAdapter.Listener {
+public class ListRestoFragment extends BaseRestoFragment implements ListViewAdapter.Listener {
 
     @BindView(R.id.list_view_resto) RecyclerView recyclerView;
     private List<Place_Nearby> list_places_nearby;
@@ -39,14 +39,6 @@ public class ListRestoFragment extends Fragment implements ListViewAdapter.Liste
     private final static String EXTRA_LAT_CURRENT = "latitude_current_location";
     private final static String EXTRA_LONG_CURRENT = "longitude_current_location";
     private Callback_DetailResto mCallback_detailResto;
-    private ListViewAdapter.Listener callback;
-    String name_resto;
-    String placeId;
-    Geometry geometry;
-    Double rating;
-    OpeningHours openingHours;
-    List<String> types;
-    String address;
 
     public ListRestoFragment() {
         // Required empty public constructor
@@ -98,101 +90,6 @@ public class ListRestoFragment extends Fragment implements ListViewAdapter.Liste
         });
     }
 
-    private Place_Nearby create_place_nearby_from_datas_firebase(DataSnapshot datas){
-
-        getNameRestaurant(datas);
-        getIdRestaurant(datas);
-        getGeometryRestaurant(datas);
-        getOpeningHours(datas);
-        getRating(datas);
-        getTypes(datas);
-        getAddress(datas);
-
-        return new Place_Nearby(name_resto, placeId,geometry,openingHours,rating,types,address);
-    }
-
-    private void getAddress(DataSnapshot datas){
-
-        this.address=null;
-        if(datas.child("address")!=null)
-            this.address= (String) datas.child("address").getValue();
-        else
-            this.address= null;
-    }
-
-    private void getTypes(DataSnapshot datas){
-        this.types=new ArrayList<>();
-
-        if(datas.child("types")!=null){
-
-            for(DataSnapshot datas_child : datas.child("types").getChildren()) {
-
-                if (datas_child != null){
-                    if(datas_child.getValue()!=null)
-                        types.add(datas_child.getValue().toString());
-                }
-            }
-        }
-    }
-
-    private void getRating(DataSnapshot datas){
-
-        rating= null;
-        if(datas.child("rating")!=null) {
-            if(datas.child("rating").getValue()!=null)
-                rating = Double.parseDouble(datas.child("rating").getValue().toString());
-        }
-        else
-            rating= null;
-    }
-
-    private void getOpeningHours(DataSnapshot datas){
-
-        this.openingHours = new OpeningHours();
-
-        if(datas.child("openingHours")!=null){
-            if(datas.child("openingHours").child("openNow")!=null)
-                openingHours.setOpenNow((Boolean) datas.child("openingHours").child("openNow").getValue());
-        }
-    }
-
-    private void getGeometryRestaurant(DataSnapshot datas){
-
-        this.geometry = new Geometry();
-        Location location = new Location();
-
-        if(datas.child("geometry")!=null){
-            if(datas.child("geometry").child("location")!=null) {
-
-                if(datas.child("geometry").child("location").child("lat")!=null)
-                    location.setLat((Double) datas.child("geometry").child("location").child("lat").getValue());
-
-                if(datas.child("geometry").child("location").child("lng")!=null)
-                    location.setLng((Double) datas.child("geometry").child("location").child("lng").getValue());
-
-            }
-        }
-
-        this.geometry.setLocation(location);
-    }
-
-    private void getIdRestaurant(DataSnapshot datas){
-        placeId = null;
-        if(datas.child("placeId")!=null)
-            placeId= (String) datas.child("placeId").getValue();
-        else
-            placeId= null;
-    }
-
-    private void getNameRestaurant(DataSnapshot datas){
-        name_resto=null;
-
-        if(datas.child("name_restaurant")!=null)
-            name_resto = (String) datas.child("name_restaurant").getValue();
-        else
-            name_resto= null;
-    }
-
     private void configure_recycler_view(){
 
         getLatLng_current_location();
@@ -211,14 +108,12 @@ public class ListRestoFragment extends Fragment implements ListViewAdapter.Liste
 
     private void getLatLng_current_location(){
 
+        // recover the latitude and longitude inside the bundle
         if(getArguments()!=null)
             current_location = new LatLng(getArguments().getDouble(EXTRA_LAT_CURRENT,0),
                                           getArguments().getDouble(EXTRA_LONG_CURRENT,0));
         else
             current_location=null;
-
-
-        System.out.println("eee YYYY lat1=" + current_location.latitude + "   lon1=" + current_location.longitude);
     }
 
     public List<Place_Nearby> getList_places_nearby() {
