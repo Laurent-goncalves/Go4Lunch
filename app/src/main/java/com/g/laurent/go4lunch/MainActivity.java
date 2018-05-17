@@ -93,6 +93,18 @@ public class MainActivity extends AppCompatActivity {
                         RC_SIGN_IN);
                 break;
         }
+
+
+           /*     GoogleSignInAccount acct = GoogleSignIn.getLastSignedInAccount(context);
+
+        if(acct!=null){
+            if(acct.getPhotoUrl()!=null){
+                if(acct.getPhotoUrl().toString()!=null)
+                    photoUrl = acct.getPhotoUrl().toString();
+            }
+        }
+   */
+
     }
 
     @Override

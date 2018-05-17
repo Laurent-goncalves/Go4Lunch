@@ -6,17 +6,11 @@ import android.support.test.filters.LargeTest;
 import android.support.test.runner.AndroidJUnit4;
 import android.support.test.rule.ActivityTestRule;
 import com.g.laurent.go4lunch.Models.List_Search_Nearby;
-import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.location.places.GeoDataApi;
-import com.google.android.gms.location.places.Places;
 import com.google.android.gms.maps.model.LatLng;
-
 import junit.framework.Assert;
-
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-
 import static org.junit.Assert.*;
 
 /**
@@ -27,13 +21,6 @@ import static org.junit.Assert.*;
 @LargeTest
 @RunWith(AndroidJUnit4.class)
 public class ExampleInstrumentedTest {
-    @Test
-    public void useAppContext() {
-        // Context of the app under test.
-        Context appContext = InstrumentationRegistry.getTargetContext();
-
-        assertEquals("com.g.laurent.go4lunch", appContext.getPackageName());
-    }
 
     @Rule
     public ActivityTestRule<MapsActivity> mActivityTestRule = new ActivityTestRule<>(MapsActivity.class,false,false);
@@ -41,7 +28,7 @@ public class ExampleInstrumentedTest {
     @Test
     public void write_and_read_list_places_nearby_in_firebase() {
         // Context of the app under test.
-        Context appContext = InstrumentationRegistry.getTargetContext();
+        //Context appContext = InstrumentationRegistry.getTargetContext();
         mActivityTestRule.launchActivity(null);
 
         // get a list of nearby places

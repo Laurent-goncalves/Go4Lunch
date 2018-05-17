@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.app.Fragment;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.graphics.drawable.DrawableCompat;
+import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -17,6 +18,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import com.g.laurent.go4lunch.Models.Workmates;
 import com.g.laurent.go4lunch.Views.GlideApp;
+import com.g.laurent.go4lunch.Views.Resto_Details.WorkmatesViewAdapter;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
@@ -45,10 +47,12 @@ public class RestoFragment extends BaseRestoFragment {
     @BindView(R.id.like_button) Button like_button;
     @BindView(R.id.website_button) Button website_button;
     @BindView(R.id.list_workmates_joining_resto) RecyclerView list_workmates_recycler;
-    private static String EXTRA_PLACE_ID = "placeId_resto";
+    private final static String TYPE_DISPLAY_WORKMATES_BY_RESTO = "list_of_workmates_by_resto";
+    private final static String EXTRA_PLACE_ID = "placeId_resto";
     private FirebaseStorage storage;
     private StorageReference storageRef;
     private FirebaseUser mCurrentUser;
+    private WorkmatesViewAdapter adapter;
 
     public RestoFragment() {
         // Required empty public constructor
@@ -93,6 +97,7 @@ public class RestoFragment extends BaseRestoFragment {
                         color_buttons();
                         setOnClickListenerButtonRestoValid(button_valid);
                         setButtonAsSelected(did_I_validate_resto(list_workmates),button_valid);
+                        configure_recycler_view();
                     }
                 }
             }
@@ -204,7 +209,7 @@ public class RestoFragment extends BaseRestoFragment {
 
                 if(mCurrentUser!=null) {
                     // Create new user
-                    new_user = new Workmates(mCurrentUser.getDisplayName(),mCurrentUser.getUid(),true, placeId, resto.getName_restaurant(), "bar");
+                    new_user = new Workmates(mCurrentUser.getDisplayName(),mCurrentUser.getUid(),mCurrentUser.getPhotoUrl(),true, placeId, resto.getName_restaurant(), "bar");
                     // create or update the new_user on Firebase in folder "workmates"
                     mDatabase.child("workmates").child(mCurrentUser.getUid()).setValue(new_user);
                     // create or update the new_user on Firebase in folder from chosen restaurant
@@ -212,5 +217,19 @@ public class RestoFragment extends BaseRestoFragment {
                 }
             }
         });
+    }
+
+    private void configure_recycler_view(){
+
+        if(adapter == null) {
+            // Create adapter passing in the sample user data
+            adapter = new WorkmatesViewAdapter(getActivity().getApplicationContext(),list_workmates,TYPE_DISPLAY_WORKMATES_BY_RESTO);
+            // Attach the adapter to the recyclerview to populate items
+            list_workmates_recycler.setAdapter(adapter);
+            // Set layout manager to position the items
+            list_workmates_recycler.setLayoutManager(new LinearLayoutManager(getActivity().getApplicationContext()));
+        } else
+            adapter.notifyDataSetChanged();
+
     }
 }

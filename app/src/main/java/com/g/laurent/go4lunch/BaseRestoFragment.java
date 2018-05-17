@@ -1,6 +1,8 @@
 package com.g.laurent.go4lunch;
 
 import android.app.Fragment;
+import android.net.Uri;
+
 import com.g.laurent.go4lunch.Models.Place_Nearby;
 import com.g.laurent.go4lunch.Models.Workmates;
 import com.g.laurent.go4lunch.Utils.Search_Nearby.Geometry;
@@ -121,6 +123,7 @@ public abstract class BaseRestoFragment extends Fragment {
                         Workmates workmates = new Workmates(
                                 (String) datas_child.child("name").getValue(),
                                 (String) datas_child.child("id").getValue(),
+                                (Uri) datas_child.child("photoUrl").getValue(),
                                 (Boolean) datas_child.child("chosen").getValue(),
                                 (String) datas_child.child("resto_id").getValue(),
                                 (String) datas_child.child("resto_name").getValue(),

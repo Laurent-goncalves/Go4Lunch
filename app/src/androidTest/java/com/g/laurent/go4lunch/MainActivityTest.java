@@ -42,13 +42,12 @@ import static org.hamcrest.core.IsNot.not;
 public class MainActivityTest {
 
     @Rule
-    public ActivityTestRule<MainActivity> mActivityTestRule = new ActivityTestRule<>(MainActivity.class);
+    public ActivityTestRule<MapsActivity> mActivityTestRule = new ActivityTestRule<>(MapsActivity.class);
 
     @Test
     public void mainActivityTest() {
 
-        Intent intent = new Intent(mActivityTestRule.getActivity(),MapsActivity.class);
-        mActivityTestRule.getActivity().startActivity(intent);
+        mActivityTestRule.getActivity().configure_and_show_ListRestoFragment();
 
         waiting_time(4000);
 
@@ -68,9 +67,19 @@ public class MainActivityTest {
                                 withClassName(is("android.widget.FrameLayout")),
                                 0)));
         recyclerView.perform(actionOnItemAtPosition(0, click()));
+        System.out.println("eee 111");
 
+      /*  ViewInteraction circleImageView = onView(
+                allOf(withId(R.id.valid_restaurant),
+                        childAtPosition(
+                                childAtPosition(
+                                        withClassName(is("android.widget.LinearLayout")),
+                                        0),
+                                2)));
+        circleImageView.perform(actionOnItemAtPosition(0, click()));*/
 
-        onView(withId(R.id.valid_restaurant)).perform(click());
+        //onView(withId(R.id.valid_restaurant)).perform(click());
+        System.out.println("eee 222");
     }
 
     private static Matcher<View> childAtPosition(

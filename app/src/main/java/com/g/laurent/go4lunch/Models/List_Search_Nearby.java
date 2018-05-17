@@ -50,7 +50,9 @@ public class List_Search_Nearby {
             @Override
             public void onNext(SearchNearby searchNearby) {
                 build_list_places_nearby(searchNearby);
-                mCallbackMapsActivity.update_list_nearby_places_firebase(list_places_nearby);
+
+                if(mCallbackMapsActivity!=null)
+                    mCallbackMapsActivity.update_list_nearby_places_firebase(list_places_nearby);
             }
 
             @Override

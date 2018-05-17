@@ -211,14 +211,21 @@ public class MapsActivity extends AppCompatActivity implements CallbackMapsActiv
         toast.show();*/
     }
 
-    private void configure_and_show_MapsFragment(){
+    public void configure_and_show_listmatesfragment(){
+        ListMatesFragment listMatesFragment = new ListMatesFragment();
+        FragmentTransaction fragmentTransaction = getFragmentManager().beginTransaction();
+        fragmentTransaction.replace(R.id.fragment_map_view, listMatesFragment);
+        fragmentTransaction.commit();
+    }
+
+    public void configure_and_show_MapsFragment(){
         MapsFragment mapsFragment = new MapsFragment();
         FragmentTransaction fragmentTransaction = getFragmentManager().beginTransaction();
         fragmentTransaction.replace(R.id.fragment_map_view, mapsFragment);
         fragmentTransaction.commit();
     }
 
-    private void configure_and_show_ListRestoFragment(){
+    public void configure_and_show_ListRestoFragment(){
         Bundle bundle = new Bundle();
 
         bundle.putDouble(EXTRA_LAT_CURRENT,currentPlaceLatLng.latitude);
@@ -366,6 +373,7 @@ public class MapsActivity extends AppCompatActivity implements CallbackMapsActiv
                     setButtonAsSelected(false, buttonList);
                     setButtonAsSelected(true, buttonMates);
                     BUTTON_SELECTED=BUTTON_MATES_SELECTED;
+                    configure_and_show_listmatesfragment();
                 }
             }
         });

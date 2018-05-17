@@ -1,5 +1,7 @@
 package com.g.laurent.go4lunch.Models;
 
+import android.net.Uri;
+
 public class Workmates {
 
     private String name;
@@ -8,14 +10,24 @@ public class Workmates {
     private String resto_id;
     private String resto_type;
     private String resto_name;
+    private Uri photoUrl;
 
-    public Workmates(String name, String id, Boolean chosen, String resto_id, String resto_name, String resto_type) {
+    public Workmates(String name, String id, Uri photoUrl, Boolean chosen, String resto_id, String resto_name, String resto_type) {
         this.name = name;
         this.id=id;
+        this.photoUrl=photoUrl;
         this.chosen = chosen;
         this.resto_id = resto_id;
         this.resto_type=resto_type;
         this.resto_name=resto_name;
+    }
+
+    public Uri getPhotoUrl() {
+        return photoUrl;
+    }
+
+    public void setPhotoUrl(Uri photoUrl) {
+        this.photoUrl = photoUrl;
     }
 
     public String getId() {

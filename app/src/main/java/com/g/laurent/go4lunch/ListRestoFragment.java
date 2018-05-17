@@ -95,12 +95,14 @@ public class ListRestoFragment extends BaseRestoFragment implements ListViewAdap
         getLatLng_current_location();
 
         if(adapter == null) {
-            // Create adapter passing in the sample user data
-            adapter = new ListViewAdapter(getActivity().getApplicationContext(),list_places_nearby,current_location,this);
-            // Attach the adapter to the recyclerview to populate items
-            recyclerView.setAdapter(adapter);
-            // Set layout manager to position the items
-            recyclerView.setLayoutManager(new LinearLayoutManager(getActivity().getApplicationContext()));
+            if(getActivity()!=null) {
+                // Create adapter passing in the sample user data
+                adapter = new ListViewAdapter(getActivity().getApplicationContext(), list_places_nearby, current_location, this);
+                // Attach the adapter to the recyclerview to populate items
+                recyclerView.setAdapter(adapter);
+                // Set layout manager to position the items
+                recyclerView.setLayoutManager(new LinearLayoutManager(getActivity().getApplicationContext()));
+            }
         } else
             adapter.notifyDataSetChanged();
 

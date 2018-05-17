@@ -9,12 +9,14 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import com.g.laurent.go4lunch.Models.Place_Nearby;
+import com.g.laurent.go4lunch.Models.Workmates;
 import com.g.laurent.go4lunch.R;
 import com.g.laurent.go4lunch.Views.GlideApp;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import java.lang.ref.WeakReference;
+import java.util.List;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
@@ -35,6 +37,8 @@ public class RestoViewHolder extends RecyclerView.ViewHolder implements View.OnC
     private StorageReference storageRef;
     private WeakReference<ListViewAdapter.Listener> callbackWeakRef;
     private Context context;
+    private final static String TYPE_DISPLAY_WORKMATES_LIST = "list_of_workmates";
+    private final static String TYPE_DISPLAY_WORKMATES_BY_RESTO = "list_of_workmates_by_resto";
 
     public RestoViewHolder(View itemView) {
         super(itemView);
@@ -170,5 +174,6 @@ public class RestoViewHolder extends RecyclerView.ViewHolder implements View.OnC
             callback.onClickShowRestoDetails(place_nearby.getPlaceId());
         }
     }
+
 }
 
