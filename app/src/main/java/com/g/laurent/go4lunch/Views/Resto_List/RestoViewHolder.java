@@ -37,8 +37,6 @@ public class RestoViewHolder extends RecyclerView.ViewHolder implements View.OnC
     private StorageReference storageRef;
     private WeakReference<ListViewAdapter.Listener> callbackWeakRef;
     private Context context;
-    private final static String TYPE_DISPLAY_WORKMATES_LIST = "list_of_workmates";
-    private final static String TYPE_DISPLAY_WORKMATES_BY_RESTO = "list_of_workmates_by_resto";
 
     public RestoViewHolder(View itemView) {
         super(itemView);

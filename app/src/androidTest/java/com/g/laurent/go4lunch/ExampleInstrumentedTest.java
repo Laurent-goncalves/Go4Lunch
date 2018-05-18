@@ -21,7 +21,7 @@ import org.junit.runner.RunWith;
 public class ExampleInstrumentedTest {
 
     @Rule
-    public ActivityTestRule<MapsActivity> mActivityTestRule = new ActivityTestRule<>(MapsActivity.class,false,false);
+    public ActivityTestRule<MultiActivity> mActivityTestRule = new ActivityTestRule<>(MultiActivity.class,false,false);
 
     @Test
     public void write_and_read_list_places_nearby_in_firebase() {

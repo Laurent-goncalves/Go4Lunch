@@ -63,7 +63,7 @@ import butterknife.ButterKnife;
 import static android.content.ContentValues.TAG;
 
 
-public class MapsActivity extends AppCompatActivity implements CallbackMapsActivity,AlarmReceiver.callbackAlarm, GoogleApiClient.OnConnectionFailedListener, Callback_DetailResto {//implements OnMapReadyCallback,GoogleApiClient.OnConnectionFailedListener {
+public class MultiActivity extends AppCompatActivity implements CallbackMapsActivity,AlarmReceiver.callbackAlarm, GoogleApiClient.OnConnectionFailedListener, Callback_DetailResto {//implements OnMapReadyCallback,GoogleApiClient.OnConnectionFailedListener {
 
     private FirebaseStorage storage;
     private StorageReference storageRef;
@@ -129,10 +129,11 @@ public class MapsActivity extends AppCompatActivity implements CallbackMapsActiv
         //configureAlarmManager();
         //configure_and_show_ListRestoFragment();
 
-        /*
+
         configure_and_show_MapsFragment();
 
-        mGoogleApiClient = new GoogleApiClient
+
+        /*mGoogleApiClient = new GoogleApiClient
                 .Builder(this)
                 .addApi(Places.GEO_DATA_API)
                 .addApi(Places.PLACE_DETECTION_API)
@@ -141,29 +142,32 @@ public class MapsActivity extends AppCompatActivity implements CallbackMapsActiv
 
     }
 
-    private void save_current_user_in_Firebase(){
 
-        // Initialization
-        FirebaseUser mCurrentUser = FirebaseAuth.getInstance().getCurrentUser();
-        DatabaseReference mDatabase;
-        mDatabase = FirebaseDatabase.getInstance().getReference().child("workmates");
 
-        // Create workmates
-        if(mCurrentUser!=null){
+    // ---------------------------------------------------------------------------------
+    // ------------------------ CREATE NEW LIST OF RESTAURANTS -------------------------
+    // ---------------------------------------------------------------------------------
 
-            String Url_photo = null;
+    private void configureAlarmManager(){
 
-            if(mCurrentUser.getPhotoUrl()!=null)
-                Url_photo = mCurrentUser.getPhotoUrl().toString();
+        // Configuration of alarm for saving feeling each day
+        AlarmReceiver.callbackAlarm mcallbackAlarm=this;
+        AlarmReceiver alarmReceiver = new AlarmReceiver();
+        alarmReceiver.createCallbackAlarm(mcallbackAlarm);
 
-            Workmates workmates = new Workmates(
-                    mCurrentUser.getDisplayName(),
-                    mCurrentUser.getUid(),
-                    Url_photo,
-                    false, null,null,null);
+        Intent alarmIntent = new Intent(getApplicationContext(), alarmReceiver.getClass());
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(getApplicationContext(), 0, alarmIntent, PendingIntent.FLAG_UPDATE_CURRENT);
 
-            mDatabase.child(mCurrentUser.getUid()).setValue(workmates);
-        }
+        // Set the alarm to start at 12:00 p.m.
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTimeInMillis(System.currentTimeMillis());
+        calendar.set(Calendar.HOUR_OF_DAY, 12);
+        calendar.set(Calendar.MINUTE,0);
+
+        // Create alarm to ring it every day at noon
+        AlarmManager manager = (AlarmManager) getApplicationContext().getSystemService(Context.ALARM_SERVICE);
+        if(manager!=null)
+            manager.setRepeating(AlarmManager.RTC,calendar.getTimeInMillis(), AlarmManager.INTERVAL_DAY, pendingIntent);
     }
 
     @Override
@@ -173,6 +177,7 @@ public class MapsActivity extends AppCompatActivity implements CallbackMapsActiv
 
     private ResultCallback<PlacePhotoResult> mDisplayPhotoResultCallback
             = new ResultCallback<PlacePhotoResult>() {
+
         @Override
         public void onResult(PlacePhotoResult placePhotoResult) {
             if (!placePhotoResult.getStatus().isSuccess()) {
@@ -203,6 +208,30 @@ public class MapsActivity extends AppCompatActivity implements CallbackMapsActiv
         }
     };
 
+    private void save_current_user_in_Firebase(){
+
+        // Initialization
+        FirebaseUser mCurrentUser = FirebaseAuth.getInstance().getCurrentUser();
+        DatabaseReference mDatabase;
+        mDatabase = FirebaseDatabase.getInstance().getReference().child("workmates");
+
+        // Create workmates
+        if(mCurrentUser!=null){
+
+            String Url_photo = null;
+
+            if(mCurrentUser.getPhotoUrl()!=null)
+                Url_photo = mCurrentUser.getPhotoUrl().toString();
+
+            Workmates workmates = new Workmates(
+                    mCurrentUser.getDisplayName(),
+                    mCurrentUser.getUid(),
+                    Url_photo,
+                    false, null,null,null);
+
+            mDatabase.child(mCurrentUser.getUid()).setValue(workmates);
+        }
+    }
 
     private void getPlacePhotosAsync(final String placeId) {
 
@@ -240,9 +269,11 @@ public class MapsActivity extends AppCompatActivity implements CallbackMapsActiv
                 getPlacePhotosAsync(place.getPlaceId());
             }
         }
-       /* Toast toast = Toast.makeText(getApplicationContext(),"FireBase mis à jour",Toast.LENGTH_SHORT);
-        toast.show();*/
     }
+
+    // ---------------------------------------------------------------------------------
+    // -------------------         CONFIGURATION OF FRAGMENTS         ------------------
+    // ---------------------------------------------------------------------------------
 
     public void configure_and_show_listmatesfragment(){
         ListMatesFragment listMatesFragment = new ListMatesFragment();
@@ -252,7 +283,13 @@ public class MapsActivity extends AppCompatActivity implements CallbackMapsActiv
     }
 
     public void configure_and_show_MapsFragment(){
+
+        Bundle bundle = new Bundle();
+        bundle.putDouble(EXTRA_LAT_CURRENT,currentPlaceLatLng.latitude);
+        bundle.putDouble(EXTRA_LONG_CURRENT,currentPlaceLatLng.longitude);
+
         MapsFragment mapsFragment = new MapsFragment();
+        mapsFragment.setArguments(bundle);
         FragmentTransaction fragmentTransaction = getFragmentManager().beginTransaction();
         fragmentTransaction.replace(R.id.fragment_map_view, mapsFragment);
         fragmentTransaction.commit();
@@ -292,27 +329,7 @@ public class MapsActivity extends AppCompatActivity implements CallbackMapsActiv
         fragmentTransaction.commit();
     }
 
-    private void configureAlarmManager(){
 
-        // Configuration of alarm for saving feeling each day
-        AlarmReceiver.callbackAlarm mcallbackAlarm=this;
-        AlarmReceiver alarmReceiver = new AlarmReceiver();
-        alarmReceiver.createCallbackAlarm(mcallbackAlarm);
-
-        Intent alarmIntent = new Intent(getApplicationContext(), alarmReceiver.getClass());
-        PendingIntent pendingIntent = PendingIntent.getBroadcast(getApplicationContext(), 0, alarmIntent, PendingIntent.FLAG_UPDATE_CURRENT);
-
-        // Set the alarm to start at 12:00 p.m.
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTimeInMillis(System.currentTimeMillis());
-        calendar.set(Calendar.HOUR_OF_DAY, 12);
-        calendar.set(Calendar.MINUTE,0);
-
-        // Create alarm to ring it every day at noon
-        AlarmManager manager = (AlarmManager) getApplicationContext().getSystemService(Context.ALARM_SERVICE);
-        if(manager!=null)
-            manager.setRepeating(AlarmManager.RTC,calendar.getTimeInMillis(), AlarmManager.INTERVAL_DAY, pendingIntent);
-    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -451,6 +468,13 @@ public class MapsActivity extends AppCompatActivity implements CallbackMapsActiv
         super.onSaveInstanceState(outState);
     }
 
+
+
+    @Override
+    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
+        System.out.println("eee PROBLEM " );
+    }
+
     private Place findPlaceHighestLikelihood(@NonNull Task<PlaceLikelihoodBufferResponse> task){
 
         Place placeHighestLikelihood = null;
@@ -523,12 +547,6 @@ public class MapsActivity extends AppCompatActivity implements CallbackMapsActiv
                     PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION);
         }
     }
-
-    @Override
-    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
-        System.out.println("eee PROBLEM " );
-    }
-
 
     /**
      * Manipulates the map once available.

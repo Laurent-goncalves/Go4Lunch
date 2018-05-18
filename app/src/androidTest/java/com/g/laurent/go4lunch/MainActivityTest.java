@@ -29,7 +29,7 @@ import static org.hamcrest.Matchers.is;
 public class MainActivityTest {
 
     @Rule
-    public ActivityTestRule<MapsActivity> mActivityTestRule = new ActivityTestRule<>(MapsActivity.class);
+    public ActivityTestRule<MultiActivity> mActivityTestRule = new ActivityTestRule<>(MultiActivity.class);
 
     @Test
     public void mainActivityTest() {

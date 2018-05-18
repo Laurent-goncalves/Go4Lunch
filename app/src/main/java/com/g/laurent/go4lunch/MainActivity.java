@@ -3,7 +3,6 @@ package com.g.laurent.go4lunch;
 import android.app.SearchManager;
 import android.content.Context;
 import android.content.Intent;
-import android.net.Uri;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
@@ -16,16 +15,7 @@ import android.widget.SearchView;
 import com.firebase.ui.auth.AuthUI;
 import com.firebase.ui.auth.ErrorCodes;
 import com.firebase.ui.auth.IdpResponse;
-import com.g.laurent.go4lunch.Models.Workmates;
-import com.google.firebase.FirebaseApp;
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -139,8 +129,8 @@ public class MainActivity extends AppCompatActivity {
                 // Save current user to Firebase storage
                 //save_current_user_in_Firebase();
 
-                // Launch MapsActivity
-                Intent intent = new Intent(this,MapsActivity.class);
+                // Launch MultiActivity
+                Intent intent = new Intent(this,MultiActivity.class);
                 startActivity(intent);
 
             } else { // ERRORS
