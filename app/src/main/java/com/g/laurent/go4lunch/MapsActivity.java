@@ -10,6 +10,7 @@ import android.content.pm.PackageManager;
 import android.content.res.ColorStateList;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
+import android.net.Uri;
 import android.os.Build;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
@@ -28,6 +29,7 @@ import com.g.laurent.go4lunch.Models.CallbackMapsActivity;
 import com.g.laurent.go4lunch.Models.Callback_DetailResto;
 import com.g.laurent.go4lunch.Models.List_Search_Nearby;
 import com.g.laurent.go4lunch.Models.Place_Nearby;
+import com.g.laurent.go4lunch.Models.Workmates;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.ResultCallback;
@@ -46,6 +48,8 @@ import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.FirebaseApp;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.storage.FirebaseStorage;
@@ -98,6 +102,10 @@ public class MapsActivity extends AppCompatActivity implements CallbackMapsActiv
         mCallback_detailResto = this;
         lastKnownPlace=findLastPlaceHighestLikelihood(savedInstanceState);
 
+
+
+
+
         mGoogleApiClient = new GoogleApiClient
                 .Builder(this)
                 .addApi(Places.GEO_DATA_API)
@@ -113,6 +121,8 @@ public class MapsActivity extends AppCompatActivity implements CallbackMapsActiv
 
         storage = FirebaseStorage.getInstance();
         storageRef = storage.getReference();
+        save_current_user_in_Firebase();
+
 
         create_new_list_nearby_places();
         configure_tabs();
@@ -131,7 +141,30 @@ public class MapsActivity extends AppCompatActivity implements CallbackMapsActiv
 
     }
 
+    private void save_current_user_in_Firebase(){
 
+        // Initialization
+        FirebaseUser mCurrentUser = FirebaseAuth.getInstance().getCurrentUser();
+        DatabaseReference mDatabase;
+        mDatabase = FirebaseDatabase.getInstance().getReference().child("workmates");
+
+        // Create workmates
+        if(mCurrentUser!=null){
+
+            String Url_photo = null;
+
+            if(mCurrentUser.getPhotoUrl()!=null)
+                Url_photo = mCurrentUser.getPhotoUrl().toString();
+
+            Workmates workmates = new Workmates(
+                    mCurrentUser.getDisplayName(),
+                    mCurrentUser.getUid(),
+                    Url_photo,
+                    false, null,null,null);
+
+            mDatabase.child(mCurrentUser.getUid()).setValue(workmates);
+        }
+    }
 
     @Override
     public void create_new_list_nearby_places() {
@@ -296,38 +329,6 @@ public class MapsActivity extends AppCompatActivity implements CallbackMapsActiv
         }
         return true;
     }
-
-    /**
-     * Manipulates the map once available.
-     * This callback is triggered when the map is ready to be used.
-     * This is where we can add markers or lines, add listeners or move the camera. In this case,
-     * we just add a marker near Sydney, Australia.
-     * If Google Play services is not installed on the device, the user will be prompted to install
-     * it inside the SupportMapFragment. This method will only be triggered once the user has
-     * installed Google Play services and returned to the app.
-     */
-
-/*    @Override
-    public void onMapReady(GoogleMap googleMap) {
-        mMap = googleMap;
-
-        // Add a marker in Sydney and move the camera
-        LatLng corbeil = new LatLng(48.6102599, 2.474805);
-        mMap.addMarker(new MarkerOptions().position(corbeil).title("Marker in corbeil"));
-        mMap.moveCamera(CameraUpdateFactory.newLatLng(corbeil));
-
-
-
-
-      // Prompt the user for permission.
-        getLocationPermission();
-
-        // Turn on the My Location layer and the related control on the map.
-        updateLocationUI();
-
-        getNumberResults();
-
-    }*/
 
     private void configure_tabs(){
 
@@ -529,6 +530,15 @@ public class MapsActivity extends AppCompatActivity implements CallbackMapsActiv
     }
 
 
+    /**
+     * Manipulates the map once available.
+     * This callback is triggered when the map is ready to be used.
+     * This is where we can add markers or lines, add listeners or move the camera. In this case,
+     * we just add a marker near Sydney, Australia.
+     * If Google Play services is not installed on the device, the user will be prompted to install
+     * it inside the SupportMapFragment. This method will only be triggered once the user has
+     * installed Google Play services and returned to the app.
+     */
 
     /*
     private void configureOnClickRecyclerView(){
@@ -542,3 +552,22 @@ public class MapsActivity extends AppCompatActivity implements CallbackMapsActiv
     }*/
 
 }
+/*    @Override
+    public void onMapReady(GoogleMap googleMap) {
+        mMap = googleMap;
+
+        // Add a marker in Sydney and move the camera
+        LatLng corbeil = new LatLng(48.6102599, 2.474805);
+        mMap.addMarker(new MarkerOptions().position(corbeil).title("Marker in corbeil"));
+        mMap.moveCamera(CameraUpdateFactory.newLatLng(corbeil));
+
+
+      // Prompt the user for permission.
+        getLocationPermission();
+
+        // Turn on the My Location layer and the related control on the map.
+        updateLocationUI();
+
+        getNumberResults();
+
+    }*/

@@ -1,11 +1,8 @@
 package com.g.laurent.go4lunch;
 
 import com.g.laurent.go4lunch.Models.List_Search_Nearby;
-import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.location.places.Places;
 import com.google.android.gms.maps.model.LatLng;
 import junit.framework.Assert;
-import org.junit.Rule;
 import org.junit.Test;
 
 

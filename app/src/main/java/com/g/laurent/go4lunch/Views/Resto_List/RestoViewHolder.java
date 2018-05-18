@@ -44,7 +44,6 @@ public class RestoViewHolder extends RecyclerView.ViewHolder implements View.OnC
         super(itemView);
         this.view=itemView;
         ButterKnife.bind(this, itemView);
-
         storage = FirebaseStorage.getInstance();
         storageRef = storage.getReference();
     }
@@ -58,10 +57,10 @@ public class RestoViewHolder extends RecyclerView.ViewHolder implements View.OnC
         this.context=context;
 
         // Name restaurant
-        name_resto.setText(place_nearby.getName_restaurant());
+        name_restaurant(place_nearby);
 
         //Address restaurant
-        address_resto.setText(place_nearby.getAddress());
+        address_restaurant(place_nearby);
 
         // Opening hours
         display_opening_hours();
@@ -77,6 +76,36 @@ public class RestoViewHolder extends RecyclerView.ViewHolder implements View.OnC
 
         // Put the picture of the resto
         apply_picture_restaurant();
+    }
+
+    // ---------------------------------- NAME RESTO ----------------------------------------------
+    private void name_restaurant(Place_Nearby place_nearby) {
+
+        if(place_nearby!=null){
+            if(place_nearby.getName_restaurant()!=null){
+                if(place_nearby.getName_restaurant().length()<=30)
+                    name_resto.setText(place_nearby.getName_restaurant());
+                else {
+                    String text = place_nearby.getName_restaurant().substring(0, 30) + "...";
+                    name_resto.setText(text);
+                }
+            }
+        }
+    }
+
+    // ---------------------------------- ADDRESS RESTO ----------------------------------------------
+    private void address_restaurant(Place_Nearby place_nearby) {
+
+        if(place_nearby!=null){
+            if(place_nearby.getAddress()!=null){
+                if(place_nearby.getAddress().length()<=25)
+                    address_resto.setText(place_nearby.getAddress());
+                else {
+                    String text = place_nearby.getAddress().substring(0, 25) + "...";
+                    address_resto.setText(text);
+                }
+            }
+        }
     }
 
     // ---------------------------------- RATING RESTO ----------------------------------------------
@@ -113,7 +142,8 @@ public class RestoViewHolder extends RecyclerView.ViewHolder implements View.OnC
 
         if(place_nearby.getWorkmatesList()!=null) {
             if (place_nearby.getWorkmatesList().size() > 0) {
-                workmates_num.setText("(" + place_nearby.getWorkmatesList().size() + ")");
+                String text = "(" + place_nearby.getWorkmatesList().size() + ")";
+                workmates_num.setText(text);
             } else // if no workmates join this restaurant, don't display the symbol workmates and the number
                 linearLayout_workmates.setVisibility(View.GONE);
         } else

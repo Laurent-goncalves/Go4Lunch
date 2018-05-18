@@ -3,6 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     tools:context=".RestoFragment">
 
     <LinearLayout
@@ -74,9 +75,10 @@
                 android:layout_alignBottom="@+id/picture_of_restaurant"
                 android:layout_alignParentEnd="true"
                 android:layout_marginBottom="-35dp"
-                android:layout_marginEnd="35dp"
-                android:background="@android:color/white"
-                android:src="@drawable/baseline_check_circle_white_36" />
+                android:layout_marginEnd="30dp"
+                app:civ_border_width="8dp"
+                app:civ_border_color="@android:color/white"
+                android:src="@drawable/baseline_check_circle_white_24" />
 
         </RelativeLayout>
 

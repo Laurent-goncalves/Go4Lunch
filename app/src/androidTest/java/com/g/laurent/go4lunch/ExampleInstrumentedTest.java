@@ -1,7 +1,5 @@
 package com.g.laurent.go4lunch;
 
-import android.content.Context;
-import android.support.test.InstrumentationRegistry;
 import android.support.test.filters.LargeTest;
 import android.support.test.runner.AndroidJUnit4;
 import android.support.test.rule.ActivityTestRule;
@@ -11,7 +9,7 @@ import junit.framework.Assert;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import static org.junit.Assert.*;
+
 
 /**
  * Instrumented test, which will execute on an Android device.

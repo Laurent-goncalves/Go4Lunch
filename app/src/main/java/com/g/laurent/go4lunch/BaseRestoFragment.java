@@ -113,9 +113,9 @@ public abstract class BaseRestoFragment extends Fragment {
     protected void getWorkmatesJoining(DataSnapshot datas){
         list_workmates=new ArrayList<>();
 
-        if(datas.child("list_workmates")!=null){
+        if(datas.child("workmates_joining")!=null){
 
-            for(DataSnapshot datas_child : datas.child("list_workmates").getChildren()) {
+            for(DataSnapshot datas_child : datas.child("workmates_joining").getChildren()) {
 
                 if (datas_child != null){
                     if(datas_child.getValue()!=null) {
@@ -123,7 +123,7 @@ public abstract class BaseRestoFragment extends Fragment {
                         Workmates workmates = new Workmates(
                                 (String) datas_child.child("name").getValue(),
                                 (String) datas_child.child("id").getValue(),
-                                (Uri) datas_child.child("photoUrl").getValue(),
+                                (String) datas_child.child("photoUrl").getValue(),
                                 (Boolean) datas_child.child("chosen").getValue(),
                                 (String) datas_child.child("resto_id").getValue(),
                                 (String) datas_child.child("resto_name").getValue(),

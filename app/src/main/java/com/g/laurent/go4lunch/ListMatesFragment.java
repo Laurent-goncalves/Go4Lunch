@@ -1,6 +1,5 @@
 package com.g.laurent.go4lunch;
 
-import android.net.Uri;
 import android.os.Bundle;
 import android.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
@@ -15,7 +14,6 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
-
 import java.util.ArrayList;
 import java.util.List;
 import butterknife.BindView;
@@ -73,7 +71,7 @@ public class ListMatesFragment extends Fragment {
                         Workmates workmates = new Workmates(
                                 (String) data.child("name").getValue(),
                                 (String) data.child("id").getValue(),
-                                (Uri) data.child("photoUrl").getValue(),
+                                (String) data.child("photoUrl").getValue(),
                                 (Boolean) data.child("chosen").getValue(),
                                 (String) data.child("resto_id").getValue(),
                                 (String) data.child("resto_name").getValue(),

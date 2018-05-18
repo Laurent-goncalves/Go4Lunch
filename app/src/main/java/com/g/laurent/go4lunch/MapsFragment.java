@@ -23,7 +23,6 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback {
         // Required empty public constructor
     }
 
-
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -36,7 +35,6 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback {
 
         if(mMapView!=null)
             mMapView.getMapAsync(this);
-
 
         return view;
     }
@@ -51,9 +49,6 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback {
         LatLng corbeil = new LatLng(48.6102599, 2.474805);
         mMap.addMarker(new MarkerOptions().position(corbeil).title("Marker in corbeil"));
         mMap.moveCamera(CameraUpdateFactory.newLatLng(corbeil));
-
-
-
 
     }
 }

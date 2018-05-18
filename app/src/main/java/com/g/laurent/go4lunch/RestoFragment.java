@@ -21,13 +21,13 @@ import com.g.laurent.go4lunch.Views.GlideApp;
 import com.g.laurent.go4lunch.Views.Resto_Details.WorkmatesViewAdapter;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.ValueEventListener;
 import java.util.List;
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -209,14 +209,25 @@ public class RestoFragment extends BaseRestoFragment {
 
                 if(mCurrentUser!=null) {
                     // Create new user
-                    new_user = new Workmates(mCurrentUser.getDisplayName(),mCurrentUser.getUid(),mCurrentUser.getPhotoUrl(),true, placeId, resto.getName_restaurant(), "bar");
+                    new_user = create_workmates(mCurrentUser);
                     // create or update the new_user on Firebase in folder "workmates"
                     mDatabase.child("workmates").child(mCurrentUser.getUid()).setValue(new_user);
                     // create or update the new_user on Firebase in folder from chosen restaurant
                     mDatabase.child("restaurants").child(placeId).child("workmates_joining").child(mCurrentUser.getUid()).setValue(new_user);
+                    setButtonAsSelected(true, button_valid);
                 }
             }
         });
+    }
+
+    private Workmates create_workmates(FirebaseUser mCurrentUser){
+
+        String photoUrl = null;
+
+        if(mCurrentUser.getPhotoUrl()!=null)
+            photoUrl=mCurrentUser.getPhotoUrl().toString();
+
+        return new Workmates(mCurrentUser.getDisplayName(),mCurrentUser.getUid(),photoUrl,true, placeId, resto.getName_restaurant(), "bar");
     }
 
     private void configure_recycler_view(){

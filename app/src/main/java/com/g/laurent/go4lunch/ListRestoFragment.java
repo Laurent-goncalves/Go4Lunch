@@ -55,6 +55,12 @@ public class ListRestoFragment extends BaseRestoFragment implements ListViewAdap
     }
 
     @Override
+    public void onResume() {
+        super.onResume();
+        recover_list_resto_firebase();
+    }
+
+    @Override
     public void onAttach(Activity activity) {
         super.onAttach(activity);
 

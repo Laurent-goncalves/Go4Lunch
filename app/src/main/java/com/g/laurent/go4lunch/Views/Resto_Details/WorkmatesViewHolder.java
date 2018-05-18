@@ -2,7 +2,7 @@ package com.g.laurent.go4lunch.Views.Resto_Details;
 
 import android.content.Context;
 import android.graphics.Color;
-import android.net.Uri;
+import android.graphics.Typeface;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import android.widget.ImageView;
@@ -11,8 +11,6 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
 import com.g.laurent.go4lunch.Models.Workmates;
 import com.g.laurent.go4lunch.R;
-import com.google.android.gms.auth.api.signin.GoogleSignIn;
-import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
@@ -57,10 +55,13 @@ public class WorkmatesViewHolder extends RecyclerView.ViewHolder {
                         if(workmates.getChosen()){
                             text = workmates.getName() + " is eating at restaurant " + workmates.getResto_name();
                             workmates_text.setText(text);
+                            workmates_text.setTextColor(Color.BLACK);
+                            workmates_text.setTypeface(null, Typeface.NORMAL);
                         } else {
                             text = workmates.getName() + " hasn't decided yet";
                             workmates_text.setText(text);
                             workmates_text.setTextColor(Color.DKGRAY);
+                            workmates_text.setTypeface(null, Typeface.ITALIC);
                         }
                     }
                 break;
@@ -78,7 +79,7 @@ public class WorkmatesViewHolder extends RecyclerView.ViewHolder {
 
     private void configure_picture_workmates(Context context,Workmates workmates){
 
-        Uri photoUrl = workmates.getPhotoUrl();
+        String photoUrl = workmates.getPhotoUrl();
 
         if(photoUrl!=null) {
             Glide.with(context)
