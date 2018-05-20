@@ -1,14 +1,81 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".ListRestoFragment">
 
-<android.support.v7.widget.RecyclerView
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:id="@+id/list_view_resto">
-</android.support.v7.widget.RecyclerView>
+    <LinearLayout
+        android:id="@+id/linearlayout_buttons_sorting"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:layout_alignParentTop="true"
+        android:layout_marginBottom="2dp"
+        android:layout_marginTop="2dp">
 
-</FrameLayout>
+        <TextView
+            android:id="@+id/sort_by_criteria"
+            android:layout_gravity="center"
+            android:layout_width="wrap_content"
+            android:layout_height="@dimen/height_sorting_button"
+            android:text="@string/sort_by"/>
+
+        <Button
+            android:id="@+id/sort_by_number_workmates"
+            android:tag="button_workmates"
+            android:gravity="center"
+            android:layout_width="wrap_content"
+            android:layout_height="@dimen/height_sorting_button"
+            android:layout_marginStart="@dimen/default_margin"
+            android:background="@color/colorPrimary"
+            android:textColor="@android:color/white"
+            android:text="@string/colleague"
+            android:textSize="12sp"
+            android:drawableStart="@drawable/baseline_keyboard_arrow_down_white_24"/>
+
+        <Button
+            android:id="@+id/sort_by_number_stars"
+            android:tag="button_stars"
+            android:gravity="center"
+            android:layout_width="wrap_content"
+            android:layout_height="@dimen/height_sorting_button"
+            android:layout_marginStart="@dimen/default_margin"
+            android:background="@color/colorPrimary"
+            android:textColor="@android:color/white"
+            android:text="@string/stars"
+            android:textSize="12sp"
+            android:drawableStart="@drawable/baseline_keyboard_arrow_down_white_24"/>
+
+        <Button
+            android:id="@+id/sort_by_distance"
+            android:tag="button_distance"
+            android:gravity="center"
+            android:layout_width="wrap_content"
+            android:layout_height="@dimen/height_sorting_button"
+            android:layout_marginStart="@dimen/default_margin"
+            android:background="@color/colorPrimary"
+            android:textColor="@android:color/white"
+            android:text="@string/distance"
+            android:textSize="12sp"
+            android:drawableStart="@drawable/baseline_keyboard_arrow_down_white_24"/>
+
+    </LinearLayout>
+
+
+    <!--  LINE SEPARATOR  -->
+    <View
+        android:id="@+id/button_line_separator"
+        android:layout_width="wrap_content"
+        android:layout_height="1dp"
+        android:layout_below="@id/linearlayout_buttons_sorting"
+        android:background="@color/colorPrimary"/>
+
+    <android.support.v7.widget.RecyclerView
+        android:layout_below="@id/button_line_separator"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:id="@+id/list_view_resto">
+    </android.support.v7.widget.RecyclerView>
+
+</RelativeLayout>

@@ -8,6 +8,7 @@ import com.g.laurent.go4lunch.Models.Workmates;
 import com.g.laurent.go4lunch.Utils.Search_Nearby.Geometry;
 import com.g.laurent.go4lunch.Utils.Search_Nearby.Location;
 import com.g.laurent.go4lunch.Utils.Search_Nearby.OpeningHours;
+import com.google.android.gms.maps.model.LatLng;
 import com.google.firebase.database.DataSnapshot;
 import java.util.ArrayList;
 import java.util.List;
@@ -26,6 +27,7 @@ public abstract class BaseRestoFragment extends Fragment {
     protected String address;
     protected List<Workmates> list_workmates;
     protected Place_Nearby resto;
+    protected List<Place_Nearby> list_places_nearby;
 
     public BaseRestoFragment() {
         // Required empty public constructor
@@ -150,4 +152,50 @@ public abstract class BaseRestoFragment extends Fragment {
         return new Place_Nearby(name_resto, placeId,geometry,openingHours,rating,types,address,list_workmates);
     }
 
+    protected Boolean is_id_resto_in_list(String id_to_check){
+
+        Boolean answer = false;
+
+        for(Place_Nearby place_nearby : list_places_nearby){
+            if(place_nearby!=null){
+                if(place_nearby.getPlaceId()!=null){
+                    if(place_nearby.getPlaceId().equals(id_to_check)){
+                        answer=true;
+                        break;
+                    }
+                }
+            }
+        }
+
+        return answer;
+    }
+
+    protected Double calulate_distance(LatLng current_location, Place_Nearby location) {
+
+        if(current_location!=null && location!=null){
+
+            if(location.getGeometry()!=null){
+
+                if(location.getGeometry().getLocation()!=null){
+
+                    Double lat1 = current_location.latitude;
+                    Double lon1 = current_location.longitude;
+                    Double lat2 = location.getGeometry().getLocation().getLat();
+                    Double lon2 = location.getGeometry().getLocation().getLng();
+
+                    Double latitude1 = lat1 * Math.PI / 180;
+                    Double latitude2 = lat2 * Math.PI / 180;
+                    Double longitude1 = lon1 * Math.PI / 180;
+                    Double longitude2 = lon2 * Math.PI / 180;
+
+                    Double Radius = 6371d;
+
+                    return 1000 * Radius * Math.acos(Math.cos(latitude1) * Math.cos(latitude2) *
+                            Math.cos(longitude2 - longitude1) + Math.sin(latitude1) *
+                            Math.sin(latitude2));
+                }
+            }
+        }
+        return null;
+    }
 }

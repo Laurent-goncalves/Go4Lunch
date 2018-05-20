@@ -6,4 +6,5 @@
     <dimen name="default_text_size">13sp</dimen>
     <dimen name="default_text_size_mini">8sp</dimen>
     <dimen name="size_padding_imageview">10dp</dimen>
+    <dimen name="height_sorting_button">20dp</dimen>
 </resources>

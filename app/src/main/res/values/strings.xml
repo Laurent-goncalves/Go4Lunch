@@ -27,4 +27,13 @@
     <string name="like">LIKE</string>
     <string name="website">WEBSITE</string>
 
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+    <string name="sort_by">Sort by :</string>
+    <string name="number_of_workmates">number of workmates</string>
+    <string name="number_of_stars">number of stars</string>
+    <string name="distance">distance</string>
+    <string name="stars">stars</string>
+    <string name="colleague">colleague</string>
+
 </resources>

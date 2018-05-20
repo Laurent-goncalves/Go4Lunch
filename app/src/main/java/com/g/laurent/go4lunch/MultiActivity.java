@@ -10,17 +10,22 @@ import android.content.pm.PackageManager;
 import android.content.res.ColorStateList;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
-import android.net.Uri;
 import android.os.Build;
 import android.support.annotation.NonNull;
+import android.support.design.widget.NavigationView;
 import android.support.v4.app.ActivityCompat;
 import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.graphics.drawable.DrawableCompat;
+import android.support.v4.view.GravityCompat;
+import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.SearchView;
@@ -41,7 +46,6 @@ import com.google.android.gms.location.places.PlacePhotoMetadataBuffer;
 import com.google.android.gms.location.places.PlacePhotoMetadataResult;
 import com.google.android.gms.location.places.PlacePhotoResult;
 import com.google.android.gms.location.places.Places;
-import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
@@ -63,13 +67,19 @@ import butterknife.ButterKnife;
 import static android.content.ContentValues.TAG;
 
 
-public class MultiActivity extends AppCompatActivity implements CallbackMapsActivity,AlarmReceiver.callbackAlarm, GoogleApiClient.OnConnectionFailedListener, Callback_DetailResto {//implements OnMapReadyCallback,GoogleApiClient.OnConnectionFailedListener {
+public class MultiActivity extends AppCompatActivity implements CallbackMapsActivity,AlarmReceiver.callbackAlarm,
+        GoogleApiClient.OnConnectionFailedListener, Callback_DetailResto,
+        NavigationView.OnNavigationItemSelectedListener {
+
+    /** The activity MultiActivity contains :
+     *     - the MapsFragment to display the mapView
+     *     - the ListRestoFragment to display the list of restaurant
+     *     - the RestoFragment to show the detailed view of a restaurant
+     *     **/
+
 
     private FirebaseStorage storage;
     private StorageReference storageRef;
-    private FirebaseDatabase database;
-    private DatabaseReference ref;
-    private GoogleMap mMap;
     private GoogleApiClient mGoogleApiClient;
     private PlaceDetectionClient mPlaceDetectionClient;
     private static final int PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION = 1;
@@ -93,6 +103,10 @@ public class MultiActivity extends AppCompatActivity implements CallbackMapsActi
     @BindView(R.id.list_view_button) Button buttonList;
     @BindView(R.id.workmates_button) Button buttonMates;
 
+/*    @BindView(R.id.activity_main_drawer_layout) DrawerLayout drawerLayout;
+    @BindView(R.id.activity_main_nav_view) NavigationView navigationView;*/
+    @BindView(R.id.activity_main_toolbar) Toolbar toolbar;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -101,10 +115,6 @@ public class MultiActivity extends AppCompatActivity implements CallbackMapsActi
         mCallbackMapsActivity=this;
         mCallback_detailResto = this;
         lastKnownPlace=findLastPlaceHighestLikelihood(savedInstanceState);
-
-
-
-
 
         mGoogleApiClient = new GoogleApiClient
                 .Builder(this)
@@ -125,24 +135,15 @@ public class MultiActivity extends AppCompatActivity implements CallbackMapsActi
 
 
         create_new_list_nearby_places();
-        configure_tabs();
+        this.configure_tabs();
+        this.configureToolBar();
+    //    this.configureDrawerLayout();
+     //   this.configureNavigationView();
         //configureAlarmManager();
-        //configure_and_show_ListRestoFragment();
 
-
-        configure_and_show_MapsFragment();
-
-
-        /*mGoogleApiClient = new GoogleApiClient
-                .Builder(this)
-                .addApi(Places.GEO_DATA_API)
-                .addApi(Places.PLACE_DETECTION_API)
-                .enableAutoManage(this, this)
-                .build();*/
+        //configure_and_show_MapsFragment();
 
     }
-
-
 
     // ---------------------------------------------------------------------------------
     // ------------------------ CREATE NEW LIST OF RESTAURANTS -------------------------
@@ -329,7 +330,45 @@ public class MultiActivity extends AppCompatActivity implements CallbackMapsActi
         fragmentTransaction.commit();
     }
 
+    // ---------------------------------------------------------------------------------
+    // -----------------     CONFIGURATION OF DRAWER AND TOOLBAR        ----------------
+    // ---------------------------------------------------------------------------------
 
+    private void configureToolBar(){
+        setSupportActionBar(toolbar);
+        android.support.v7.app.ActionBar ab;
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        ab = getSupportActionBar();
+        ab.setTitle("Choisir humeur");
+    }
+/*
+    private void configureDrawerLayout(){
+        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(this, drawerLayout, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
+        drawerLayout.addDrawerListener(toggle);
+        toggle.syncState();
+    }
+
+    private void configureNavigationView(){
+        navigationView.setNavigationItemSelectedListener(this);
+    }
+*/
+    @Override
+    public boolean onNavigationItemSelected( MenuItem item) {
+        //this.drawerLayout.closeDrawer(GravityCompat.START);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        System.out.println("eee button HOME 0");
+        switch (item.getItemId()) {
+            case android.R.id.home:
+                System.out.println("eee button HOME1");
+                //drawerLayout.openDrawer(GravityCompat.START);  // OPEN DRAWER
+                return true;
+        }
+        return true;
+    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -468,8 +507,6 @@ public class MultiActivity extends AppCompatActivity implements CallbackMapsActi
         super.onSaveInstanceState(outState);
     }
 
-
-
     @Override
     public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
         System.out.println("eee PROBLEM " );
@@ -513,7 +550,7 @@ public class MultiActivity extends AppCompatActivity implements CallbackMapsActi
     }
 
     private void updateLocationUI() {
-        if (mMap == null) {
+     /*   if (mMap == null) {
             return;
         }
         try {
@@ -528,7 +565,7 @@ public class MultiActivity extends AppCompatActivity implements CallbackMapsActi
             }
         } catch (SecurityException e)  {
             Log.e("Exception: %s", e.getMessage());
-        }
+        }*/
     }
 
     private void getLocationPermission() {
@@ -547,6 +584,8 @@ public class MultiActivity extends AppCompatActivity implements CallbackMapsActi
                     PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION);
         }
     }
+
+
 
     /**
      * Manipulates the map once available.

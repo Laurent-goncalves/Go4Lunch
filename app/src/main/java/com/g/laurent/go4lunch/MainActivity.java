@@ -5,6 +5,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.Snackbar;
+import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
@@ -30,14 +32,17 @@ public class MainActivity extends AppCompatActivity {
     private static final String FACEBOOK_SIGN_IN = "facebook";
     @BindView(R.id.window_sign_in) CoordinatorLayout window_sign_in;
 
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
+        Intent intent = new Intent(this,MultiActivity.class);
+        startActivity(intent);
     }
 
-    @Override
+   /* @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.options_menu, menu);
@@ -49,7 +54,7 @@ public class MainActivity extends AppCompatActivity {
             searchView.setSearchableInfo(searchManager.getSearchableInfo(getComponentName()));
 
         return true;
-    }
+    }*/
 
     @OnClick(R.id.main_activity_button_login_google)
     public void onClickLoginButtonGoogle() {
@@ -144,15 +149,16 @@ public class MainActivity extends AppCompatActivity {
             }
         }
     }
+
 }
 
 
 
 /* protected void configureToolbar(String title){
-        // Assign toolbar
-        toolbar = findViewById(R.id.activity_main_toolbar);
+        // Assign toolbar_old
+        toolbar_old = findViewById(R.id.activity_main_toolbar);
         // Sets the Toolbar
-        setSupportActionBar(toolbar);
+        setSupportActionBar(toolbar_old);
 
         this.title_tb = title;
 
@@ -162,7 +168,7 @@ public class MainActivity extends AppCompatActivity {
                 @Override
                 public void run() {
 
-                    if (toolbar != null && title_toolbar != null) {
+                    if (toolbar_old != null && title_toolbar != null) {
                         title_toolbar.setText(title_tb);
 
                         if (getSupportActionBar() != null) {
