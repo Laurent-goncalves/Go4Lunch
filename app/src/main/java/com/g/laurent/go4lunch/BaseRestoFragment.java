@@ -1,155 +1,31 @@
 package com.g.laurent.go4lunch;
 
+import android.app.Activity;
 import android.app.Fragment;
-import android.net.Uri;
 
+import com.g.laurent.go4lunch.Models.Callback_DetailResto;
+import com.g.laurent.go4lunch.Models.Callback_resto_fb;
 import com.g.laurent.go4lunch.Models.Place_Nearby;
-import com.g.laurent.go4lunch.Models.Workmates;
-import com.g.laurent.go4lunch.Utils.Search_Nearby.Geometry;
-import com.g.laurent.go4lunch.Utils.Search_Nearby.Location;
-import com.g.laurent.go4lunch.Utils.Search_Nearby.OpeningHours;
+import com.g.laurent.go4lunch.Utils.Firebase_update;
 import com.google.android.gms.maps.model.LatLng;
-import com.google.firebase.database.DataSnapshot;
+
 import java.util.ArrayList;
 import java.util.List;
+
+import static java.lang.Double.compare;
 
 /**
  * A simple {@link Fragment} subclass.
  */
-public abstract class BaseRestoFragment extends Fragment {
+public abstract class BaseRestoFragment extends Fragment implements Callback_DetailResto{
 
-    protected String name_resto;
-    protected String placeId;
-    protected Geometry geometry;
-    protected Double rating;
-    protected OpeningHours openingHours;
-    protected List<String> types;
-    protected String address;
-    protected List<Workmates> list_workmates;
-    protected Place_Nearby resto;
     protected List<Place_Nearby> list_places_nearby;
+    protected Firebase_update firebase_tool;
+    protected Callback_resto_fb mCallback_resto_fb;
+    protected Callback_DetailResto mCallback_detailResto;
 
     public BaseRestoFragment() {
         // Required empty public constructor
-    }
-
-    protected void getAddress(DataSnapshot datas){
-
-        this.address=null;
-        if(datas.child("address")!=null)
-            this.address= (String) datas.child("address").getValue();
-        else
-            this.address= null;
-    }
-
-    protected void getTypes(DataSnapshot datas){
-        this.types=new ArrayList<>();
-
-        if(datas.child("types")!=null){
-
-            for(DataSnapshot datas_child : datas.child("types").getChildren()) {
-
-                if (datas_child != null){
-                    if(datas_child.getValue()!=null)
-                        types.add(datas_child.getValue().toString());
-                }
-            }
-        }
-    }
-
-    protected void getRating(DataSnapshot datas){
-        rating = 0d;
-        if(datas.child("rating")!=null) {
-            if(datas.child("rating").getValue()!=null)
-                rating = Double.parseDouble(datas.child("rating").getValue().toString());
-        }
-    }
-
-    protected void getOpeningHours(DataSnapshot datas){
-
-        this.openingHours = new OpeningHours();
-
-        if(datas.child("openingHours")!=null){
-            if(datas.child("openingHours").child("openNow")!=null)
-                openingHours.setOpenNow((Boolean) datas.child("openingHours").child("openNow").getValue());
-        }
-    }
-
-    protected void getGeometryRestaurant(DataSnapshot datas){
-
-        this.geometry = new Geometry();
-        Location location = new Location();
-
-        if(datas.child("geometry")!=null){
-            if(datas.child("geometry").child("location")!=null) {
-
-                if(datas.child("geometry").child("location").child("lat")!=null)
-                    location.setLat((Double) datas.child("geometry").child("location").child("lat").getValue());
-
-                if(datas.child("geometry").child("location").child("lng")!=null)
-                    location.setLng((Double) datas.child("geometry").child("location").child("lng").getValue());
-
-            }
-        }
-
-        this.geometry.setLocation(location);
-    }
-
-    protected void getIdRestaurant(DataSnapshot datas){
-        placeId = null;
-        if(datas.child("placeId")!=null)
-            placeId= (String) datas.child("placeId").getValue();
-        else
-            placeId= null;
-    }
-
-    protected void getNameRestaurant(DataSnapshot datas){
-        name_resto=null;
-
-        if(datas.child("name_restaurant")!=null)
-            name_resto = (String) datas.child("name_restaurant").getValue();
-        else
-            name_resto= null;
-    }
-
-    protected void getWorkmatesJoining(DataSnapshot datas){
-        list_workmates=new ArrayList<>();
-
-        if(datas.child("workmates_joining")!=null){
-
-            for(DataSnapshot datas_child : datas.child("workmates_joining").getChildren()) {
-
-                if (datas_child != null){
-                    if(datas_child.getValue()!=null) {
-
-                        Workmates workmates = new Workmates(
-                                (String) datas_child.child("name").getValue(),
-                                (String) datas_child.child("id").getValue(),
-                                (String) datas_child.child("photoUrl").getValue(),
-                                (Boolean) datas_child.child("chosen").getValue(),
-                                (String) datas_child.child("resto_id").getValue(),
-                                (String) datas_child.child("resto_name").getValue(),
-                                (String) datas_child.child("resto_type").getValue());
-
-                        list_workmates.add(workmates);
-                    }
-                }
-            }
-        }
-    }
-
-    protected Place_Nearby create_place_nearby_from_datas_firebase(DataSnapshot datas){
-
-        getNameRestaurant(datas);
-        getIdRestaurant(datas);
-        getGeometryRestaurant(datas);
-        getOpeningHours(datas);
-        getRating(datas);
-        getTypes(datas);
-        getAddress(datas);
-        getWorkmatesJoining(datas);
-
-        return new Place_Nearby(name_resto, placeId,geometry,openingHours,rating,types,address,list_workmates);
     }
 
     protected Boolean is_id_resto_in_list(String id_to_check){
@@ -170,7 +46,7 @@ public abstract class BaseRestoFragment extends Fragment {
         return answer;
     }
 
-    protected Double calulate_distance(LatLng current_location, Place_Nearby location) {
+    protected Double calculate_distance(LatLng current_location, Place_Nearby location) {
 
         if(current_location!=null && location!=null){
 
@@ -197,5 +73,175 @@ public abstract class BaseRestoFragment extends Fragment {
             }
         }
         return null;
+    }
+
+    protected List<Place_Nearby> create_list_place_nearby_sorted(List<Integer> list_index){
+
+        List<Place_Nearby> new_list = new ArrayList<>();
+
+        for(Integer index:list_index)
+            new_list.add(list_places_nearby.get(index));
+
+        return new_list;
+    }
+
+    protected List<Double> create_list_to_sort(List<Place_Nearby> new_list_places_nearby, String type_sorting, LatLng current_location){
+
+        List<Double> list_to_sort = new ArrayList<>();
+
+        for(Place_Nearby place : new_list_places_nearby){
+
+            if(place!=null) {
+                switch (type_sorting) {
+                    case "stars":
+                        list_to_sort.add(place.getRating());
+                        break;
+                    case "distance":
+                        list_to_sort.add(calculate_distance(current_location, place));
+                        break;
+                }
+            }
+        }
+
+        return list_to_sort;
+    }
+
+    protected List<Integer> create_list_to_sort(List<Place_Nearby> new_list_places_nearby){
+
+        List<Integer> list_to_sort = new ArrayList<>();
+
+        for(Place_Nearby place : new_list_places_nearby){
+            if(place!=null) {
+                if(place.getWorkmatesList()!=null)
+                    list_to_sort.add(place.getWorkmatesList().size());
+            }
+        }
+
+        return list_to_sort;
+    }
+
+    protected List<Integer> set_list_sorted_dbl(List<Double> list_to_sort, String type_sorting){
+
+        List<Integer> list_index_sorted = new ArrayList<>();
+
+        for(int i = 0; i<list_to_sort.size();i++){
+
+            int index = 0 ;
+            // Search the first index not in the table
+            for(Double item : list_to_sort){
+                if(!is_index_in_the_list(index,list_index_sorted))
+                    break;
+                else
+                    index++;
+            }
+
+            int index_to_add = index;
+            Double item_ref = list_to_sort.get(index);
+            index = -1;
+
+            for(Double item : list_to_sort) {
+                index++;
+                if (item != null && !is_index_in_the_list(index, list_index_sorted)) {
+
+                    switch (type_sorting) {
+                        case "stars":
+                            if (compare(item,item_ref)>=0) {
+                                index_to_add = index;
+                                item_ref = item;
+                            }
+                            break;
+                        case "distance":
+                            if (compare(item,item_ref)<=0) {
+                                index_to_add = index;
+                                item_ref = item;
+                            }
+                            break;
+                    }
+                }
+            }
+
+            list_index_sorted.add(index_to_add);
+        }
+
+        return list_index_sorted;
+    }
+
+    protected List<Integer> set_list_sorted_int(List<Integer> list_to_sort){
+
+        List<Integer> list_index_sorted = new ArrayList<>();
+
+        for(int i = 0; i<list_to_sort.size();i++){
+
+            int index = 0 ;
+            // Search the first index not in the table
+            for(Integer item : list_to_sort){
+                if(!is_index_in_the_list(index,list_index_sorted))
+                    break;
+                else
+                    index++;
+            }
+
+            int index_to_add = index;
+            Integer item_ref = list_to_sort.get(index);
+            index = -1;
+
+            for(Integer item : list_to_sort) {
+                index++;
+                if (item != null && !is_index_in_the_list(index, list_index_sorted)) {
+                    if (compare(item,item_ref)>=0) {
+                        index_to_add = index;
+                        item_ref = item;
+                    }
+                }
+            }
+
+            list_index_sorted.add(index_to_add);
+        }
+
+        return list_index_sorted;
+    }
+
+    protected Boolean is_index_in_the_list(int index, List<Integer> list_index) {
+
+        Boolean answer = false;
+
+        for(int item : list_index){
+            if(item == index) {
+                answer=true;
+                break;
+            }
+        }
+        return answer;
+    }
+
+    // -------------------------- GETTER and SETTER ----------------------------------------------------
+
+    protected void setList_places_nearby(List<Place_Nearby> list_places_nearby) {
+        this.list_places_nearby = list_places_nearby;
+    }
+
+    protected List<Place_Nearby> getList_places_nearby() {
+        return list_places_nearby;
+    }
+
+    @Override
+    public void onAttach(Activity activity) {
+        super.onAttach(activity);
+
+        // This makes sure that the container activity has implemented
+        // the callback interface. If not, it throws an exception
+        try {
+            mCallback_detailResto = (Callback_DetailResto) activity;
+        } catch (ClassCastException e) {
+            throw new ClassCastException(activity.toString()
+                    + " must implement Callback_DetailResto");
+        }
+
+        try {
+            mCallback_resto_fb = (Callback_resto_fb) activity;
+        } catch (ClassCastException e) {
+            throw new ClassCastException(activity.toString()
+                    + " must implement Callback_resto_fb");
+        }
     }
 }

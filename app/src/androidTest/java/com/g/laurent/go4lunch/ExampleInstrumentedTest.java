@@ -4,11 +4,18 @@ import android.support.test.filters.LargeTest;
 import android.support.test.runner.AndroidJUnit4;
 import android.support.test.rule.ActivityTestRule;
 import com.g.laurent.go4lunch.Models.List_Search_Nearby;
+import com.g.laurent.go4lunch.Models.Workmates;
+import com.g.laurent.go4lunch.Utils.Firebase_recover;
+import com.g.laurent.go4lunch.Utils.Firebase_update;
 import com.google.android.gms.maps.model.LatLng;
+
 import junit.framework.Assert;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+
+import java.util.ArrayList;
+import java.util.List;
 
 
 /**
@@ -41,13 +48,47 @@ public class ExampleInstrumentedTest {
 
         // Retrieve list of nearby places in Firebase database
         ListRestoFragment listRestoFragment = new ListRestoFragment();
-        listRestoFragment.recover_list_resto_firebase();
+        //listRestoFragment.recover_list_resto_firebase();
         waiting_time(1000);
 
         int count_final = listRestoFragment.getList_places_nearby().size();
 
         Assert.assertTrue(count_init==count_final);
     }
+
+    @Test
+    public void update_and_recover_data_firebase() {
+        // Context of the app under test.
+        //Context appContext = InstrumentationRegistry.getTargetContext();
+        mActivityTestRule.launchActivity(null);
+
+        //FirebaseApp.initializeApp(mActivityTestRule.getActivity().getApplicationContext());
+        Firebase_update firebase_workmates_update = new Firebase_update(mActivityTestRule.getActivity().getApplicationContext(),null);
+
+        // Create a new user in Firebase
+        List<String> list_resto_liked = new ArrayList<>();
+        list_resto_liked.add("ID_RESTO_1");
+        list_resto_liked.add("ID_RESTO_2");
+        list_resto_liked.add("ID_RESTO_3");
+        Workmates workmate = new Workmates("Jean", "ID1", "html_photo_Url", true, "ID_RESTO_1", "Le resto 1", "pizzeria",list_resto_liked);
+
+        firebase_workmates_update.update_full_workmate_data(workmate);
+
+        // Recover the new user in Firebase
+        Firebase_recover firebase_workmates_recover = new Firebase_recover(mActivityTestRule.getActivity().getApplicationContext(),null,null,null,null);
+
+        firebase_workmates_recover.recover_workmate_on_firebase("ID1");
+
+        waiting_time(2000);
+        firebase_workmates_recover.recover_workmate_on_firebase("ID1");
+
+        Workmates workmate_recovered= firebase_workmates_recover.getWorkmate();
+
+        Assert.assertEquals("Jean",workmate_recovered.getName());
+        Assert.assertEquals("ID1",workmate_recovered.getId());
+        Assert.assertEquals(list_resto_liked,workmate_recovered.getList_resto_liked());
+    }
+
 
 
 

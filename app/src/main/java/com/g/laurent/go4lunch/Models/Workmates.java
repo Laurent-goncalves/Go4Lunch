@@ -1,5 +1,7 @@
 package com.g.laurent.go4lunch.Models;
 
+import java.util.List;
+
 public class Workmates {
 
     private String name;
@@ -9,8 +11,9 @@ public class Workmates {
     private String resto_type;
     private String resto_name;
     private String photoUrl;
+    private List<String> list_resto_liked;
 
-    public Workmates(String name, String id, String photoUrl, Boolean chosen, String resto_id, String resto_name, String resto_type) {
+    public Workmates(String name, String id, String photoUrl, Boolean chosen, String resto_id, String resto_name, String resto_type, List<String> list_resto_liked) {
         this.name = name;
         this.id=id;
         this.photoUrl=photoUrl;
@@ -18,6 +21,7 @@ public class Workmates {
         this.resto_id = resto_id;
         this.resto_type=resto_type;
         this.resto_name=resto_name;
+        this.list_resto_liked=list_resto_liked;
     }
 
     public String getPhotoUrl() {
@@ -74,5 +78,13 @@ public class Workmates {
 
     public void setResto_name(String resto_name) {
         this.resto_name = resto_name;
+    }
+
+    public List<String> getList_resto_liked() {
+        return list_resto_liked;
+    }
+
+    public void setList_resto_liked(List<String> list_resto_liked) {
+        this.list_resto_liked = list_resto_liked;
     }
 }

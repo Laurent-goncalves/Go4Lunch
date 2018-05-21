@@ -36,7 +36,7 @@ public class List_Search_Nearby {
                         result.getOpeningHours(),
                         result.getRating(),
                         result.getTypes(),
-                        result.getVicinity(),null));
+                        result.getVicinity(),null,null));
             }
         }
     }

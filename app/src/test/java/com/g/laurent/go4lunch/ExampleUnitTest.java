@@ -6,6 +6,7 @@ import com.g.laurent.go4lunch.Models.Workmates;
 import com.g.laurent.go4lunch.Utils.Search_Nearby.Geometry;
 import com.g.laurent.go4lunch.Utils.Search_Nearby.Location;
 import com.google.android.gms.maps.model.LatLng;
+
 import junit.framework.Assert;
 import org.junit.Test;
 
@@ -26,9 +27,6 @@ public class ExampleUnitTest {
         Assert.assertTrue(list_Search_Nearby.getList_places_nearby().size() > 0);
 
     }
-
-
-
 
     @Test
     public void TEST_sort_place_nearby() {
@@ -91,10 +89,10 @@ public class ExampleUnitTest {
         geometry1.setLocation(location1);
         Double rating1 = 3.3d;
         List<Workmates> list_workmates1 = new ArrayList<>();
-        list_workmates1.add(new Workmates("Jean",null,null,null,null,null,null));
-        list_workmates1.add(new Workmates("Kevin",null,null,null,null,null,null));
-        list_workmates1.add(new Workmates("Sami",null,null,null,null,null,null));
-        list_workmates1.add(new Workmates("Caro",null,null,null,null,null,null));
+        list_workmates1.add(new Workmates("Jean",null,null,null,null,null,null,null));
+        list_workmates1.add(new Workmates("Kevin",null,null,null,null,null,null,null));
+        list_workmates1.add(new Workmates("Sami",null,null,null,null,null,null,null));
+        list_workmates1.add(new Workmates("Caro",null,null,null,null,null,null,null));
 
         String id2 = "ID2";
         Geometry geometry2 = new Geometry();
@@ -104,9 +102,9 @@ public class ExampleUnitTest {
         geometry2.setLocation(location2);
         Double rating2 = 2.3d;
         List<Workmates> list_workmates2 = new ArrayList<>();
-        list_workmates2.add(new Workmates("Jean",null,null,null,null,null,null));
-        list_workmates2.add(new Workmates("Kevin",null,null,null,null,null,null));
-        list_workmates2.add(new Workmates("Sami",null,null,null,null,null,null));
+        list_workmates2.add(new Workmates("Jean",null,null,null,null,null,null,null));
+        list_workmates2.add(new Workmates("Kevin",null,null,null,null,null,null,null));
+        list_workmates2.add(new Workmates("Sami",null,null,null,null,null,null,null));
 
 
         String id3 = "ID3";
@@ -117,8 +115,8 @@ public class ExampleUnitTest {
         geometry3.setLocation(location3);
         Double rating3 = 1.6d;
         List<Workmates> list_workmates3 = new ArrayList<>();
-        list_workmates3.add(new Workmates("Jean",null,null,null,null,null,null));
-        list_workmates3.add(new Workmates("Kevin",null,null,null,null,null,null));
+        list_workmates3.add(new Workmates("Jean",null,null,null,null,null,null,null));
+        list_workmates3.add(new Workmates("Kevin",null,null,null,null,null,null,null));
 
 
         String id4 = "ID4";
@@ -129,7 +127,7 @@ public class ExampleUnitTest {
         geometry4.setLocation(location4);
         Double rating4 = 0.9d;
         List<Workmates> list_workmates4 = new ArrayList<>();
-        list_workmates4.add(new Workmates("Jean",null,null,null,null,null,null));
+        list_workmates4.add(new Workmates("Jean",null,null,null,null,null,null,null));
 
         new_list_places_nearby.add(new Place_Nearby(null,id4,geometry4,null,rating4,null,null,list_workmates4));
         new_list_places_nearby.add(new Place_Nearby(null,id1,geometry1,null,rating1,null,null,list_workmates1));

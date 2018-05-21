@@ -1,5 +1,6 @@
 package com.g.laurent.go4lunch;
 
+import android.app.Activity;
 import android.content.res.ColorStateList;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
@@ -16,18 +17,15 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import com.g.laurent.go4lunch.Models.Callback_resto_fb;
+import com.g.laurent.go4lunch.Models.Place_Nearby;
 import com.g.laurent.go4lunch.Models.Workmates;
+import com.g.laurent.go4lunch.Utils.Firebase_recover;
+import com.g.laurent.go4lunch.Utils.Firebase_update;
 import com.g.laurent.go4lunch.Views.GlideApp;
 import com.g.laurent.go4lunch.Views.Resto_Details.WorkmatesViewAdapter;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.storage.FirebaseStorage;
-import com.google.firebase.storage.StorageReference;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.ValueEventListener;
 import java.util.List;
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -49,10 +47,13 @@ public class RestoFragment extends BaseRestoFragment {
     @BindView(R.id.list_workmates_joining_resto) RecyclerView list_workmates_recycler;
     private final static String TYPE_DISPLAY_WORKMATES_BY_RESTO = "list_of_workmates_by_resto";
     private final static String EXTRA_PLACE_ID = "placeId_resto";
-    private FirebaseStorage storage;
-    private StorageReference storageRef;
-    private FirebaseUser mCurrentUser;
     private WorkmatesViewAdapter adapter;
+    private Place_Nearby resto;
+    private Workmates current_user;
+    private String placeId;
+    private Firebase_recover firebase_recover;
+    private Firebase_update firebase_update;
+    //private int PLACE_PICKER_REQUEST = 1;
 
     public RestoFragment() {
         // Required empty public constructor
@@ -67,79 +68,165 @@ public class RestoFragment extends BaseRestoFragment {
 
         // Initialize variables
         placeId = getArguments().getString(EXTRA_PLACE_ID,null);
-        mCurrentUser = FirebaseAuth.getInstance().getCurrentUser();
-        storage = FirebaseStorage.getInstance();
-        storageRef = storage.getReference();
+        FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
+
+        firebase_recover = new Firebase_recover(getActivity().getApplicationContext(),null,null,this,null);
+        firebase_update = new Firebase_update(getActivity().getApplicationContext(),this);
 
         // Launch the search for restaurant details on Firebase storage
-        launch_search_restaurant_firebase();
+        firebase_recover.recover_resto_on_firebase(placeId);
+
+        // Launch the search for user data on firebase
+        if (currentUser != null)
+            firebase_recover.recover_workmate_on_firebase(currentUser.getUid());
+
         return view;
     }
 
-    private void launch_search_restaurant_firebase() {
-
-        DatabaseReference mDatabase;
-        mDatabase = FirebaseDatabase.getInstance().getReference().child("restaurants").child(placeId);
-        mDatabase.addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot datas) {
-                if(datas!=null) {
-
-                    resto = create_place_nearby_from_datas_firebase(datas);
-
-                    // Create views
-                    if(resto!=null){
-
-                        apply_picture_restaurant();
-                        name_resto.setText(resto.getName_restaurant());
-                        address_resto.setText(resto.getAddress());
-                        getRating(datas);
-                        color_buttons();
-                        setOnClickListenerButtonRestoValid(button_valid);
-                        setButtonAsSelected(did_I_validate_resto(list_workmates),button_valid);
-                        configure_recycler_view();
-                    }
-                }
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-                System.out.println("eee Cancellation");
-            }
-        });
+    @Override
+    public void onAttach(Activity activity) {
+        super.onAttach(activity);
+        try {
+            mCallback_resto_fb = (Callback_resto_fb) activity;
+        } catch (ClassCastException e) {
+            throw new ClassCastException(activity.toString()
+                    + " must implement Callback_DetailResto");
+        }
     }
 
-    // ---------------------------------- RATING RESTO ----------------------------------------------
+    private void configure_recycler_view(){
 
-    @Override
-    protected void getRating(DataSnapshot datas) {
+        if(adapter == null) {
+            // Create adapter passing in the sample user data
+            adapter = new WorkmatesViewAdapter(getActivity().getApplicationContext(),resto.getWorkmatesList(),TYPE_DISPLAY_WORKMATES_BY_RESTO);
+            // Attach the adapter to the recyclerview to populate items
+            list_workmates_recycler.setAdapter(adapter);
+            // Set layout manager to position the items
+            list_workmates_recycler.setLayoutManager(new LinearLayoutManager(getActivity().getApplicationContext()));
+        } else
+            adapter.notifyDataSetChanged();
+
+    }
+
+    public void configure_views_with_resto(Place_Nearby resto){
+
+        this.resto=resto;
+
+        // Create views
+        if(resto!=null){
+            apply_picture_restaurant();                         // PICTURE RESTO
+
+            if(resto.getName_restaurant().length()>=15) {
+                String name = resto.getName_restaurant().substring(0, 15) + "...";
+                name_resto.setText(name); // NAME RESTO
+            } else
+                name_resto.setText(resto.getName_restaurant()); // NAME RESTO
+
+            address_resto.setText(resto.getAddress());          // ADDRESS RESTO
+            getRating(resto.getRating());                       // RATING RESTO
+
+            // Configure recyclerView and buttons
+            configure_recycler_view();
+            configure_buttons();
+        }
+    }
+
+    private void configure_buttons(){
+        // Button CALL
+        setColorButton(call_button,R.color.colorIconSelected);
+
+        // Button WEBSITE
+        setColorButton(website_button,R.color.colorIconSelected);
+
+        // Button LIKE
+        if(resto.getLiked()){
+            setColorButton(like_button,R.color.colorStars);
+            like_button.setEnabled(false);
+        } else {
+            setColorButton(like_button,R.color.colorIconSelected);
+            setOnClickListenerButtonLike();
+        }
+
+        // Button choose resto
+        if(did_I_choose_resto(resto.getWorkmatesList())) {
+            setRestoChosen(true);
+            button_valid.setEnabled(false);
+        } else {
+            setRestoChosen(false);
+            setOnClickListenerButtonRestoValid();
+        }
+    }
+
+    protected void getRating(Double rating) {
 
         int numStars;
 
-        if(rating!=null)
+        if (rating != null)
             numStars = Math.round(rating.floatValue());
         else
             numStars = 0;
 
         rating_resto.removeAllViews();
 
-        if(numStars>=1){
-            for (int i = 0; i < numStars-1; i++) {
+        if (numStars >= 1) {
+            for (int i = 0; i < numStars - 1; i++) {
                 ImageView imgView = new ImageView(getActivity().getApplicationContext());
                 imgView.setImageResource(R.drawable.baseline_star_white_24);
-                imgView.setColorFilter(ContextCompat.getColor(getActivity().getApplicationContext(),(R.color.colorStars)));
+                imgView.setColorFilter(ContextCompat.getColor(getActivity().getApplicationContext(), (R.color.colorStars)));
                 rating_resto.addView(imgView);
             }
         }
     }
 
-    private void color_buttons(){
-        setColorPrimaryButtons(call_button);
-        setColorPrimaryButtons(like_button);
-        setColorPrimaryButtons(website_button);
+    private void apply_picture_restaurant() {
+        // Load the image using Glide
+        GlideApp.with(getActivity().getApplicationContext())
+                .load(firebase_recover.get_picture_resto(placeId))
+                .into(picture_resto);
     }
 
-    private Boolean did_I_validate_resto(List<Workmates> list_workmates){
+    private void setColorButton(Button button, int color){
+
+        button.setTextColor(getResources().getColor(color));
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M)
+            button.setCompoundDrawableTintList(ColorStateList.valueOf(ContextCompat.getColor(getActivity().getApplicationContext(),(color))));
+        else {
+            Drawable[] wrapDrawable = button.getCompoundDrawables();
+            DrawableCompat.setTint(wrapDrawable[0], getResources().getColor(color));
+        }
+    }
+
+    public void set_current_user(Workmates workmate) {
+        current_user=workmate;
+    }
+
+    public void set_resto(List<Place_Nearby> list_restos) { }
+
+    // ----------------------------------------------------------------------------------------------
+    // ------------------------------- BUTTON CHOOSE RESTO ------------------------------------------
+    // ----------------------------------------------------------------------------------------------
+
+    private void setRestoChosen(Boolean select){
+
+        if(getActivity().getApplicationContext()!=null){
+            if(select)
+                button_valid.setColorFilter(ContextCompat.getColor(getActivity().getApplicationContext(),(R.color.colorGreen)));
+            else
+                button_valid.setColorFilter(ContextCompat.getColor(getActivity().getApplicationContext(),(R.color.colorIconNotSelected)));
+        }
+    }
+
+    private void setOnClickListenerButtonRestoValid(){
+        button_valid.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                firebase_update.update_chosen_status_resto(current_user.getId(),resto);
+            }
+        });
+    }
+
+    private Boolean did_I_choose_resto(List<Workmates> list_workmates){
 
         Boolean answer = false;
 
@@ -165,59 +252,49 @@ public class RestoFragment extends BaseRestoFragment {
         return answer;
     }
 
-    private void apply_picture_restaurant() {
-
-        StorageReference storageReference = storageRef.child(placeId + ".jpg");
-
-        // Load the image using Glide
-        GlideApp.with(getActivity().getApplicationContext())
-                .load(storageReference)
-                .into(picture_resto);
+    public void modify_state_button_choose() {
+        firebase_recover.recover_resto_on_firebase(placeId);
+        setRestoChosen(true);
+        button_valid.setEnabled(false);
     }
 
-    private void setColorPrimaryButtons(Button button){
+    // ----------------------------------------------------------------------------------------------
+    // ------------------------------- BUTTON LIKE RESTO --------------------------------------------
+    // ----------------------------------------------------------------------------------------------
 
-        button.setTextColor(getResources().getColor(R.color.colorIconSelected));
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M)
-            button.setCompoundDrawableTintList(ColorStateList.valueOf(ContextCompat.getColor(getActivity().getApplicationContext(),(R.color.colorIconSelected))));
-        else {
-            Drawable[] wrapDrawable = button.getCompoundDrawables();
-            DrawableCompat.setTint(wrapDrawable[0], getResources().getColor(R.color.colorIconSelected));
-        }
-    }
-
-    private void setButtonAsSelected(Boolean select, CircleImageView button){
-
-        if(getActivity().getApplicationContext()!=null){
-            if(select)
-                button.setColorFilter(ContextCompat.getColor(getActivity().getApplicationContext(),(R.color.colorGreen)));
-            else
-                button.setColorFilter(ContextCompat.getColor(getActivity().getApplicationContext(),(R.color.colorIconNotSelected)));
-        }
-    }
-
-    private void setOnClickListenerButtonRestoValid(CircleImageView button){
-
-        button.setOnClickListener(new View.OnClickListener() {
+    private void setOnClickListenerButtonLike(){
+        like_button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
-                DatabaseReference mDatabase;
-                mDatabase = FirebaseDatabase.getInstance().getReference();
-                Workmates new_user;
-
-                if(mCurrentUser!=null) {
-                    // Create new user
-                    new_user = create_workmates(mCurrentUser);
-                    // create or update the new_user on Firebase in folder "workmates"
-                    mDatabase.child("workmates").child(mCurrentUser.getUid()).setValue(new_user);
-                    // create or update the new_user on Firebase in folder from chosen restaurant
-                    mDatabase.child("restaurants").child(placeId).child("workmates_joining").child(mCurrentUser.getUid()).setValue(new_user);
-                    setButtonAsSelected(true, button_valid);
-                }
+                firebase_update.update_like_status_workmates(current_user.getId(), resto.getPlaceId());
             }
         });
+    }
+
+    public void modify_state_button_like() {
+        setColorButton(like_button,R.color.colorStars);
+        like_button.setEnabled(false);
+    }
+
+    @Override
+    public void configure_and_show_restofragment(String placeId) {
+
+    }
+}
+
+
+
+
+/*
+
+
+
+
+    private void update_workmates_on_firebase(Workmates workmates){
+
+        DatabaseReference databaseReference=FirebaseDatabase.getInstance().getReference();
+        databaseReference = databaseReference.child("workmates").child(workmates.getId());
+        databaseReference.setValue(workmates);
     }
 
     private Workmates create_workmates(FirebaseUser mCurrentUser){
@@ -227,20 +304,60 @@ public class RestoFragment extends BaseRestoFragment {
         if(mCurrentUser.getPhotoUrl()!=null)
             photoUrl=mCurrentUser.getPhotoUrl().toString();
 
-        return new Workmates(mCurrentUser.getDisplayName(),mCurrentUser.getUid(),photoUrl,true, placeId, resto.getName_restaurant(), "bar");
+        return new Workmates(mCurrentUser.getDisplayName(),mCurrentUser.getUid(),photoUrl,true, placeId, resto.getName_restaurant(), "bar",null);
     }
 
-    private void configure_recycler_view(){
+    private Workmates recover_workmates_in_firebase(DataSnapshot datas){
 
-        if(adapter == null) {
-            // Create adapter passing in the sample user data
-            adapter = new WorkmatesViewAdapter(getActivity().getApplicationContext(),list_workmates,TYPE_DISPLAY_WORKMATES_BY_RESTO);
-            // Attach the adapter to the recyclerview to populate items
-            list_workmates_recycler.setAdapter(adapter);
-            // Set layout manager to position the items
-            list_workmates_recycler.setLayoutManager(new LinearLayoutManager(getActivity().getApplicationContext()));
-        } else
-            adapter.notifyDataSetChanged();
+        // Search id of user in firebase workmates list
 
+        if(datas.child("id")!=null){
+
+            for(DataSnapshot datas_C : datas.child("id").getChildren()) {
+
+                List<String> list_resto_liked = new ArrayList<>();
+
+                if (datas_C.child("list_resto_liked") != null) {
+                    for (DataSnapshot datas_CC : datas_C.child("list_resto_liked").getChildren())
+                        list_resto_liked.add((String) datas_CC.getValue());
+                }
+
+                System.out.println("eee1 " + list_resto_liked.toString());
+
+                return new Workmates(
+                        (String) datas_C.child("name").getValue(),
+                        (String) datas_C.child("id").getValue(),
+                        (String) datas_C.child("photoUrl").getValue(),
+                        (Boolean) datas_C.child("chosen").getValue(),
+                        (String) datas_C.child("resto_id").getValue(),
+                        (String) datas_C.child("resto_name").getValue(),
+                        (String) datas_C.child("resto_type").getValue(),
+                        list_resto_liked);
+
+            }
+        }
+        return null;
     }
-}
+
+
+
+                        PlacePicker.IntentBuilder builder = new PlacePicker.IntentBuilder();
+                        LatLng latLng = new LatLng(resto.getGeometry().getLocation().getLat(),resto.getGeometry().getLocation().getLng());
+                        LatLngBounds latLngBounds = new LatLngBounds(latLng,latLng);
+                        builder.setLatLngBounds(latLngBounds);
+                        try {
+                            startActivityForResult(builder.build(getActivity()), PLACE_PICKER_REQUEST);
+                        } catch (GooglePlayServicesRepairableException | GooglePlayServicesNotAvailableException e) {
+                            e.printStackTrace();
+                        }
+
+
+*//*
+public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == PLACE_PICKER_REQUEST) {
+            if (resultCode == RESULT_OK) {
+                Place place = PlacePicker.getPlace(data, getActivity());
+                System.out.println("eeeeggg " + String.format("Place: %s", place.getName()));
+            }
+        }
+    }*/

@@ -42,7 +42,7 @@ public class MainActivityTest {
                 allOf(withId(R.id.list_view_button), withText("List View"),
                         childAtPosition(
                                 childAtPosition(
-                                        withId(R.id.map_activity),
+                                        withId(R.id.window_sign_in),
                                         1),
                                 1),
                         isDisplayed()));
@@ -51,7 +51,7 @@ public class MainActivityTest {
         ViewInteraction recyclerView = onView(
                 allOf(withId(R.id.list_view_resto),
                         childAtPosition(
-                                withClassName(is("android.widget.FrameLayout")),
+                                withClassName(is("android.widget.RelativeLayout")),
                                 0)));
         recyclerView.perform(actionOnItemAtPosition(0, click()));
         System.out.println("eee 111");

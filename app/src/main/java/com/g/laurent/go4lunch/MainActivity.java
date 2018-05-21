@@ -38,8 +38,6 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
-        Intent intent = new Intent(this,MultiActivity.class);
-        startActivity(intent);
     }
 
    /* @Override

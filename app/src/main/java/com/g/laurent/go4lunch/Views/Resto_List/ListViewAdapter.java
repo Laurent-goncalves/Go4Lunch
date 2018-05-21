@@ -6,11 +6,9 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-
 import com.g.laurent.go4lunch.Models.Place_Nearby;
 import com.g.laurent.go4lunch.R;
 import com.google.android.gms.maps.model.LatLng;
-
 import java.util.List;
 
 public class ListViewAdapter extends RecyclerView.Adapter<RestoViewHolder> {
@@ -45,7 +43,10 @@ public class ListViewAdapter extends RecyclerView.Adapter<RestoViewHolder> {
 
     @Override
     public int getItemCount() {
-        return list_search_nearby.size();
+        if(list_search_nearby!=null)
+            return list_search_nearby.size();
+        else
+            return 0;
     }
 
     public interface Listener {

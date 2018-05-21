@@ -1,5 +1,6 @@
 package com.g.laurent.go4lunch;
 
+import android.content.Context;
 import android.os.Bundle;
 import android.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
@@ -8,6 +9,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import com.g.laurent.go4lunch.Models.Workmates;
+import com.g.laurent.go4lunch.Utils.Firebase_recover;
 import com.g.laurent.go4lunch.Views.Resto_Details.WorkmatesViewAdapter;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -28,6 +30,7 @@ public class ListMatesFragment extends Fragment {
     private final static String TYPE_DISPLAY_WORKMATES_LIST = "list_of_workmates";
     private WorkmatesViewAdapter adapter;
     private List<Workmates> list_workmates;
+    private Context context;
 
     public ListMatesFragment() {
         // Required empty public constructor
@@ -39,8 +42,13 @@ public class ListMatesFragment extends Fragment {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_user, container, false);
         ButterKnife.bind(this,view);
+        context = getActivity().getApplicationContext();
 
-        launch_search_restaurant_firebase();
+        Firebase_recover firebase_tool = new Firebase_recover(getActivity().getApplicationContext(),null,null,null,this);
+
+        // Get list of workmates on firebase
+        firebase_tool.recover_list_workmates();
+
         return view;
     }
 
@@ -48,7 +56,7 @@ public class ListMatesFragment extends Fragment {
 
         if(adapter == null) {
             // Create adapter passing in the sample user data
-            adapter = new WorkmatesViewAdapter(getActivity().getApplicationContext(),list_workmates,TYPE_DISPLAY_WORKMATES_LIST);
+            adapter = new WorkmatesViewAdapter(context,list_workmates,TYPE_DISPLAY_WORKMATES_LIST);
             // Attach the adapter to the recyclerview to populate items
             list_workmates_recycler.setAdapter(adapter);
             // Set layout manager to position the items
@@ -57,38 +65,8 @@ public class ListMatesFragment extends Fragment {
             adapter.notifyDataSetChanged();
     }
 
-    private void launch_search_restaurant_firebase() {
-
-        list_workmates = new ArrayList<>();
-        DatabaseReference mDatabase;
-        mDatabase = FirebaseDatabase.getInstance().getReference().child("workmates");
-        mDatabase.addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot datas) {
-                if(datas!=null) {
-                    for (DataSnapshot data : datas.getChildren()) {
-
-                        Workmates workmates = new Workmates(
-                                (String) data.child("name").getValue(),
-                                (String) data.child("id").getValue(),
-                                (String) data.child("photoUrl").getValue(),
-                                (Boolean) data.child("chosen").getValue(),
-                                (String) data.child("resto_id").getValue(),
-                                (String) data.child("resto_name").getValue(),
-                                (String) data.child("resto_type").getValue());
-
-                        list_workmates.add(workmates);
-                    }
-                    // Create views
-                    configure_recycler_view();
-                }
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-                System.out.println("eee Cancellation");
-            }
-        });
+    public void set_list_of_workmates(List<Workmates> list_workmates){
+        this.list_workmates=list_workmates;
+        configure_recycler_view();
     }
-
 }

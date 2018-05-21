@@ -17,9 +17,10 @@ public class Place_Nearby {
     private List<String> types;
     private String address;
     private List<Workmates> mWorkmatesList;
+    private Boolean liked;
 
 
-    public Place_Nearby(String name_restaurant, String placeId, Geometry geometry, OpeningHours openingHours, Double rating, List<String> types, String address,List<Workmates> mWorkmatesList) {
+    public Place_Nearby(String name_restaurant, String placeId, Geometry geometry, OpeningHours openingHours, Double rating, List<String> types, String address,List<Workmates> mWorkmatesList, Boolean liked) {
         this.name_restaurant = name_restaurant;
         this.placeId=placeId;
         this.geometry=geometry;
@@ -28,6 +29,15 @@ public class Place_Nearby {
         this.types = types;
         this.address = address;
         this.mWorkmatesList=mWorkmatesList;
+        this.liked = liked;
+    }
+
+    public Boolean getLiked() {
+        return liked;
+    }
+
+    public void setLiked(Boolean liked) {
+        this.liked = liked;
     }
 
     public List<Workmates> getWorkmatesList() {

@@ -32,6 +32,7 @@ import android.widget.SearchView;
 import com.g.laurent.go4lunch.Models.AlarmReceiver;
 import com.g.laurent.go4lunch.Models.CallbackMapsActivity;
 import com.g.laurent.go4lunch.Models.Callback_DetailResto;
+import com.g.laurent.go4lunch.Models.Callback_resto_fb;
 import com.g.laurent.go4lunch.Models.List_Search_Nearby;
 import com.g.laurent.go4lunch.Models.Place_Nearby;
 import com.g.laurent.go4lunch.Models.Workmates;
@@ -68,8 +69,7 @@ import static android.content.ContentValues.TAG;
 
 
 public class MultiActivity extends AppCompatActivity implements CallbackMapsActivity,AlarmReceiver.callbackAlarm,
-        GoogleApiClient.OnConnectionFailedListener, Callback_DetailResto,
-        NavigationView.OnNavigationItemSelectedListener {
+        Callback_DetailResto, Callback_resto_fb, NavigationView.OnNavigationItemSelectedListener {
 
     /** The activity MultiActivity contains :
      *     - the MapsFragment to display the mapView
@@ -77,19 +77,10 @@ public class MultiActivity extends AppCompatActivity implements CallbackMapsActi
      *     - the RestoFragment to show the detailed view of a restaurant
      *     **/
 
-
-    private FirebaseStorage storage;
-    private StorageReference storageRef;
-    private GoogleApiClient mGoogleApiClient;
-    private PlaceDetectionClient mPlaceDetectionClient;
-    private static final int PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION = 1;
-    private boolean mLocationPermissionGranted = true;
     private List_Search_Nearby mList_search_nearby;
-    private LatLng lastKnownPlace;
-    private Place currentPlace;
     private LatLng currentPlaceLatLng;
+    private LatLng lastKnownPlace;
     private List<Place_Nearby> list_search_nearby;
-    int count_id;
     private final static String EXTRA_LAT_CURRENT = "latitude_current_location";
     private final static String EXTRA_LONG_CURRENT = "longitude_current_location";
     private final static String BUTTON_MAP_SELECTED = "button_map_selected";
@@ -102,9 +93,8 @@ public class MultiActivity extends AppCompatActivity implements CallbackMapsActi
     @BindView(R.id.map_view_button) Button buttonMap;
     @BindView(R.id.list_view_button) Button buttonList;
     @BindView(R.id.workmates_button) Button buttonMates;
-
-/*    @BindView(R.id.activity_main_drawer_layout) DrawerLayout drawerLayout;
-    @BindView(R.id.activity_main_nav_view) NavigationView navigationView;*/
+    @BindView(R.id.activity_main_drawer_layout) DrawerLayout drawerLayout;
+    @BindView(R.id.activity_main_nav_view) NavigationView navigationView;
     @BindView(R.id.activity_main_toolbar) Toolbar toolbar;
 
     @Override
@@ -114,14 +104,9 @@ public class MultiActivity extends AppCompatActivity implements CallbackMapsActi
         ButterKnife.bind(this);
         mCallbackMapsActivity=this;
         mCallback_detailResto = this;
-        lastKnownPlace=findLastPlaceHighestLikelihood(savedInstanceState);
+        //lastKnownPlace=findLastPlaceHighestLikelihood(savedInstanceState);
 
-        mGoogleApiClient = new GoogleApiClient
-                .Builder(this)
-                .addApi(Places.GEO_DATA_API)
-                .addApi(Places.PLACE_DETECTION_API)
-                .enableAutoManage(this, this)
-                .build();
+
 
         currentPlaceLatLng=new LatLng(48.866667,2.333333);
 
@@ -129,19 +114,12 @@ public class MultiActivity extends AppCompatActivity implements CallbackMapsActi
 
        // create_new_list_nearby_places();
 
-        storage = FirebaseStorage.getInstance();
-        storageRef = storage.getReference();
-        save_current_user_in_Firebase();
-
-
-        create_new_list_nearby_places();
         this.configure_tabs();
-        this.configureToolBar();
-    //    this.configureDrawerLayout();
-     //   this.configureNavigationView();
-        //configureAlarmManager();
+        this.configureDrawerLayout();
+        this.configureNavigationView();
+    //  configureAlarmManager();
 
-        //configure_and_show_MapsFragment();
+        configure_and_show_MapsFragment();
 
     }
 
@@ -176,40 +154,8 @@ public class MultiActivity extends AppCompatActivity implements CallbackMapsActi
         mList_search_nearby = new List_Search_Nearby(currentPlaceLatLng,"500",mCallbackMapsActivity);
     }
 
-    private ResultCallback<PlacePhotoResult> mDisplayPhotoResultCallback
-            = new ResultCallback<PlacePhotoResult>() {
 
-        @Override
-        public void onResult(PlacePhotoResult placePhotoResult) {
-            if (!placePhotoResult.getStatus().isSuccess()) {
-                return;
-            }
-
-            // if success, store the bitmap picture on Firebase storage
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            placePhotoResult.getBitmap().compress(Bitmap.CompressFormat.JPEG, 100, baos);
-
-            byte[] data = baos.toByteArray();
-
-            // Create a reference
-            String placeId = list_search_nearby.get(count_id).getPlaceId();
-            StorageReference mountainsRef = storageRef.child(placeId + ".jpg");
-            count_id++;
-
-            UploadTask uploadTask = mountainsRef.putBytes(data);
-            uploadTask.addOnFailureListener(new OnFailureListener() {
-                @Override
-                public void onFailure(@NonNull Exception exception) {
-                }
-            }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
-                @Override
-                public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-                }
-            });
-        }
-    };
-
-    private void save_current_user_in_Firebase(){
+   /* private void save_current_user_in_Firebase(){
 
         // Initialization
         FirebaseUser mCurrentUser = FirebaseAuth.getInstance().getCurrentUser();
@@ -228,48 +174,17 @@ public class MultiActivity extends AppCompatActivity implements CallbackMapsActi
                     mCurrentUser.getDisplayName(),
                     mCurrentUser.getUid(),
                     Url_photo,
-                    false, null,null,null);
+                    false, null,null,null,null);
 
             mDatabase.child(mCurrentUser.getUid()).setValue(workmates);
         }
-    }
+    }*/
 
-    private void getPlacePhotosAsync(final String placeId) {
 
-        Places.GeoDataApi.getPlacePhotos(mGoogleApiClient, placeId)
-            .setResultCallback(new ResultCallback<PlacePhotoMetadataResult>() {
-
-                @Override
-                public void onResult(PlacePhotoMetadataResult photos) {
-                    if (!photos.getStatus().isSuccess())
-                        return;
-
-                    PlacePhotoMetadataBuffer photoMetadataBuffer = photos.getPhotoMetadata();
-                    if (photoMetadataBuffer.getCount() > 0) {
-                        photoMetadataBuffer.get(0)
-                                .getScaledPhoto(mGoogleApiClient, 100,100)
-                                .setResultCallback(mDisplayPhotoResultCallback);
-                    }
-                    photoMetadataBuffer.release();
-                }
-            });
-    }
 
     public void update_list_nearby_places_firebase(List<Place_Nearby> list_search_nearby){
 
-        this.list_search_nearby=list_search_nearby;
-        FirebaseApp.initializeApp(getApplicationContext());
-        DatabaseReference mDatabase;
-        mDatabase = FirebaseDatabase.getInstance().getReference().child("restaurants");
-        mDatabase.removeValue();
-        count_id=0;
 
-        if(list_search_nearby!=null) {
-            for(Place_Nearby place : list_search_nearby) {
-                mDatabase.child(place.getPlaceId()).setValue(place);
-                getPlacePhotosAsync(place.getPlaceId());
-            }
-        }
     }
 
     // ---------------------------------------------------------------------------------
@@ -277,6 +192,7 @@ public class MultiActivity extends AppCompatActivity implements CallbackMapsActi
     // ---------------------------------------------------------------------------------
 
     public void configure_and_show_listmatesfragment(){
+        configureToolBar("available workmates",true);
         ListMatesFragment listMatesFragment = new ListMatesFragment();
         FragmentTransaction fragmentTransaction = getFragmentManager().beginTransaction();
         fragmentTransaction.replace(R.id.fragment_map_view, listMatesFragment);
@@ -288,6 +204,8 @@ public class MultiActivity extends AppCompatActivity implements CallbackMapsActi
         Bundle bundle = new Bundle();
         bundle.putDouble(EXTRA_LAT_CURRENT,currentPlaceLatLng.latitude);
         bundle.putDouble(EXTRA_LONG_CURRENT,currentPlaceLatLng.longitude);
+
+        configureToolBar("I'm hungry!",true);
 
         MapsFragment mapsFragment = new MapsFragment();
         mapsFragment.setArguments(bundle);
@@ -301,6 +219,8 @@ public class MultiActivity extends AppCompatActivity implements CallbackMapsActi
 
         bundle.putDouble(EXTRA_LAT_CURRENT,currentPlaceLatLng.latitude);
         bundle.putDouble(EXTRA_LONG_CURRENT,currentPlaceLatLng.longitude);
+
+        configureToolBar("I'm hungry!",true);
 
         ListRestoFragment listRestoFragment = new ListRestoFragment();
         listRestoFragment.setArguments(bundle);
@@ -321,6 +241,9 @@ public class MultiActivity extends AppCompatActivity implements CallbackMapsActi
         restoFragment.setArguments(bundle);
         FragmentTransaction fragmentTransaction = getFragmentManager().beginTransaction();
 
+        // Configuration toolbar
+        configureToolBar(null,false);
+
         // Replace whatever is in the fragment_container view with this fragment,
         // and add the transaction to the back stack if needed
         fragmentTransaction.replace(R.id.fragment_map_view, restoFragment);
@@ -334,14 +257,19 @@ public class MultiActivity extends AppCompatActivity implements CallbackMapsActi
     // -----------------     CONFIGURATION OF DRAWER AND TOOLBAR        ----------------
     // ---------------------------------------------------------------------------------
 
-    private void configureToolBar(){
-        setSupportActionBar(toolbar);
-        android.support.v7.app.ActionBar ab;
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        ab = getSupportActionBar();
-        ab.setTitle("Choisir humeur");
+    private void configureToolBar(String title, Boolean bar_display){
+        if(bar_display){
+            toolbar.setVisibility(View.VISIBLE);
+            setSupportActionBar(toolbar);
+            android.support.v7.app.ActionBar actionBar = getSupportActionBar();
+            if(actionBar!=null) {
+                actionBar.setTitle(title);
+                actionBar.setDisplayHomeAsUpEnabled(true);
+            }
+        } else
+            toolbar.setVisibility(View.GONE);
     }
-/*
+
     private void configureDrawerLayout(){
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(this, drawerLayout, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
         drawerLayout.addDrawerListener(toggle);
@@ -351,7 +279,7 @@ public class MultiActivity extends AppCompatActivity implements CallbackMapsActi
     private void configureNavigationView(){
         navigationView.setNavigationItemSelectedListener(this);
     }
-*/
+
     @Override
     public boolean onNavigationItemSelected( MenuItem item) {
         //this.drawerLayout.closeDrawer(GravityCompat.START);
@@ -385,6 +313,10 @@ public class MultiActivity extends AppCompatActivity implements CallbackMapsActi
         }
         return true;
     }
+
+    // ----------------------------------------------------------------------------------------------------
+    // -------------------------------------- CONFIGURE TABS ----------------------------------------------
+    // ----------------------------------------------------------------------------------------------------
 
     private void configure_tabs(){
 
@@ -463,40 +395,7 @@ public class MultiActivity extends AppCompatActivity implements CallbackMapsActi
         }
     }
 
-    public LatLng getNumberResults() {
 
-        mPlaceDetectionClient = Places.getPlaceDetectionClient(this);
-
-        if (mLocationPermissionGranted) {
-
-            try {
-
-                @SuppressWarnings("MissingPermission") final Task<PlaceLikelihoodBufferResponse> placeResult = mPlaceDetectionClient.getCurrentPlace(null);
-                placeResult.addOnCompleteListener(new OnCompleteListener<PlaceLikelihoodBufferResponse>() {
-                    @Override
-                    public void onComplete(@NonNull Task<PlaceLikelihoodBufferResponse> task) {
-                        if (task.isSuccessful() && task.getResult() != null) {
-
-                            currentPlace=findPlaceHighestLikelihood(task);
-
-                            if(currentPlace!=null)
-                                currentPlaceLatLng=currentPlace.getLatLng();
-                            else
-                                currentPlaceLatLng = lastKnownPlace;
-
-                        } else {
-                            Log.d(TAG, "Current location is null. Using defaults.");
-                            Log.e(TAG, "Exception: %s", task.getException());
-                        }
-                    }
-                });
-
-            } catch (SecurityException e) {
-                e.printStackTrace();
-            }
-        }
-        return currentPlaceLatLng;
-    }
 
     @Override
     public void onSaveInstanceState(Bundle outState) {
@@ -508,83 +407,9 @@ public class MultiActivity extends AppCompatActivity implements CallbackMapsActi
     }
 
     @Override
-    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
-        System.out.println("eee PROBLEM " );
+    public void update_chosen_list_restos(List<Place_Nearby> list_restos) {
+
     }
-
-    private Place findPlaceHighestLikelihood(@NonNull Task<PlaceLikelihoodBufferResponse> task){
-
-        Place placeHighestLikelihood = null;
-        float percentage = 0;
-
-        PlaceLikelihoodBufferResponse likelyPlaces = task.getResult();
-
-        for (PlaceLikelihood placeLikelihood : likelyPlaces) {       // for each placeLikelihood
-
-            if(placeLikelihood.getLikelihood() > percentage) {       // if the likelihood is higher than the other ones,
-                placeHighestLikelihood = placeLikelihood.getPlace(); //   set this place as placeLikelihood
-                percentage = placeLikelihood.getLikelihood();        //   set this percentage as highest likelihood
-            }
-        }
-        likelyPlaces.release();
-
-        return placeHighestLikelihood;
-    }
-
-    private LatLng findLastPlaceHighestLikelihood(Bundle savedInstanceState) {
-
-        float latitude=0;
-        float longitude=0;
-
-        if(savedInstanceState!=null){
-            latitude = savedInstanceState.getFloat(EXTRA_LAT_CURRENT,0);
-            longitude = savedInstanceState.getFloat(EXTRA_LONG_CURRENT,0);
-        }
-
-        LatLng lastLatLng = null;
-
-        if(latitude!=0 && longitude!=0 )
-            lastLatLng = new LatLng(latitude,longitude);
-
-        return lastLatLng;
-    }
-
-    private void updateLocationUI() {
-     /*   if (mMap == null) {
-            return;
-        }
-        try {
-            if (mLocationPermissionGranted) {
-                mMap.setMyLocationEnabled(true);
-                mMap.getUiSettings().setMyLocationButtonEnabled(true);
-            } else {
-                mMap.setMyLocationEnabled(false);
-                mMap.getUiSettings().setMyLocationButtonEnabled(false);
-                lastKnownPlace = null;
-                //getLocationPermission();
-            }
-        } catch (SecurityException e)  {
-            Log.e("Exception: %s", e.getMessage());
-        }*/
-    }
-
-    private void getLocationPermission() {
-        /*
-         * Request location permission, so that we can get the location of the
-         * device. The result of the permission request is handled by a callback,
-         * onRequestPermissionsResult.
-         */
-        if (ContextCompat.checkSelfPermission(this.getApplicationContext(),
-                android.Manifest.permission.ACCESS_FINE_LOCATION)
-                == PackageManager.PERMISSION_GRANTED) {
-            mLocationPermissionGranted = true;
-        } else {
-            ActivityCompat.requestPermissions(this,
-                    new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION},
-                    PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION);
-        }
-    }
-
 
 
     /**
