@@ -67,7 +67,7 @@
 
             </LinearLayout>
 
-            <!-- BUTTON VALID RESTAURANT -->
+            <!-- BUTTON VALID RESTAURANT    android:src="@drawable/baseline_check_circle_white_24"-->
             <de.hdodenhof.circleimageview.CircleImageView
                 android:id="@+id/valid_restaurant"
                 android:layout_width="60dp"
@@ -78,7 +78,7 @@
                 android:layout_marginEnd="30dp"
                 app:civ_border_width="8dp"
                 app:civ_border_color="@android:color/white"
-                android:src="@drawable/baseline_check_circle_white_24" />
+                />
 
         </RelativeLayout>
 

@@ -7,6 +7,14 @@
     android:id="@+id/window_sign_in"
     tools:context=".MainActivity">
 
+    <!-- IMAGE MAIN PAGE
+    <ImageView
+        android:id="@+id/image_main_page"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        />-->
+
+
     <!-- BUTTONS CONTAINER -->
     <LinearLayout
         android:layout_width="match_parent"
@@ -27,7 +35,7 @@
             android:textSize="@dimen/default_text_size"
             android:drawableStart="@drawable/ic_google"
             android:layout_margin="@dimen/default_large_margin"
-            android:padding="@dimen/default_large_margin"/>
+            android:padding="10dp"/>
 
         <!-- BUTTON CONNECT WITH FACEBOOK -->
         <Button
@@ -40,7 +48,7 @@
             android:textSize="@dimen/default_text_size"
             android:drawableStart="@drawable/ic_facebook"
             android:layout_margin="@dimen/default_large_margin"
-            android:padding="@dimen/default_large_margin"/>
+            android:padding="10dp"/>
 
     </LinearLayout>
 

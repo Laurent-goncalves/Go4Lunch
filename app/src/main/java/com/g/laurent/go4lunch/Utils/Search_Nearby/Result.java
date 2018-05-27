@@ -2,6 +2,10 @@
 package com.g.laurent.go4lunch.Utils.Search_Nearby;
 
 import java.util.List;
+
+import com.g.laurent.go4lunch.Utils.DetailsPlace.DetailsPlace;
+import com.g.laurent.go4lunch.Utils.DetailsPlace.Geometry;
+import com.g.laurent.go4lunch.Utils.DetailsPlace.OpeningHours;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
@@ -9,40 +13,50 @@ public class Result {
 
     @SerializedName("geometry")
     @Expose
-    private Geometry geometry;
+    private transient Geometry geometry;
     @SerializedName("icon")
     @Expose
     private transient String icon;
     @SerializedName("id")
     @Expose
     private transient String id;
-    @SerializedName("name") // name of restaurant
+    @SerializedName("name")
     @Expose
-    private String name;
-    @SerializedName("opening_hours") // opening hours
+    private transient String name;
+    @SerializedName("opening_hours")
     @Expose
-    private OpeningHours openingHours;
-    @SerializedName("photos")  // photos
+    private transient OpeningHours openingHours;
+    @SerializedName("photos")
     @Expose
-    private List<Photo> photos = null;
+    private transient List<Photo> photos = null;
     @SerializedName("place_id")
     @Expose
     private String placeId;
     @SerializedName("rating")
     @Expose
-    private Double rating; // score
+    private transient Double rating;
     @SerializedName("reference")
     @Expose
     private transient String reference;
     @SerializedName("scope")
     @Expose
     private transient String scope;
-    @SerializedName("types") // type of restaurant
+    @SerializedName("types")
     @Expose
-    private List<String> types = null;
-    @SerializedName("vicinity") // address
+    private transient List<String> types = null;
+    @SerializedName("vicinity")
     @Expose
-    private String vicinity;
+    private transient String vicinity;
+
+    private DetailsPlace mDetailsPlace;
+
+    public DetailsPlace getDetailsPlace() {
+        return mDetailsPlace;
+    }
+
+    public void setDetailsPlace(DetailsPlace detailsPlace) {
+        mDetailsPlace = detailsPlace;
+    }
 
     public Geometry getGeometry() {
         return geometry;

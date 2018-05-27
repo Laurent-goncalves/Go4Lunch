@@ -6,23 +6,17 @@ import android.app.PendingIntent;
 import android.app.SearchManager;
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.content.res.ColorStateList;
-import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
-import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
-import android.support.v4.app.ActivityCompat;
 import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.graphics.drawable.DrawableCompat;
-import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -35,40 +29,19 @@ import com.g.laurent.go4lunch.Models.Callback_DetailResto;
 import com.g.laurent.go4lunch.Models.Callback_resto_fb;
 import com.g.laurent.go4lunch.Models.List_Search_Nearby;
 import com.g.laurent.go4lunch.Models.Place_Nearby;
-import com.g.laurent.go4lunch.Models.Workmates;
-import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.common.api.ResultCallback;
-import com.google.android.gms.location.places.Place;
-import com.google.android.gms.location.places.PlaceDetectionClient;
-import com.google.android.gms.location.places.PlaceLikelihood;
-import com.google.android.gms.location.places.PlaceLikelihoodBufferResponse;
-import com.google.android.gms.location.places.PlacePhotoMetadataBuffer;
-import com.google.android.gms.location.places.PlacePhotoMetadataResult;
-import com.google.android.gms.location.places.PlacePhotoResult;
-import com.google.android.gms.location.places.Places;
+import com.g.laurent.go4lunch.Utils.Firebase_update;
 import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.android.gms.tasks.Task;
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.storage.FirebaseStorage;
-import com.google.firebase.storage.StorageReference;
-import com.google.firebase.storage.UploadTask;
-import java.io.ByteArrayOutputStream;
+
 import java.util.Calendar;
 import java.util.List;
 import butterknife.BindView;
 import butterknife.ButterKnife;
-import static android.content.ContentValues.TAG;
 
 
-public class MultiActivity extends AppCompatActivity implements CallbackMapsActivity,AlarmReceiver.callbackAlarm,
+public class MultiActivity extends AppCompatActivity implements AlarmReceiver.callbackAlarm,
         Callback_DetailResto, Callback_resto_fb, NavigationView.OnNavigationItemSelectedListener {
 
     /** The activity MultiActivity contains :
@@ -77,10 +50,9 @@ public class MultiActivity extends AppCompatActivity implements CallbackMapsActi
      *     - the RestoFragment to show the detailed view of a restaurant
      *     **/
 
-    private List_Search_Nearby mList_search_nearby;
     private LatLng currentPlaceLatLng;
+    private Bundle bundle;
     private LatLng lastKnownPlace;
-    private List<Place_Nearby> list_search_nearby;
     private final static String EXTRA_LAT_CURRENT = "latitude_current_location";
     private final static String EXTRA_LONG_CURRENT = "longitude_current_location";
     private final static String BUTTON_MAP_SELECTED = "button_map_selected";
@@ -88,7 +60,6 @@ public class MultiActivity extends AppCompatActivity implements CallbackMapsActi
     private final static String BUTTON_MATES_SELECTED = "button_workmates_selected";
     private final static String EXTRA_PLACE_ID = "placeId_resto";
     private String BUTTON_SELECTED;
-    private CallbackMapsActivity mCallbackMapsActivity;
     private Callback_DetailResto mCallback_detailResto;
     @BindView(R.id.map_view_button) Button buttonMap;
     @BindView(R.id.list_view_button) Button buttonList;
@@ -101,26 +72,31 @@ public class MultiActivity extends AppCompatActivity implements CallbackMapsActi
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_maps);
+        Context context = getApplicationContext();
+        System.out.println("eeee  2222");
+        // Save current user to Firebase storage
+        FirebaseApp.initializeApp(context);
+        System.out.println("eeee  3333");
+        FirebaseUser mCurrentUser = FirebaseAuth.getInstance().getCurrentUser();
+        System.out.println("eeee  4444");
+        Firebase_update firebase_update = new Firebase_update(context);
+        System.out.println("eeee  5555");
+        firebase_update.create_new_user_firebase(mCurrentUser);
+        System.out.println("eeee  6666");
         ButterKnife.bind(this);
-        mCallbackMapsActivity=this;
         mCallback_detailResto = this;
         //lastKnownPlace=findLastPlaceHighestLikelihood(savedInstanceState);
-
-
-
         currentPlaceLatLng=new LatLng(48.866667,2.333333);
-
-
-
-       // create_new_list_nearby_places();
+        bundle = new Bundle();
+        bundle.putDouble(EXTRA_LAT_CURRENT,48.866667);
+        bundle.putDouble(EXTRA_LONG_CURRENT,2.333333);
 
         this.configure_tabs();
         this.configureDrawerLayout();
         this.configureNavigationView();
-    //  configureAlarmManager();
+        //configureAlarmManager();
 
         configure_and_show_MapsFragment();
-
     }
 
     // ---------------------------------------------------------------------------------
@@ -149,11 +125,6 @@ public class MultiActivity extends AppCompatActivity implements CallbackMapsActi
             manager.setRepeating(AlarmManager.RTC,calendar.getTimeInMillis(), AlarmManager.INTERVAL_DAY, pendingIntent);
     }
 
-    @Override
-    public void create_new_list_nearby_places() {
-        mList_search_nearby = new List_Search_Nearby(currentPlaceLatLng,"500",mCallbackMapsActivity);
-    }
-
 
    /* private void save_current_user_in_Firebase(){
 
@@ -170,7 +141,7 @@ public class MultiActivity extends AppCompatActivity implements CallbackMapsActi
             if(mCurrentUser.getPhotoUrl()!=null)
                 Url_photo = mCurrentUser.getPhotoUrl().toString();
 
-            Workmates workmates = new Workmates(
+            Workmate workmates = new Workmate(
                     mCurrentUser.getDisplayName(),
                     mCurrentUser.getUid(),
                     Url_photo,
@@ -180,12 +151,6 @@ public class MultiActivity extends AppCompatActivity implements CallbackMapsActi
         }
     }*/
 
-
-
-    public void update_list_nearby_places_firebase(List<Place_Nearby> list_search_nearby){
-
-
-    }
 
     // ---------------------------------------------------------------------------------
     // -------------------         CONFIGURATION OF FRAGMENTS         ------------------
@@ -201,10 +166,6 @@ public class MultiActivity extends AppCompatActivity implements CallbackMapsActi
 
     public void configure_and_show_MapsFragment(){
 
-        Bundle bundle = new Bundle();
-        bundle.putDouble(EXTRA_LAT_CURRENT,currentPlaceLatLng.latitude);
-        bundle.putDouble(EXTRA_LONG_CURRENT,currentPlaceLatLng.longitude);
-
         configureToolBar("I'm hungry!",true);
 
         MapsFragment mapsFragment = new MapsFragment();
@@ -215,13 +176,8 @@ public class MultiActivity extends AppCompatActivity implements CallbackMapsActi
     }
 
     public void configure_and_show_ListRestoFragment(){
-        Bundle bundle = new Bundle();
-
-        bundle.putDouble(EXTRA_LAT_CURRENT,currentPlaceLatLng.latitude);
-        bundle.putDouble(EXTRA_LONG_CURRENT,currentPlaceLatLng.longitude);
 
         configureToolBar("I'm hungry!",true);
-
         ListRestoFragment listRestoFragment = new ListRestoFragment();
         listRestoFragment.setArguments(bundle);
         FragmentTransaction fragmentTransaction = getFragmentManager().beginTransaction();
@@ -325,45 +281,36 @@ public class MultiActivity extends AppCompatActivity implements CallbackMapsActi
         setButtonAsSelected(false, buttonList);
         setButtonAsSelected(false, buttonMates);
 
-        buttonMap.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
+        buttonMap.setOnClickListener(v -> {
 
-                if(!BUTTON_SELECTED.equals(BUTTON_MAP_SELECTED)) {
-                    setButtonAsSelected(true, buttonMap);
-                    setButtonAsSelected(false, buttonList);
-                    setButtonAsSelected(false, buttonMates);
-                    BUTTON_SELECTED=BUTTON_MAP_SELECTED;
-                    configure_and_show_MapsFragment();
-                }
+            if(!BUTTON_SELECTED.equals(BUTTON_MAP_SELECTED)) {
+                setButtonAsSelected(true, buttonMap);
+                setButtonAsSelected(false, buttonList);
+                setButtonAsSelected(false, buttonMates);
+                BUTTON_SELECTED=BUTTON_MAP_SELECTED;
+                configure_and_show_MapsFragment();
             }
         });
 
-        buttonList.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
+        buttonList.setOnClickListener(v -> {
 
-                if(!BUTTON_SELECTED.equals(BUTTON_LIST_SELECTED)) {
-                    setButtonAsSelected(false, buttonMap);
-                    setButtonAsSelected(true, buttonList);
-                    setButtonAsSelected(false, buttonMates);
-                    BUTTON_SELECTED=BUTTON_LIST_SELECTED;
-                    configure_and_show_ListRestoFragment();
-                }
+            if(!BUTTON_SELECTED.equals(BUTTON_LIST_SELECTED)) {
+                setButtonAsSelected(false, buttonMap);
+                setButtonAsSelected(true, buttonList);
+                setButtonAsSelected(false, buttonMates);
+                BUTTON_SELECTED=BUTTON_LIST_SELECTED;
+                configure_and_show_ListRestoFragment();
             }
         });
 
-        buttonMates.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
+        buttonMates.setOnClickListener(v -> {
 
-                if(!BUTTON_SELECTED.equals(BUTTON_MATES_SELECTED)) {
-                    setButtonAsSelected(false, buttonMap);
-                    setButtonAsSelected(false, buttonList);
-                    setButtonAsSelected(true, buttonMates);
-                    BUTTON_SELECTED=BUTTON_MATES_SELECTED;
-                    configure_and_show_listmatesfragment();
-                }
+            if(!BUTTON_SELECTED.equals(BUTTON_MATES_SELECTED)) {
+                setButtonAsSelected(false, buttonMap);
+                setButtonAsSelected(false, buttonList);
+                setButtonAsSelected(true, buttonMates);
+                BUTTON_SELECTED=BUTTON_MATES_SELECTED;
+                configure_and_show_listmatesfragment();
             }
         });
 
@@ -395,8 +342,6 @@ public class MultiActivity extends AppCompatActivity implements CallbackMapsActi
         }
     }
 
-
-
     @Override
     public void onSaveInstanceState(Bundle outState) {
         if(lastKnownPlace!=null){
@@ -408,6 +353,11 @@ public class MultiActivity extends AppCompatActivity implements CallbackMapsActi
 
     @Override
     public void update_chosen_list_restos(List<Place_Nearby> list_restos) {
+
+    }
+
+    @Override
+    public void create_new_list_nearby_places() {
 
     }
 

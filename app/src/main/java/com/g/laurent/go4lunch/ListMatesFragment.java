@@ -8,15 +8,11 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import com.g.laurent.go4lunch.Models.Workmates;
+
+import com.g.laurent.go4lunch.Models.Workmate;
 import com.g.laurent.go4lunch.Utils.Firebase_recover;
 import com.g.laurent.go4lunch.Views.Resto_Details.WorkmatesViewAdapter;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
-import java.util.ArrayList;
+
 import java.util.List;
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -29,7 +25,7 @@ public class ListMatesFragment extends Fragment {
     @BindView(R.id.list_workmates) RecyclerView list_workmates_recycler;
     private final static String TYPE_DISPLAY_WORKMATES_LIST = "list_of_workmates";
     private WorkmatesViewAdapter adapter;
-    private List<Workmates> list_workmates;
+    private List<Workmate> list_workmates;
     private Context context;
 
     public ListMatesFragment() {
@@ -44,28 +40,24 @@ public class ListMatesFragment extends Fragment {
         ButterKnife.bind(this,view);
         context = getActivity().getApplicationContext();
 
-        Firebase_recover firebase_tool = new Firebase_recover(getActivity().getApplicationContext(),null,null,null,this);
-
         // Get list of workmates on firebase
-        firebase_tool.recover_list_workmates();
+        Firebase_recover firebase_recover = new Firebase_recover(context,this);
+        firebase_recover.recover_list_workmates();
 
         return view;
     }
 
     private void configure_recycler_view(){
 
-        if(adapter == null) {
-            // Create adapter passing in the sample user data
-            adapter = new WorkmatesViewAdapter(context,list_workmates,TYPE_DISPLAY_WORKMATES_LIST);
-            // Attach the adapter to the recyclerview to populate items
-            list_workmates_recycler.setAdapter(adapter);
-            // Set layout manager to position the items
-            list_workmates_recycler.setLayoutManager(new LinearLayoutManager(getActivity().getApplicationContext()));
-        } else
-            adapter.notifyDataSetChanged();
+        // Create adapter passing in the sample user data
+        adapter = new WorkmatesViewAdapter(context,list_workmates,TYPE_DISPLAY_WORKMATES_LIST);
+        // Attach the adapter to the recyclerview to populate items
+        list_workmates_recycler.setAdapter(adapter);
+        // Set layout manager to position the items
+        list_workmates_recycler.setLayoutManager(new LinearLayoutManager(context));
     }
 
-    public void set_list_of_workmates(List<Workmates> list_workmates){
+    public void set_list_of_workmates(List<Workmate> list_workmates){
         this.list_workmates=list_workmates;
         configure_recycler_view();
     }

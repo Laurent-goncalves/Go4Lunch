@@ -9,7 +9,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
-import com.g.laurent.go4lunch.Models.Workmates;
+import com.g.laurent.go4lunch.Models.Workmate;
 import com.g.laurent.go4lunch.R;
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -27,7 +27,7 @@ public class WorkmatesViewHolder extends RecyclerView.ViewHolder {
         ButterKnife.bind(this, itemView);
     }
 
-    public void show_workmates(Context context, Workmates workmates, String type_display) {
+    public void show_workmates(Context context, Workmate workmates, String type_display) {
         configure_picture_workmates(context,workmates);
         configure_workmates_text(workmates, type_display);
         configure_line_separator(type_display);
@@ -45,7 +45,7 @@ public class WorkmatesViewHolder extends RecyclerView.ViewHolder {
         }
     }
 
-    private void configure_workmates_text(Workmates workmates, String type_display){
+    private void configure_workmates_text(Workmate workmates, String type_display){
         String text;
 
         switch(type_display){
@@ -68,16 +68,18 @@ public class WorkmatesViewHolder extends RecyclerView.ViewHolder {
 
             case TYPE_DISPLAY_WORKMATES_BY_RESTO:
                 if(workmates!=null){
-                    if(workmates.getChosen()){
-                        text =workmates.getName() + " is joining!";
-                        workmates_text.setText(text);
+                    if(workmates.getChosen()!=null){
+                        if(workmates.getChosen()) {
+                            text = workmates.getName() + " is joining!";
+                            workmates_text.setText(text);
+                        }
                     }
                 }
                 break;
         }
     }
 
-    private void configure_picture_workmates(Context context,Workmates workmates){
+    private void configure_picture_workmates(Context context,Workmate workmates){
 
         String photoUrl = workmates.getPhotoUrl();
 

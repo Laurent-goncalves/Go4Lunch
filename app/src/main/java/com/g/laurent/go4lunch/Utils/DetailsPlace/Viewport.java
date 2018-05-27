@@ -1,7 +1,6 @@
-package com.g.laurent.go4lunch.Utils.Search_Nearby;
 
-import com.g.laurent.go4lunch.Utils.DetailsPlace.Northeast;
-import com.g.laurent.go4lunch.Utils.DetailsPlace.Southwest;
+package com.g.laurent.go4lunch.Utils.DetailsPlace;
+
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 

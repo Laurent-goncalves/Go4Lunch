@@ -2,7 +2,7 @@ package com.g.laurent.go4lunch.Models;
 
 import java.util.List;
 
-public class Workmates {
+public class Workmate {
 
     private String name;
     private String id;
@@ -13,7 +13,7 @@ public class Workmates {
     private String photoUrl;
     private List<String> list_resto_liked;
 
-    public Workmates(String name, String id, String photoUrl, Boolean chosen, String resto_id, String resto_name, String resto_type, List<String> list_resto_liked) {
+    public Workmate(String name, String id, String photoUrl, Boolean chosen, String resto_id, String resto_name, String resto_type, List<String> list_resto_liked) {
         this.name = name;
         this.id=id;
         this.photoUrl=photoUrl;

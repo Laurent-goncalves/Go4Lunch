@@ -4,7 +4,7 @@ import android.support.test.filters.LargeTest;
 import android.support.test.runner.AndroidJUnit4;
 import android.support.test.rule.ActivityTestRule;
 import com.g.laurent.go4lunch.Models.List_Search_Nearby;
-import com.g.laurent.go4lunch.Models.Workmates;
+import com.g.laurent.go4lunch.Models.Workmate;
 import com.g.laurent.go4lunch.Utils.Firebase_recover;
 import com.g.laurent.go4lunch.Utils.Firebase_update;
 import com.google.android.gms.maps.model.LatLng;
@@ -70,7 +70,7 @@ public class ExampleInstrumentedTest {
         list_resto_liked.add("ID_RESTO_1");
         list_resto_liked.add("ID_RESTO_2");
         list_resto_liked.add("ID_RESTO_3");
-        Workmates workmate = new Workmates("Jean", "ID1", "html_photo_Url", true, "ID_RESTO_1", "Le resto 1", "pizzeria",list_resto_liked);
+        Workmate workmate = new Workmate("Jean", "ID1", "html_photo_Url", true, "ID_RESTO_1", "Le resto 1", "pizzeria",list_resto_liked);
 
         firebase_workmates_update.update_full_workmate_data(workmate);
 
@@ -82,7 +82,7 @@ public class ExampleInstrumentedTest {
         waiting_time(2000);
         firebase_workmates_recover.recover_workmate_on_firebase("ID1");
 
-        Workmates workmate_recovered= firebase_workmates_recover.getWorkmate();
+        Workmate workmate_recovered= firebase_workmates_recover.getWorkmate();
 
         Assert.assertEquals("Jean",workmate_recovered.getName());
         Assert.assertEquals("ID1",workmate_recovered.getId());

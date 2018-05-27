@@ -9,12 +9,12 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import com.g.laurent.go4lunch.Models.Place_Nearby;
-import com.g.laurent.go4lunch.Models.Workmates;
+import com.g.laurent.go4lunch.Models.Workmate;
 import com.g.laurent.go4lunch.R;
+import com.g.laurent.go4lunch.Utils.TimeCalculation;
 import com.g.laurent.go4lunch.Views.GlideApp;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.firebase.storage.FirebaseStorage;
-import com.google.firebase.storage.StorageReference;
 import java.lang.ref.WeakReference;
 import java.util.List;
 import butterknife.BindView;
@@ -32,9 +32,8 @@ public class RestoViewHolder extends RecyclerView.ViewHolder implements View.OnC
     @BindView(R.id.image_restaurant) ImageView picture_resto;
     private View view;
     private Place_Nearby place_nearby;
+    private List<Workmate> list_workmates;
     private LatLng current_loc;
-    private FirebaseStorage storage;
-    private StorageReference storageRef;
     private WeakReference<ListViewAdapter.Listener> callbackWeakRef;
     private Context context;
 
@@ -42,17 +41,16 @@ public class RestoViewHolder extends RecyclerView.ViewHolder implements View.OnC
         super(itemView);
         this.view=itemView;
         ButterKnife.bind(this, itemView);
-        storage = FirebaseStorage.getInstance();
-        storageRef = storage.getReference();
     }
 
-    public void configure_restaurant(LatLng current_loc, Place_Nearby place_nearby,ListViewAdapter.Listener callback, Context context){
+    public void configure_restaurant(LatLng current_loc, Place_Nearby place_nearby, ListViewAdapter.Listener callback, List<Workmate> list_workmates, Context context){
 
         this.place_nearby=place_nearby;
         this.current_loc=current_loc;
         this.callbackWeakRef = new WeakReference<>(callback);
         this.view.setOnClickListener(this);
         this.context=context;
+        this.list_workmates=list_workmates;
 
         // Name restaurant
         name_restaurant(place_nearby);
@@ -66,7 +64,7 @@ public class RestoViewHolder extends RecyclerView.ViewHolder implements View.OnC
         // Distance to restaurant
         display_distance_to_restaurant();
 
-        // Workmates joining
+        // Workmate joining
         define_workmates_number();
 
         // Score resto
@@ -125,11 +123,12 @@ public class RestoViewHolder extends RecyclerView.ViewHolder implements View.OnC
 
     private void apply_picture_restaurant() {
 
-        StorageReference storageReference = storageRef.child(place_nearby.getPlaceId() + ".jpg");
+        String link = "https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&photoreference=" + place_nearby.getPhoto_reference()
+                + "&key=" + context.getResources().getString(R.string.google_maps_key);
 
         // Load the image using Glide
         GlideApp.with(view)
-                    .load(storageReference)
+                    .load(link)
                     .into(picture_resto);
     }
 
@@ -138,14 +137,26 @@ public class RestoViewHolder extends RecyclerView.ViewHolder implements View.OnC
     @SuppressLint("SetTextI18n")
     private void define_workmates_number(){
 
-        if(place_nearby.getWorkmatesList()!=null) {
-            if (place_nearby.getWorkmatesList().size() > 0) {
-                String text = "(" + place_nearby.getWorkmatesList().size() + ")";
-                workmates_num.setText(text);
-            } else // if no workmates join this restaurant, don't display the symbol workmates and the number
+        int count = 0;
+        // Count number of workmates choosing this restaurant
+        if(list_workmates!=null && place_nearby.getPlaceId()!=null){
+
+            for(Workmate workmate : list_workmates){
+                if(workmate!=null){
+                    if(workmate.getResto_id()!=null){
+                        if(workmate.getResto_id().equals(place_nearby.getPlaceId()))
+                            count++;
+                    }
+                }
+            }
+        }
+
+        // Set text to display
+        if(count>0) { // if at least one workmate join the restaurant
+            String text = "(" + count + ")";
+            workmates_num.setText(text);
+        } else // if no workmates join this restaurant, don't display the symbol workmates and the number
                 linearLayout_workmates.setVisibility(View.GONE);
-        } else
-            linearLayout_workmates.setVisibility(View.GONE);
     }
 
     // -------------------------------- OPENING HOURS ---------------------------------------------
@@ -153,8 +164,13 @@ public class RestoViewHolder extends RecyclerView.ViewHolder implements View.OnC
     private void display_opening_hours() {
         String opening = null;
         if (place_nearby.getOpeningHours() != null) {
-            if (place_nearby.getOpeningHours().getOpenNow()!=null){
-                if (place_nearby.getOpeningHours().getOpenNow())
+            if (place_nearby.getOpeningHours().getOpenNow()!=null) {
+                if (place_nearby.getOpeningHours().getOpenNow()){
+
+                    TimeCalculation timeCalculation = new TimeCalculation();
+                    opening = timeCalculation.getTextOpeningHours(place_nearby);
+
+                }else
                     opening = "Closed now";
             }
         }
@@ -202,6 +218,5 @@ public class RestoViewHolder extends RecyclerView.ViewHolder implements View.OnC
             callback.onClickShowRestoDetails(place_nearby.getPlaceId());
         }
     }
-
 }
 

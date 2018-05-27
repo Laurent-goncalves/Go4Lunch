@@ -19,9 +19,6 @@ public class RestoViewAdapter extends RecyclerView.Adapter<RestoViewHolder> {
     public RestoViewAdapter(Context context, List<String> list_workmates_id){
         this.context=context;
         this.list_workmates_id=list_workmates_id;
-
-
-
     }
 
 

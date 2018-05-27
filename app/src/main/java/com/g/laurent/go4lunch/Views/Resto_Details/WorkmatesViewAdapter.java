@@ -6,17 +6,18 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import com.g.laurent.go4lunch.Models.Workmates;
+
+import com.g.laurent.go4lunch.Models.Workmate;
 import com.g.laurent.go4lunch.R;
 import java.util.List;
 
 public class WorkmatesViewAdapter extends RecyclerView.Adapter<WorkmatesViewHolder> {
 
     private Context context;
-    private List<Workmates> list_workmates;
+    private List<Workmate> list_workmates;
     private String TYPE_DISPLAY;
 
-    public WorkmatesViewAdapter(Context context, List<Workmates> list_workmates, String type_display) {
+    public WorkmatesViewAdapter(Context context, List<Workmate> list_workmates, String type_display) {
         this.context=context;
         this.list_workmates=list_workmates;
         this.TYPE_DISPLAY = type_display;

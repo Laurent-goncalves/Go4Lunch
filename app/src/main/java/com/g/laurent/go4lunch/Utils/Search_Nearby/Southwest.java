@@ -1,4 +1,3 @@
-
 package com.g.laurent.go4lunch.Utils.Search_Nearby;
 
 import com.google.gson.annotations.Expose;

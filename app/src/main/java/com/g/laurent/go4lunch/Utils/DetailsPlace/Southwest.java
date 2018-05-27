@@ -1,9 +1,10 @@
-package com.g.laurent.go4lunch.Utils.Search_Nearby;
+
+package com.g.laurent.go4lunch.Utils.DetailsPlace;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
-public class Location {
+public class Southwest {
 
     @SerializedName("lat")
     @Expose

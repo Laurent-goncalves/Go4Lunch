@@ -1,11 +1,16 @@
 package com.g.laurent.go4lunch;
 
 import android.app.Activity;
+import android.content.Context;
+import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.content.res.ColorStateList;
 import android.graphics.drawable.Drawable;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.app.Fragment;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.graphics.drawable.DrawableCompat;
 import android.support.v7.widget.LinearLayoutManager;
@@ -19,7 +24,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import com.g.laurent.go4lunch.Models.Callback_resto_fb;
 import com.g.laurent.go4lunch.Models.Place_Nearby;
-import com.g.laurent.go4lunch.Models.Workmates;
+import com.g.laurent.go4lunch.Models.Workmate;
 import com.g.laurent.go4lunch.Utils.Firebase_recover;
 import com.g.laurent.go4lunch.Utils.Firebase_update;
 import com.g.laurent.go4lunch.Views.GlideApp;
@@ -47,13 +52,12 @@ public class RestoFragment extends BaseRestoFragment {
     @BindView(R.id.list_workmates_joining_resto) RecyclerView list_workmates_recycler;
     private final static String TYPE_DISPLAY_WORKMATES_BY_RESTO = "list_of_workmates_by_resto";
     private final static String EXTRA_PLACE_ID = "placeId_resto";
-    private WorkmatesViewAdapter adapter;
     private Place_Nearby resto;
-    private Workmates current_user;
     private String placeId;
-    private Firebase_recover firebase_recover;
+    private Context context;
     private Firebase_update firebase_update;
-    //private int PLACE_PICKER_REQUEST = 1;
+    private List<Workmate> list_workmates;
+    private FirebaseUser mCurrentUser;
 
     public RestoFragment() {
         // Required empty public constructor
@@ -67,50 +71,26 @@ public class RestoFragment extends BaseRestoFragment {
         ButterKnife.bind(this,view);
 
         // Initialize variables
+        context = getActivity().getApplicationContext();
+        mCurrentUser = FirebaseAuth.getInstance().getCurrentUser();
         placeId = getArguments().getString(EXTRA_PLACE_ID,null);
-        FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
-
-        firebase_recover = new Firebase_recover(getActivity().getApplicationContext(),null,null,this,null);
-        firebase_update = new Firebase_update(getActivity().getApplicationContext(),this);
-
-        // Launch the search for restaurant details on Firebase storage
-        firebase_recover.recover_resto_on_firebase(placeId);
-
-        // Launch the search for user data on firebase
-        if (currentUser != null)
-            firebase_recover.recover_workmate_on_firebase(currentUser.getUid());
+        firebase_update = new Firebase_update(context,this);
+        resto = new Place_Nearby(placeId,this);
 
         return view;
     }
 
-    @Override
-    public void onAttach(Activity activity) {
-        super.onAttach(activity);
-        try {
-            mCallback_resto_fb = (Callback_resto_fb) activity;
-        } catch (ClassCastException e) {
-            throw new ClassCastException(activity.toString()
-                    + " must implement Callback_DetailResto");
-        }
+    public void recover_list_workmates() {
+        Firebase_recover firebase_recover = new Firebase_recover(context,this);
+        firebase_recover.recover_list_workmates();
     }
 
-    private void configure_recycler_view(){
-
-        if(adapter == null) {
-            // Create adapter passing in the sample user data
-            adapter = new WorkmatesViewAdapter(getActivity().getApplicationContext(),resto.getWorkmatesList(),TYPE_DISPLAY_WORKMATES_BY_RESTO);
-            // Attach the adapter to the recyclerview to populate items
-            list_workmates_recycler.setAdapter(adapter);
-            // Set layout manager to position the items
-            list_workmates_recycler.setLayoutManager(new LinearLayoutManager(getActivity().getApplicationContext()));
-        } else
-            adapter.notifyDataSetChanged();
-
+    public void set_list_of_workmates(List<Workmate> list_workmates) {
+        this.list_workmates=list_workmates;
+        configure_views_with_resto();
     }
 
-    public void configure_views_with_resto(Place_Nearby resto){
-
-        this.resto=resto;
+    public void configure_views_with_resto(){
 
         // Create views
         if(resto!=null){
@@ -127,37 +107,40 @@ public class RestoFragment extends BaseRestoFragment {
 
             // Configure recyclerView and buttons
             configure_recycler_view();
-            configure_buttons();
+            configure_buttons_call_and_website();
+            configure_button_like();
+            configure_button_choose_resto();
         }
     }
 
-    private void configure_buttons(){
-        // Button CALL
-        setColorButton(call_button,R.color.colorIconSelected);
-
-        // Button WEBSITE
-        setColorButton(website_button,R.color.colorIconSelected);
-
-        // Button LIKE
-        if(resto.getLiked()){
-            setColorButton(like_button,R.color.colorStars);
-            like_button.setEnabled(false);
-        } else {
-            setColorButton(like_button,R.color.colorIconSelected);
-            setOnClickListenerButtonLike();
-        }
-
-        // Button choose resto
-        if(did_I_choose_resto(resto.getWorkmatesList())) {
-            setRestoChosen(true);
-            button_valid.setEnabled(false);
-        } else {
-            setRestoChosen(false);
-            setOnClickListenerButtonRestoValid();
+    @Override
+    public void onAttach(Activity activity) {
+        super.onAttach(activity);
+        try {
+            mCallback_resto_fb = (Callback_resto_fb) activity;
+        } catch (ClassCastException e) {
+            throw new ClassCastException(activity.toString()
+                    + " must implement Callback_DetailResto");
         }
     }
 
-    protected void getRating(Double rating) {
+    // ----------------------------------------------------------------------------------------------
+    // ---------------------------------- PICTURE RESTO & RATING ------------------------------------
+    // ----------------------------------------------------------------------------------------------
+
+    private void apply_picture_restaurant() {
+
+        String link = "https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&photoreference=" + resto.getPhoto_reference()
+                + "&key=" + context.getResources().getString(R.string.google_maps_key);
+
+        // Load the image using Glide
+        GlideApp.with(getActivity().getApplicationContext())
+                .load(link)
+                .into(picture_resto);
+
+    }
+
+    private void getRating(Double rating) {
 
         int numStars;
 
@@ -178,11 +161,31 @@ public class RestoFragment extends BaseRestoFragment {
         }
     }
 
-    private void apply_picture_restaurant() {
-        // Load the image using Glide
-        GlideApp.with(getActivity().getApplicationContext())
-                .load(firebase_recover.get_picture_resto(placeId))
-                .into(picture_resto);
+    // ----------------------------------------------------------------------------------------------
+    // ---------------------------------- CONFIG LIST WORKMATES -------------------------------------
+    // ----------------------------------------------------------------------------------------------
+
+    private void configure_recycler_view(){
+
+        // Create adapter passing in the sample user data
+        WorkmatesViewAdapter adapter = new WorkmatesViewAdapter(context, list_workmates, TYPE_DISPLAY_WORKMATES_BY_RESTO);
+        // Attach the adapter to the recyclerview to populate items
+        list_workmates_recycler.setAdapter(adapter);
+        // Set layout manager to position the items
+        list_workmates_recycler.setLayoutManager(new LinearLayoutManager(context));
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    // ---------------------------------- CONFIG BUTTONS CALL & WEBSITE------------------------------
+    // ----------------------------------------------------------------------------------------------
+
+    private void configure_buttons_call_and_website(){
+        // Button CALL
+        setColorButton(call_button,R.color.colorIconSelected);
+        setOnClickListenerButtonCall();
+
+        // Button WEBSITE
+        setColorButton(website_button,R.color.colorIconSelected);
     }
 
     private void setColorButton(Button button, int color){
@@ -197,36 +200,39 @@ public class RestoFragment extends BaseRestoFragment {
         }
     }
 
-    public void set_current_user(Workmates workmate) {
-        current_user=workmate;
+    private void setOnClickListenerButtonCall(){
+
+        call_button.setOnClickListener(v -> {
+            if(ContextCompat.checkSelfPermission(
+                    context,android.Manifest.permission.CALL_PHONE) !=
+                    PackageManager.PERMISSION_GRANTED) {
+                ActivityCompat.requestPermissions((Activity) getActivity(), new
+                        String[]{android.Manifest.permission.CALL_PHONE}, 0);
+            } else {
+                startActivity(new Intent(Intent.ACTION_CALL, Uri.parse("tel:" + resto.getPhone_number())));
+            }
+        });
+
     }
 
-    public void set_resto(List<Place_Nearby> list_restos) { }
-
     // ----------------------------------------------------------------------------------------------
-    // ------------------------------- BUTTON CHOOSE RESTO ------------------------------------------
+    // ---------------------------------- CONFIG BUTTON LIKE ----------------------------------------
     // ----------------------------------------------------------------------------------------------
 
-    private void setRestoChosen(Boolean select){
+    private void configure_button_like() {
 
-        if(getActivity().getApplicationContext()!=null){
-            if(select)
-                button_valid.setColorFilter(ContextCompat.getColor(getActivity().getApplicationContext(),(R.color.colorGreen)));
-            else
-                button_valid.setColorFilter(ContextCompat.getColor(getActivity().getApplicationContext(),(R.color.colorIconNotSelected)));
+        // Button choose resto
+        if(did_I_like_resto(list_workmates)) {
+            System.out.println("eeee did_I_like_resto =  true");
+            setColorButton(like_button, R.color.colorStars);
+            like_button.setEnabled(false);
+        } else {
+            setColorButton(like_button, R.color.colorIconSelected);
+            setOnClickListenerButtonLike();
         }
     }
 
-    private void setOnClickListenerButtonRestoValid(){
-        button_valid.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                firebase_update.update_chosen_status_resto(current_user.getId(),resto);
-            }
-        });
-    }
-
-    private Boolean did_I_choose_resto(List<Workmates> list_workmates){
+    private boolean did_I_like_resto(List<Workmate> list_workmates) {
 
         Boolean answer = false;
 
@@ -236,13 +242,23 @@ public class RestoFragment extends BaseRestoFragment {
             // User is signed in
 
             // Search user id among workmates who want to lunch at this resto
-            for(Workmates workmates : list_workmates){
+            for(Workmate workmates : list_workmates){
 
                 if(workmates!=null){
                     if(workmates.getId()!=null){
-                        if(workmates.getId().equals(user.getUid())) {
-                            answer = true;
-                            break;
+                        if(workmates.getId().equals(user.getUid())) { // when user is found
+
+                            if(workmates.getList_resto_liked()!=null){
+
+                                for(String id_liked : workmates.getList_resto_liked()){
+                                    if(id_liked!=null){
+                                        if(id_liked.equals(resto.getPlaceId()))
+                                            answer = true;
+                                    }
+                                }
+
+                                break;
+                            }
                         }
                     }
                 }
@@ -252,112 +268,87 @@ public class RestoFragment extends BaseRestoFragment {
         return answer;
     }
 
-    public void modify_state_button_choose() {
-        firebase_recover.recover_resto_on_firebase(placeId);
-        setRestoChosen(true);
-        button_valid.setEnabled(false);
-    }
-
-    // ----------------------------------------------------------------------------------------------
-    // ------------------------------- BUTTON LIKE RESTO --------------------------------------------
-    // ----------------------------------------------------------------------------------------------
-
     private void setOnClickListenerButtonLike(){
-        like_button.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                firebase_update.update_like_status_workmates(current_user.getId(), resto.getPlaceId());
-            }
-        });
+        like_button.setOnClickListener(v ->
+                firebase_update.update_like_status_workmates(mCurrentUser.getUid(), resto));
     }
 
     public void modify_state_button_like() {
-        setColorButton(like_button,R.color.colorStars);
+        setColorButton(like_button, R.color.colorStars);
         like_button.setEnabled(false);
+
+        // update list of workmates
+        resto = new Place_Nearby(placeId,this);
     }
 
-    @Override
-    public void configure_and_show_restofragment(String placeId) {
+    // ----------------------------------------------------------------------------------------------
+    // ---------------------------------- CONFIG BUTTON CHOOSE RESTO --------------------------------
+    // ----------------------------------------------------------------------------------------------
 
-    }
-}
+    private void configure_button_choose_resto() {
 
-
-
-
-/*
-
-
-
-
-    private void update_workmates_on_firebase(Workmates workmates){
-
-        DatabaseReference databaseReference=FirebaseDatabase.getInstance().getReference();
-        databaseReference = databaseReference.child("workmates").child(workmates.getId());
-        databaseReference.setValue(workmates);
-    }
-
-    private Workmates create_workmates(FirebaseUser mCurrentUser){
-
-        String photoUrl = null;
-
-        if(mCurrentUser.getPhotoUrl()!=null)
-            photoUrl=mCurrentUser.getPhotoUrl().toString();
-
-        return new Workmates(mCurrentUser.getDisplayName(),mCurrentUser.getUid(),photoUrl,true, placeId, resto.getName_restaurant(), "bar",null);
-    }
-
-    private Workmates recover_workmates_in_firebase(DataSnapshot datas){
-
-        // Search id of user in firebase workmates list
-
-        if(datas.child("id")!=null){
-
-            for(DataSnapshot datas_C : datas.child("id").getChildren()) {
-
-                List<String> list_resto_liked = new ArrayList<>();
-
-                if (datas_C.child("list_resto_liked") != null) {
-                    for (DataSnapshot datas_CC : datas_C.child("list_resto_liked").getChildren())
-                        list_resto_liked.add((String) datas_CC.getValue());
-                }
-
-                System.out.println("eee1 " + list_resto_liked.toString());
-
-                return new Workmates(
-                        (String) datas_C.child("name").getValue(),
-                        (String) datas_C.child("id").getValue(),
-                        (String) datas_C.child("photoUrl").getValue(),
-                        (Boolean) datas_C.child("chosen").getValue(),
-                        (String) datas_C.child("resto_id").getValue(),
-                        (String) datas_C.child("resto_name").getValue(),
-                        (String) datas_C.child("resto_type").getValue(),
-                        list_resto_liked);
-
-            }
+        // Button choose resto
+        if(did_I_choose_resto(list_workmates)) {
+            System.out.println("eeee did_I_choose_resto =  true");
+            setRestoChosen(true);
+            button_valid.setEnabled(false);
+        } else {
+            setRestoChosen(false);
+            setOnClickListenerButtonRestoValid();
         }
-        return null;
     }
 
+    private Boolean did_I_choose_resto(List<Workmate> list_workmates){
 
+        Boolean answer = false;
 
-                        PlacePicker.IntentBuilder builder = new PlacePicker.IntentBuilder();
-                        LatLng latLng = new LatLng(resto.getGeometry().getLocation().getLat(),resto.getGeometry().getLocation().getLng());
-                        LatLngBounds latLngBounds = new LatLngBounds(latLng,latLng);
-                        builder.setLatLngBounds(latLngBounds);
-                        try {
-                            startActivityForResult(builder.build(getActivity()), PLACE_PICKER_REQUEST);
-                        } catch (GooglePlayServicesRepairableException | GooglePlayServicesNotAvailableException e) {
-                            e.printStackTrace();
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+
+        if (user != null && list_workmates!=null) {
+            // User is signed in
+
+            // Search user id among workmates who want to lunch at this resto
+            for(Workmate workmates : list_workmates){
+
+                if(workmates!=null){
+                    if(workmates.getId()!=null){
+                        if(workmates.getId().equals(user.getUid())) {
+
+                            if(workmates.getResto_id()!=null){
+                                if(workmates.getResto_id().equals(resto.getPlaceId()))
+                                    answer = true;
+                                break;
+                            }
                         }
-
-
-*//*
-public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == PLACE_PICKER_REQUEST) {
-            if (resultCode == RESULT_OK) {
-                Place place = PlacePicker.getPlace(data, getActivity());
-                System.out.println("eeeeggg " + String.format("Place: %s", place.getName()));
+                    }
+                }
             }
         }
-    }*/
+
+        return answer;
+    }
+
+    private void setRestoChosen(Boolean select){
+
+        if(getActivity().getApplicationContext()!=null){
+            if(select)
+                button_valid.setImageDrawable(getResources().getDrawable(R.drawable.baseline_check_circle_green_24));
+            else
+                button_valid.setImageDrawable(getResources().getDrawable(R.drawable.baseline_check_circle_black_24));
+        }
+    }
+
+    private void setOnClickListenerButtonRestoValid(){
+        button_valid.setOnClickListener(v ->
+                firebase_update.update_chosen_status_workmate(mCurrentUser.getUid(), resto));
+    }
+
+    public void modify_state_button_choose() {
+        setRestoChosen(true);
+        button_valid.setEnabled(false);
+
+        // update list of workmates
+        resto = new Place_Nearby(placeId,this);
+    }
+
+}

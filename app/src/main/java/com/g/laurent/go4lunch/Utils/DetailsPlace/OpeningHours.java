@@ -1,4 +1,5 @@
-package com.g.laurent.go4lunch.Utils.Search_Nearby;
+
+package com.g.laurent.go4lunch.Utils.DetailsPlace;
 
 import java.util.List;
 import com.google.gson.annotations.Expose;
@@ -9,9 +10,12 @@ public class OpeningHours {
     @SerializedName("open_now")
     @Expose
     private Boolean openNow;
+    @SerializedName("periods")
+    @Expose
+    private List<Period> periods = null;
     @SerializedName("weekday_text")
     @Expose
-    private List<Object> weekdayText = null;
+    private transient List<String> weekdayText = null;
 
     public Boolean getOpenNow() {
         return openNow;
@@ -21,13 +25,20 @@ public class OpeningHours {
         this.openNow = openNow;
     }
 
-    public List<Object> getWeekdayText() {
+    public List<Period> getPeriods() {
+        return periods;
+    }
+
+    public void setPeriods(List<Period> periods) {
+        this.periods = periods;
+    }
+
+    public List<String> getWeekdayText() {
         return weekdayText;
     }
 
-    public void setWeekdayText(List<Object> weekdayText) {
+    public void setWeekdayText(List<String> weekdayText) {
         this.weekdayText = weekdayText;
     }
 
 }
-

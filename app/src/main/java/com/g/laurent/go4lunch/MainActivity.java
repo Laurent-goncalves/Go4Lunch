@@ -1,22 +1,18 @@
 package com.g.laurent.go4lunch;
 
-import android.app.SearchManager;
-import android.content.Context;
 import android.content.Intent;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.Snackbar;
-import android.support.v4.widget.DrawerLayout;
-import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.widget.SearchView;
+import android.widget.ImageView;
+import android.widget.Toast;
 
 import com.firebase.ui.auth.AuthUI;
 import com.firebase.ui.auth.ErrorCodes;
 import com.firebase.ui.auth.IdpResponse;
+import com.google.firebase.FirebaseApp;
 
 import java.util.Collections;
 import butterknife.BindView;
@@ -31,6 +27,7 @@ public class MainActivity extends AppCompatActivity {
     private static final String GOOGLE_SIGN_IN = "google";
     private static final String FACEBOOK_SIGN_IN = "facebook";
     @BindView(R.id.window_sign_in) CoordinatorLayout window_sign_in;
+  //  @BindView(R.id.image_main_page) ImageView mImageView;
 
 
     @Override
@@ -80,7 +77,6 @@ public class MainActivity extends AppCompatActivity {
                                 .setLogo(R.drawable.ic_google)
                                 .build(),
                         RC_SIGN_IN);
-
                 break;
 
             case FACEBOOK_SIGN_IN:
@@ -97,18 +93,6 @@ public class MainActivity extends AppCompatActivity {
                         RC_SIGN_IN);
                 break;
         }
-
-
-           /*     GoogleSignInAccount acct = GoogleSignIn.getLastSignedInAccount(context);
-
-        if(acct!=null){
-            if(acct.getPhotoUrl()!=null){
-                if(acct.getPhotoUrl().toString()!=null)
-                    photoUrl = acct.getPhotoUrl().toString();
-            }
-        }
-   */
-
     }
 
     @Override
@@ -128,9 +112,6 @@ public class MainActivity extends AppCompatActivity {
         if (requestCode == RC_SIGN_IN) {
             if (resultCode == RESULT_OK) { // SUCCESS
                 showSnackBar(this.window_sign_in, getString(R.string.connection_succeed));
-
-                // Save current user to Firebase storage
-                //save_current_user_in_Firebase();
 
                 // Launch MultiActivity
                 Intent intent = new Intent(this,MultiActivity.class);
