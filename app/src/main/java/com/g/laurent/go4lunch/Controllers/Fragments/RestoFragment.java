@@ -1,4 +1,4 @@
-package com.g.laurent.go4lunch;
+package com.g.laurent.go4lunch.Controllers.Fragments;
 
 import android.app.Activity;
 import android.content.Context;
@@ -25,6 +25,7 @@ import android.widget.TextView;
 import com.g.laurent.go4lunch.Models.Callback_resto_fb;
 import com.g.laurent.go4lunch.Models.Place_Nearby;
 import com.g.laurent.go4lunch.Models.Workmate;
+import com.g.laurent.go4lunch.R;
 import com.g.laurent.go4lunch.Utils.Firebase_recover;
 import com.g.laurent.go4lunch.Utils.Firebase_update;
 import com.g.laurent.go4lunch.Views.GlideApp;
@@ -58,6 +59,7 @@ public class RestoFragment extends BaseRestoFragment {
     private Firebase_update firebase_update;
     private List<Workmate> list_workmates;
     private FirebaseUser mCurrentUser;
+    private String api_key;
 
     public RestoFragment() {
         // Required empty public constructor
@@ -75,7 +77,8 @@ public class RestoFragment extends BaseRestoFragment {
         mCurrentUser = FirebaseAuth.getInstance().getCurrentUser();
         placeId = getArguments().getString(EXTRA_PLACE_ID,null);
         firebase_update = new Firebase_update(context,this);
-        resto = new Place_Nearby(placeId,this);
+        api_key = context.getResources().getString(R.string.google_maps_key);
+        resto = new Place_Nearby(api_key,placeId,this);
 
         return view;
     }
@@ -131,7 +134,7 @@ public class RestoFragment extends BaseRestoFragment {
     private void apply_picture_restaurant() {
 
         String link = "https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&photoreference=" + resto.getPhoto_reference()
-                + "&key=" + context.getResources().getString(R.string.google_maps_key);
+                + "&key=" + api_key;
 
         // Load the image using Glide
         GlideApp.with(getActivity().getApplicationContext())
@@ -223,7 +226,6 @@ public class RestoFragment extends BaseRestoFragment {
 
         // Button choose resto
         if(did_I_like_resto(list_workmates)) {
-            System.out.println("eeee did_I_like_resto =  true");
             setColorButton(like_button, R.color.colorStars);
             like_button.setEnabled(false);
         } else {
@@ -269,8 +271,16 @@ public class RestoFragment extends BaseRestoFragment {
     }
 
     private void setOnClickListenerButtonLike(){
-        like_button.setOnClickListener(v ->
-                firebase_update.update_like_status_workmates(mCurrentUser.getUid(), resto));
+        like_button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(mCurrentUser!=null)
+                    firebase_update.update_like_status_workmates(mCurrentUser.getUid(), resto);
+                else
+                    firebase_update.update_like_status_workmates("UXKUE5wPVUfwqgkeSelNRi0MoQU2", resto);
+            }
+        });
+
     }
 
     public void modify_state_button_like() {
@@ -278,7 +288,7 @@ public class RestoFragment extends BaseRestoFragment {
         like_button.setEnabled(false);
 
         // update list of workmates
-        resto = new Place_Nearby(placeId,this);
+        resto = new Place_Nearby(api_key,placeId,this);
     }
 
     // ----------------------------------------------------------------------------------------------
@@ -287,13 +297,16 @@ public class RestoFragment extends BaseRestoFragment {
 
     private void configure_button_choose_resto() {
 
+        System.out.println("eee configure_button_choose_resto");
+
         // Button choose resto
         if(did_I_choose_resto(list_workmates)) {
-            System.out.println("eeee did_I_choose_resto =  true");
+            System.out.println("resto chosen");
             setRestoChosen(true);
             button_valid.setEnabled(false);
         } else {
             setRestoChosen(false);
+            System.out.println("configure_button_choose_resto");
             setOnClickListenerButtonRestoValid();
         }
     }
@@ -339,8 +352,17 @@ public class RestoFragment extends BaseRestoFragment {
     }
 
     private void setOnClickListenerButtonRestoValid(){
-        button_valid.setOnClickListener(v ->
-                firebase_update.update_chosen_status_workmate(mCurrentUser.getUid(), resto));
+        button_valid.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    if(mCurrentUser!=null)
+                        firebase_update.update_chosen_status_workmate(mCurrentUser.getUid(), resto);
+                    else {
+                        System.out.println("setOnClickListenerButtonRestoValid");
+                        firebase_update.update_chosen_status_workmate("UXKUE5wPVUfwqgkeSelNRi0MoQU2", resto);
+                    }
+                }
+            });
     }
 
     public void modify_state_button_choose() {
@@ -348,7 +370,7 @@ public class RestoFragment extends BaseRestoFragment {
         button_valid.setEnabled(false);
 
         // update list of workmates
-        resto = new Place_Nearby(placeId,this);
+        resto = new Place_Nearby(api_key,placeId,this);
     }
 
 }

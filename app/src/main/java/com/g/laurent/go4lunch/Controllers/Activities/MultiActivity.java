@@ -1,4 +1,4 @@
-package com.g.laurent.go4lunch;
+package com.g.laurent.go4lunch.Controllers.Activities;
 
 import android.app.AlarmManager;
 import android.app.FragmentTransaction;
@@ -9,10 +9,12 @@ import android.content.Intent;
 import android.content.res.ColorStateList;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
+import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
 import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.graphics.drawable.DrawableCompat;
+import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
@@ -22,19 +24,29 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.SearchView;
+import android.widget.TextView;
+
+import com.bumptech.glide.Glide;
+import com.firebase.ui.auth.AuthUI;
+import com.g.laurent.go4lunch.Controllers.Fragments.ListMatesFragment;
+import com.g.laurent.go4lunch.Controllers.Fragments.ListRestoFragment;
+import com.g.laurent.go4lunch.Controllers.Fragments.MapsFragment;
+import com.g.laurent.go4lunch.Controllers.Fragments.RestoFragment;
 import com.g.laurent.go4lunch.Models.AlarmReceiver;
-import com.g.laurent.go4lunch.Models.CallbackMapsActivity;
 import com.g.laurent.go4lunch.Models.Callback_DetailResto;
 import com.g.laurent.go4lunch.Models.Callback_resto_fb;
-import com.g.laurent.go4lunch.Models.List_Search_Nearby;
 import com.g.laurent.go4lunch.Models.Place_Nearby;
+import com.g.laurent.go4lunch.R;
+import com.g.laurent.go4lunch.Utils.Firebase_recover;
 import com.g.laurent.go4lunch.Utils.Firebase_update;
+import com.g.laurent.go4lunch.Views.GlideApp;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-
 import java.util.Calendar;
 import java.util.List;
 import butterknife.BindView;
@@ -59,31 +71,41 @@ public class MultiActivity extends AppCompatActivity implements AlarmReceiver.ca
     private final static String BUTTON_LIST_SELECTED = "button_list_view_selected";
     private final static String BUTTON_MATES_SELECTED = "button_workmates_selected";
     private final static String EXTRA_PLACE_ID = "placeId_resto";
+    private static final int SIGN_OUT_TASK = 10;
     private String BUTTON_SELECTED;
     private Callback_DetailResto mCallback_detailResto;
+    private final String EXTRA_API_KEY = "api_key";
+    private String api_key;
+    private FirebaseUser mCurrentUser;
+    private ListRestoFragment listRestoFragment;
     @BindView(R.id.map_view_button) Button buttonMap;
     @BindView(R.id.list_view_button) Button buttonList;
     @BindView(R.id.workmates_button) Button buttonMates;
     @BindView(R.id.activity_main_drawer_layout) DrawerLayout drawerLayout;
     @BindView(R.id.activity_main_nav_view) NavigationView navigationView;
     @BindView(R.id.activity_main_toolbar) Toolbar toolbar;
+    private ImageView picture_user;
+    private TextView name_user;
+    private TextView email_user;
+   // @BindView(R.id.current_user_email_drawer)
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_maps);
         Context context = getApplicationContext();
-        System.out.println("eeee  2222");
+        ButterKnife.bind(this);
+
         // Save current user to Firebase storage
         FirebaseApp.initializeApp(context);
-        System.out.println("eeee  3333");
-        FirebaseUser mCurrentUser = FirebaseAuth.getInstance().getCurrentUser();
-        System.out.println("eeee  4444");
+        mCurrentUser = FirebaseAuth.getInstance().getCurrentUser();
         Firebase_update firebase_update = new Firebase_update(context);
-        System.out.println("eeee  5555");
-        firebase_update.create_new_user_firebase(mCurrentUser);
-        System.out.println("eeee  6666");
-        ButterKnife.bind(this);
+
+        if(mCurrentUser!=null)
+            firebase_update.create_new_user_firebase(mCurrentUser);
+
+        api_key=getResources().getString(R.string.google_maps_key);
+
         mCallback_detailResto = this;
         //lastKnownPlace=findLastPlaceHighestLikelihood(savedInstanceState);
         currentPlaceLatLng=new LatLng(48.866667,2.333333);
@@ -125,33 +147,6 @@ public class MultiActivity extends AppCompatActivity implements AlarmReceiver.ca
             manager.setRepeating(AlarmManager.RTC,calendar.getTimeInMillis(), AlarmManager.INTERVAL_DAY, pendingIntent);
     }
 
-
-   /* private void save_current_user_in_Firebase(){
-
-        // Initialization
-        FirebaseUser mCurrentUser = FirebaseAuth.getInstance().getCurrentUser();
-        DatabaseReference mDatabase;
-        mDatabase = FirebaseDatabase.getInstance().getReference().child("workmates");
-
-        // Create workmates
-        if(mCurrentUser!=null){
-
-            String Url_photo = null;
-
-            if(mCurrentUser.getPhotoUrl()!=null)
-                Url_photo = mCurrentUser.getPhotoUrl().toString();
-
-            Workmate workmates = new Workmate(
-                    mCurrentUser.getDisplayName(),
-                    mCurrentUser.getUid(),
-                    Url_photo,
-                    false, null,null,null,null);
-
-            mDatabase.child(mCurrentUser.getUid()).setValue(workmates);
-        }
-    }*/
-
-
     // ---------------------------------------------------------------------------------
     // -------------------         CONFIGURATION OF FRAGMENTS         ------------------
     // ---------------------------------------------------------------------------------
@@ -166,6 +161,9 @@ public class MultiActivity extends AppCompatActivity implements AlarmReceiver.ca
 
     public void configure_and_show_MapsFragment(){
 
+        // Create new bundle
+        bundle.putString(EXTRA_API_KEY,api_key);
+
         configureToolBar("I'm hungry!",true);
 
         MapsFragment mapsFragment = new MapsFragment();
@@ -178,11 +176,17 @@ public class MultiActivity extends AppCompatActivity implements AlarmReceiver.ca
     public void configure_and_show_ListRestoFragment(){
 
         configureToolBar("I'm hungry!",true);
-        ListRestoFragment listRestoFragment = new ListRestoFragment();
+        listRestoFragment = new ListRestoFragment();
         listRestoFragment.setArguments(bundle);
         FragmentTransaction fragmentTransaction = getFragmentManager().beginTransaction();
         fragmentTransaction.replace(R.id.fragment_map_view, listRestoFragment);
         fragmentTransaction.commit();
+    }
+
+    public void configure_and_show_settings_fragment(){
+        configureToolBar("Settings",true);
+        Intent intent = new Intent(this,SettingActivity.class);
+        startActivity(intent);
     }
 
     @Override
@@ -210,45 +214,30 @@ public class MultiActivity extends AppCompatActivity implements AlarmReceiver.ca
     }
 
     // ---------------------------------------------------------------------------------
-    // -----------------     CONFIGURATION OF DRAWER AND TOOLBAR        ----------------
+    // -----------------     CONFIGURATION OF TOOLBAR  ---------------------------------
     // ---------------------------------------------------------------------------------
 
     private void configureToolBar(String title, Boolean bar_display){
-        if(bar_display){
-            toolbar.setVisibility(View.VISIBLE);
-            setSupportActionBar(toolbar);
-            android.support.v7.app.ActionBar actionBar = getSupportActionBar();
-            if(actionBar!=null) {
-                actionBar.setTitle(title);
-                actionBar.setDisplayHomeAsUpEnabled(true);
-            }
-        } else
-            toolbar.setVisibility(View.GONE);
-    }
 
-    private void configureDrawerLayout(){
-        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(this, drawerLayout, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
-        drawerLayout.addDrawerListener(toggle);
-        toggle.syncState();
-    }
-
-    private void configureNavigationView(){
-        navigationView.setNavigationItemSelectedListener(this);
-    }
-
-    @Override
-    public boolean onNavigationItemSelected( MenuItem item) {
-        //this.drawerLayout.closeDrawer(GravityCompat.START);
-        return true;
+        runOnUiThread(() -> {
+            if(bar_display){
+                toolbar.setVisibility(View.VISIBLE);
+                setSupportActionBar(toolbar);
+                android.support.v7.app.ActionBar actionBar = getSupportActionBar();
+                if(actionBar!=null) {
+                    actionBar.setTitle(title);
+                    actionBar.setDisplayHomeAsUpEnabled(true);
+                }
+            } else
+                toolbar.setVisibility(View.GONE);
+        });
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        System.out.println("eee button HOME 0");
         switch (item.getItemId()) {
             case android.R.id.home:
-                System.out.println("eee button HOME1");
-                //drawerLayout.openDrawer(GravityCompat.START);  // OPEN DRAWER
+                drawerLayout.openDrawer(GravityCompat.START);  // OPEN DRAWER
                 return true;
         }
         return true;
@@ -268,6 +257,76 @@ public class MultiActivity extends AppCompatActivity implements AlarmReceiver.ca
             searchView.setSearchableInfo(searchManager.getSearchableInfo(getComponentName()));
         }
         return true;
+    }
+
+    // ---------------------------------------------------------------------------------
+    // -----------------     CONFIGURATION OF DRAWER  ----------------------------------
+    // ---------------------------------------------------------------------------------
+
+    private void configureDrawerLayout(){
+        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(this, drawerLayout, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
+        drawerLayout.addDrawerListener(toggle);
+        toggle.syncState();
+    }
+
+    private void configureNavigationView(){
+        navigationView.setNavigationItemSelectedListener(this);
+
+        if(mCurrentUser!=null){
+
+            picture_user = navigationView.getHeaderView(0).findViewById(R.id.current_user_image_drawer);
+            name_user = navigationView.getHeaderView(0).findViewById(R.id.current_user_name_drawer);
+            email_user = navigationView.getHeaderView(0).findViewById(R.id.current_user_email_drawer);
+
+            name_user.setText(mCurrentUser.getDisplayName());
+            email_user.setText(mCurrentUser.getEmail());
+
+            if(mCurrentUser.getPhotoUrl()!=null)
+                Glide.with(this)
+                        .load(mCurrentUser.getPhotoUrl().toString())
+                        .into(picture_user);
+
+        }
+    }
+
+    @Override
+    public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+
+        int id = item.getItemId();
+        switch (id){
+            case R.id.activity_main_drawer_your_lunch :
+                Firebase_recover firebase_recover = new Firebase_recover(getApplicationContext(),this,mCurrentUser.getUid());
+                firebase_recover.show_lunch_current_user();
+                break;
+            case R.id.activity_main_drawer_settings:
+                configure_and_show_settings_fragment();
+                break;
+            case R.id.activity_main_drawer_logout:
+                signOutUserFromFirebase();
+                break;
+            default:
+                break;
+        }
+        this.drawerLayout.closeDrawer(GravityCompat.START);
+        return true;
+    }
+
+    private void signOutUserFromFirebase(){
+        AuthUI.getInstance()
+                .signOut(this)
+                .addOnSuccessListener(this, this.updateUIAfterRESTRequestsCompleted(SIGN_OUT_TASK));
+    }
+
+    private OnSuccessListener<Void> updateUIAfterRESTRequestsCompleted(final int origin){
+        return aVoid -> {
+            switch (origin){
+                case SIGN_OUT_TASK:
+                    finish();
+                    break;
+                default:
+                    break;
+            }
+        };
     }
 
     // ----------------------------------------------------------------------------------------------------
@@ -361,18 +420,11 @@ public class MultiActivity extends AppCompatActivity implements AlarmReceiver.ca
 
     }
 
+    public ListRestoFragment getListRestoFragment() {
+        return listRestoFragment;
+    }
 
-    /**
-     * Manipulates the map once available.
-     * This callback is triggered when the map is ready to be used.
-     * This is where we can add markers or lines, add listeners or move the camera. In this case,
-     * we just add a marker near Sydney, Australia.
-     * If Google Play services is not installed on the device, the user will be prompted to install
-     * it inside the SupportMapFragment. This method will only be triggered once the user has
-     * installed Google Play services and returned to the app.
-     */
-
-    /*
+/*
     private void configureOnClickRecyclerView(){
         ItemClickSupport.addTo(recyclerView, R.layout.fragment_main_item)
                 .setOnItemClickListener(new ItemClickSupport.OnItemClickListener() {

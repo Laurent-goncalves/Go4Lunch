@@ -1,8 +1,8 @@
 package com.g.laurent.go4lunch.Models;
 
 import android.util.Log;
-import com.g.laurent.go4lunch.ListRestoFragment;
-import com.g.laurent.go4lunch.MapsFragment;
+import com.g.laurent.go4lunch.Controllers.Fragments.ListRestoFragment;
+import com.g.laurent.go4lunch.Controllers.Fragments.MapsFragment;
 import com.g.laurent.go4lunch.Utils.DetailsPlace.DetailsPlace;
 import com.g.laurent.go4lunch.Utils.DetailsPlace.Photo;
 import com.g.laurent.go4lunch.Utils.DetailsPlace.Result;
@@ -24,23 +24,22 @@ public class List_Search_Nearby {
     private final static String CALLBACK_MAPS_FRAGMENT = "callbasck_maps_fragment";
     private final static String CALLBACK_LIST_RESTO_FRAGMENT = "callbasck_list_resto_fragment";
 
-    public List_Search_Nearby(LatLng latLng, String radius, String type, MapsFragment mapsFragment) {
-
+    public List_Search_Nearby(String api_key, LatLng latLng, String radius, String type, MapsFragment mapsFragment) {
         this.mapsFragment=mapsFragment;
         list_places_nearby = new ArrayList<>();
-        launch_request_search_nearby_places(latLng, radius, type,CALLBACK_MAPS_FRAGMENT);
+        launch_request_search_nearby_places(api_key, latLng, radius, type, CALLBACK_MAPS_FRAGMENT);
     }
 
-    public List_Search_Nearby(LatLng latLng, String radius, String type, ListRestoFragment listRestoFragment) {
+    public List_Search_Nearby(String api_key, LatLng latLng, String radius, String type, ListRestoFragment listRestoFragment) {
 
         this.listRestoFragment=listRestoFragment;
         list_places_nearby = new ArrayList<>();
-        launch_request_search_nearby_places(latLng, radius, type,CALLBACK_LIST_RESTO_FRAGMENT);
+        launch_request_search_nearby_places(api_key,latLng, radius, type,CALLBACK_LIST_RESTO_FRAGMENT);
     }
 
-    public List_Search_Nearby(LatLng latLng, String radius, String type) {
+    public List_Search_Nearby(String api_key, LatLng latLng, String radius, String type) {
         list_places_nearby = new ArrayList<>();
-        launch_request_search_nearby_places(latLng, radius, type,null);
+        launch_request_search_nearby_places(api_key, latLng, radius, type,null);
     }
 
     private void build_list_places_nearby(DetailsPlace detailsPlace){
@@ -79,14 +78,14 @@ public class List_Search_Nearby {
         }
     }
 
-    private void launch_request_search_nearby_places(LatLng latLng, String radius, String type, String callback){
+    private void launch_request_search_nearby_places(String api_key,LatLng latLng, String radius, String type, String callback){
 
         String location = String.valueOf(latLng.latitude) + "," + String.valueOf(latLng.longitude);
 
-        disposable = Maps_API_stream.streamFetchgetSearchNearbyPlaces(type,radius,location)
+        disposable = Maps_API_stream.streamFetchgetSearchNearbyPlaces(api_key,type,radius,location)
                 .flatMap(userResponse -> Observable.just(userResponse.getResults()))
                 .flatMapIterable(ids -> ids)
-                .flatMap(Maps_API_stream::streamFetchgetDetailsPlaces)
+                .flatMap(result -> Maps_API_stream.streamFetchgetDetailsPlaces(api_key,result))
                 .subscribeWith(getSubscriber(callback));
     }
 
@@ -105,7 +104,6 @@ public class List_Search_Nearby {
             @Override
             public void onComplete() {
                 //disposable.dispose();
-
                 if(callback!=null){
                     switch(callback){
 

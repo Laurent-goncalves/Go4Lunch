@@ -11,4 +11,6 @@
     <color name="colorStars">#ffca27</color>
     <color name="colorGreen">#68efad</color>
     <color name="colorWhite">#fffffe</color>
+    <color name="colorTrackSwitch">#ffc2ae</color>
+
 </resources>

@@ -1,4 +1,4 @@
-package com.g.laurent.go4lunch;
+package com.g.laurent.go4lunch.Controllers.Fragments;
 
 import android.content.Context;
 import android.os.Bundle;
@@ -10,6 +10,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.g.laurent.go4lunch.Models.Workmate;
+import com.g.laurent.go4lunch.R;
 import com.g.laurent.go4lunch.Utils.Firebase_recover;
 import com.g.laurent.go4lunch.Views.Resto_Details.WorkmatesViewAdapter;
 

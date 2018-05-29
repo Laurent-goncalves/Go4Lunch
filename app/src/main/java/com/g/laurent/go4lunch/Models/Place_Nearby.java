@@ -2,18 +2,16 @@ package com.g.laurent.go4lunch.Models;
 
 import android.util.Log;
 
-import com.g.laurent.go4lunch.RestoFragment;
+import com.g.laurent.go4lunch.Controllers.Fragments.RestoFragment;
 import com.g.laurent.go4lunch.Utils.DetailsPlace.DetailsPlace;
 import com.g.laurent.go4lunch.Utils.DetailsPlace.Geometry;
 import com.g.laurent.go4lunch.Utils.DetailsPlace.OpeningHours;
 import com.g.laurent.go4lunch.Utils.DetailsPlace.Photo;
 import com.g.laurent.go4lunch.Utils.DetailsPlace.Result;
 import com.g.laurent.go4lunch.Utils.Maps_API_stream;
-import com.google.android.gms.maps.model.LatLng;
 
 import java.util.List;
 
-import io.reactivex.Observable;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.observers.DisposableObserver;
 
@@ -49,11 +47,14 @@ public class Place_Nearby {
         this.icon_url=icon_url;
     }
 
-    public Place_Nearby(String placeId, RestoFragment restofragment) {
+    public Place_Nearby(String api_key,String placeId, RestoFragment restofragment) {
         this.restofragment=restofragment;
         this.placeId=placeId;
 
-        disposable = Maps_API_stream.streamFetchgetDetailsPlaces(placeId)
+
+        System.out.println("eee Place_Nearby   constructor");
+
+        disposable = Maps_API_stream.streamFetchgetDetailsPlaces(api_key, placeId)
                 .subscribeWith(getSubscriber());
     }
 

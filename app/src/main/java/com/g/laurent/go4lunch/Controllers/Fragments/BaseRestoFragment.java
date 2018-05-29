@@ -1,4 +1,4 @@
-package com.g.laurent.go4lunch;
+package com.g.laurent.go4lunch.Controllers.Fragments;
 
 import android.app.Activity;
 import android.app.Fragment;
@@ -365,11 +365,11 @@ public abstract class BaseRestoFragment extends Fragment {
 
     // -------------------------- GETTER and SETTER ----------------------------------------------------
 
-    protected void setList_places_nearby(List<Place_Nearby> list_places_nearby) {
+    public void setList_places_nearby(List<Place_Nearby> list_places_nearby) {
         this.list_places_nearby = list_places_nearby;
     }
 
-    protected List<Place_Nearby> getList_places_nearby() {
+    public List<Place_Nearby> getList_places_nearby() {
         return list_places_nearby;
     }
 

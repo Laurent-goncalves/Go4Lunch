@@ -1,11 +1,14 @@
 package com.g.laurent.go4lunch.Utils;
 
 import android.content.Context;
-import com.g.laurent.go4lunch.ListMatesFragment;
-import com.g.laurent.go4lunch.ListRestoFragment;
-import com.g.laurent.go4lunch.MapsFragment;
+import android.provider.ContactsContract;
+
+import com.g.laurent.go4lunch.Controllers.Activities.MultiActivity;
+import com.g.laurent.go4lunch.Controllers.Fragments.ListMatesFragment;
+import com.g.laurent.go4lunch.Controllers.Fragments.ListRestoFragment;
+import com.g.laurent.go4lunch.Controllers.Fragments.MapsFragment;
 import com.g.laurent.go4lunch.Models.Workmate;
-import com.g.laurent.go4lunch.RestoFragment;
+import com.g.laurent.go4lunch.Controllers.Fragments.RestoFragment;
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -24,11 +27,11 @@ public class Firebase_recover {
     private MapsFragment mapsFragment;
     private RestoFragment restoFragment;
     private ListMatesFragment listMatesFragment;
+    private MultiActivity multiActivity;
     private final static String CALLBACK_RESTOFRAGMENT = "callback_restofragment";
     private final static String CALLBACK_LISTRESTOFRAGMENT = "callback_listrestofragment";
     private final static String CALLBACK_LISTMATESFRAGMENT = "callback_listmatesfragment";
     private final static String CALLBACK_MAPSFRAGMENT = "callback_mapsfragment";
-    private Workmate workmate;
     private String callback;
 
     public Firebase_recover(Context context, ListRestoFragment listRestoFragment) {
@@ -63,9 +66,15 @@ public class Firebase_recover {
         databaseReferenceWorkmates= databaseReference.child("workmates");
     }
 
+    public Firebase_recover(Context context, MultiActivity multiActivity, String userId) {
+        FirebaseApp.initializeApp(context);
+        this.multiActivity=multiActivity;
+        DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference();
+        databaseReferenceWorkmates= databaseReference.child("workmates").child(userId).child("resto_id");
+    }
 
     // ----------------------------------------------------------------------------------------------
-    // ------------------------------- RECOVER LIST WORKMATES ---------------------------------------
+    // ------------------------------- RECOVER WORKMATES --------------------------------------------
     // ----------------------------------------------------------------------------------------------
 
     public void recover_list_workmates(){
@@ -102,6 +111,67 @@ public class Firebase_recover {
                                 mapsFragment.set_list_of_workmates(list_workmates);
                             break;
                     }
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                System.out.println("eee Cancellation");
+            }
+        });
+    }
+
+    public void recover_workmate_restoId(String userId){
+
+        databaseReferenceWorkmates= databaseReferenceWorkmates.child(userId).child("resto_id");
+
+        databaseReferenceWorkmates.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot data) {
+                if(data!=null) {
+                    listRestoFragment.setPlaceId((String) data.getValue());
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                System.out.println("eee Cancellation");
+            }
+        });
+    }
+
+    public void recover_workmate_like(String userId, String restoId_liked){
+
+        databaseReferenceWorkmates= databaseReferenceWorkmates.child(userId).child("list_resto_liked");
+
+        databaseReferenceWorkmates.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot data) {
+                if(data!=null) {
+
+                    for(DataSnapshot datas : data.getChildren()){
+
+
+                    }
+                    listRestoFragment.setPlaceId((String) data.getValue());
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                System.out.println("eee Cancellation");
+            }
+        });
+    }
+
+    public void show_lunch_current_user(){
+
+        databaseReferenceWorkmates.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot data) {
+                if(data!=null) {
+                    if(multiActivity!=null)
+                        multiActivity.configure_and_show_restofragment((String) data.getValue());
                 }
             }
 
@@ -156,7 +226,4 @@ public class Firebase_recover {
     // ----------------------------------- TOOLS , GETTER AND SETTER --------------------------------
     // ----------------------------------------------------------------------------------------------
 
-    public Workmate getWorkmate() {
-        return workmate;
-    }
 }

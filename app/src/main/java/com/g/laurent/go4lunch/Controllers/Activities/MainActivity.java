@@ -1,20 +1,24 @@
-package com.g.laurent.go4lunch;
+package com.g.laurent.go4lunch.Controllers.Activities;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.content.res.Configuration;
+import android.content.res.Resources;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
-import android.widget.ImageView;
-import android.widget.Toast;
+import android.widget.Button;
 
 import com.firebase.ui.auth.AuthUI;
 import com.firebase.ui.auth.ErrorCodes;
 import com.firebase.ui.auth.IdpResponse;
-import com.google.firebase.FirebaseApp;
+import com.g.laurent.go4lunch.R;
 
 import java.util.Collections;
+import java.util.Locale;
+
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
@@ -23,18 +27,25 @@ public class MainActivity extends AppCompatActivity {
 
     private Toolbar toolbar;
     private Intent intent;
+    private Configuration conf;
+    private Resources res;
     private static final int RC_SIGN_IN = 123;
     private static final String GOOGLE_SIGN_IN = "google";
     private static final String FACEBOOK_SIGN_IN = "facebook";
+    private static final String EXTRA_PREFERENCES = "preferences";
+    private static final String EXTRA_PREF_LANG = "language_preferences";
     @BindView(R.id.window_sign_in) CoordinatorLayout window_sign_in;
   //  @BindView(R.id.image_main_page) ImageView mImageView;
-
+    @BindView(R.id.main_activity_button_login_google) Button button_google;
+    @BindView(R.id.main_activity_button_login_facebook) Button button_facebook;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
+        set_language_button();
+
     }
 
    /* @Override
@@ -53,7 +64,7 @@ public class MainActivity extends AppCompatActivity {
 
     @OnClick(R.id.main_activity_button_login_google)
     public void onClickLoginButtonGoogle() {
-        this.startSignInActivity(GOOGLE_SIGN_IN);
+       this.startSignInActivity(GOOGLE_SIGN_IN);
     }
 
     @OnClick(R.id.main_activity_button_login_facebook)
@@ -126,6 +137,35 @@ public class MainActivity extends AppCompatActivity {
                     showSnackBar(this.window_sign_in, getString(R.string.error_unknown_error));
                 }
             }
+        }
+    }
+
+    private void set_language_button(){
+
+        SharedPreferences sharedPreferences = getSharedPreferences(EXTRA_PREFERENCES,MODE_PRIVATE);
+        res = getApplicationContext().getResources();
+        conf = res.getConfiguration();
+
+        if(sharedPreferences!=null){
+
+            String lang = sharedPreferences.getString(EXTRA_PREF_LANG,"En");
+
+            switch (lang) {
+                case "Fr":
+                    conf.locale = Locale.FRANCE;
+                    break;
+                case "En":
+                    conf.locale = Locale.FRANCE;
+                    break;
+                default:
+                    sharedPreferences.edit().putString(EXTRA_PREF_LANG, "En").apply();
+                    conf.locale = Locale.FRANCE;
+                    break;
+            }
+
+            res.updateConfiguration(conf, res.getDisplayMetrics());
+            button_google.setText(getApplicationContext().createConfigurationContext(conf).getResources().getString(R.string.connect_with_google));
+            button_facebook.setText(getApplicationContext().createConfigurationContext(conf).getResources().getString(R.string.connect_with_facebook));
         }
     }
 

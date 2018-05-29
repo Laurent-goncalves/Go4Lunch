@@ -1,7 +1,8 @@
-package com.g.laurent.go4lunch;
+package com.g.laurent.go4lunch.Controllers.Fragments;
 
 import android.app.Fragment;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -10,20 +11,19 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
-
 import com.g.laurent.go4lunch.Models.List_Search_Nearby;
 import com.g.laurent.go4lunch.Models.Place_Nearby;
 import com.g.laurent.go4lunch.Models.Workmate;
+import com.g.laurent.go4lunch.R;
 import com.g.laurent.go4lunch.Utils.Firebase_recover;
 import com.g.laurent.go4lunch.Views.Resto_List.ListViewAdapter;
 import com.google.android.gms.maps.model.LatLng;
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
-
 import java.util.ArrayList;
 import java.util.List;
 import butterknife.BindView;
 import butterknife.ButterKnife;
+
+import static android.content.Context.MODE_PRIVATE;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -38,8 +38,11 @@ public class ListRestoFragment extends BaseRestoFragment implements ListViewAdap
     private LatLng current_location;
     private final static String EXTRA_LAT_CURRENT = "latitude_current_location";
     private final static String EXTRA_LONG_CURRENT = "longitude_current_location";
-    private final static String EXTRA_RADIUS = "radius_for_search";
-    private final static String EXTRA_TYPE_PLACE = "type_of_place";
+    private static final String EXTRA_PREFERENCES = "preferences";
+    private static final String EXTRA_PREF_LANG = "language_preferences";
+    private static final String EXTRA_PREF_RADIUS = "radius_preferences";
+    private static final String EXTRA_PREF_TYPE_PLACE = "type_place_preferences";
+    private String placeId;
     private Firebase_recover firebase_recover;
     private Context context;
 
@@ -53,19 +56,21 @@ public class ListRestoFragment extends BaseRestoFragment implements ListViewAdap
         // Inflate the layout for this fragment
         View view =inflater.inflate(R.layout.fragment_list_resto, container, false);
         ButterKnife.bind(this,view);
+        SharedPreferences sharedPreferences = getActivity().getSharedPreferences(EXTRA_PREFERENCES, MODE_PRIVATE);
         context = getActivity().getApplicationContext();
 
         // Recover list of restaurants on firebase
         firebase_recover = new Firebase_recover(context,this);
 
         // Recover list of restos nearby
-        if(getArguments()!=null){
-            getLatLng_current_location();
-            String radius = getArguments().getString(EXTRA_RADIUS,"500");
-            String type = getArguments().getString(EXTRA_TYPE_PLACE,"restaurant");
+        current_location =new LatLng(48.866667,2.333333);
+        String radius = sharedPreferences.getString(EXTRA_PREF_RADIUS,"500");
+        String type = sharedPreferences.getString(EXTRA_PREF_TYPE_PLACE,"restaurant");
+        String api_key = getResources().getString(R.string.google_maps_key);
 
-            new List_Search_Nearby(current_location,radius,type,this);
-        }
+        System.out.println("eee api_key=" + api_key);
+
+        new List_Search_Nearby(api_key, current_location,radius,type,this);
 
         create_onclicklistener_for_sorting_buttons();
         return view;
@@ -153,13 +158,8 @@ public class ListRestoFragment extends BaseRestoFragment implements ListViewAdap
                 list_places_nearby.clear();
                 list_places_nearby.addAll(new_list_place_nearby);
 
-            } else {
+            } else
                 sort_list_places_nearby_by_workmates();
-                /*list_to_sort_int=create_list_to_sort(list_places_nearby);
-                list_index.addAll(set_list_sorted_int(list_to_sort_int));*/
-            }
-
-
         }
     }
 
@@ -176,6 +176,14 @@ public class ListRestoFragment extends BaseRestoFragment implements ListViewAdap
     public void set_list_of_workmates(List<Workmate> list_workmates){
         this.list_workmates=list_workmates;
         configure_recycler_view();
+    }
+
+    public String getPlaceId() {
+        return placeId;
+    }
+
+    public void setPlaceId(String placeId) {
+        this.placeId = placeId;
     }
 
     // ------------------------ UNUSED METHODS -----------------------------------

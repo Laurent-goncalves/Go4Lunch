@@ -2,8 +2,6 @@
     <string name="app_name">Go4Lunch</string>
     <string name="title_activity_maps">Map</string>
     <string name="radius">500</string>
-    <string name="connect_with_google">Sign in with Google</string>
-    <string name="connect_with_facebook">Sign in with Facebook</string>
 
 
     <string name="error_not_connected">Vous devez vous connecter !</string>
@@ -23,17 +21,13 @@
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="image_restaurant">Image_restaurant</string>
-    <string name="call">CALL</string>
-    <string name="like">LIKE</string>
-    <string name="website">WEBSITE</string>
-
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
-    <string name="sort_by">Sort by :</string>
     <string name="number_of_workmates">number of workmates</string>
     <string name="number_of_stars">number of stars</string>
-    <string name="distance">distance</string>
-    <string name="stars">stars</string>
-    <string name="colleague">colleague</string>
+    <string name="français">Français</string>
+    <string name="english">English</string>
+    <string name="go4lunch">Go4Lunch</string>
+    <string name="imageview_drawer">ImageView drawer</string>
 
 </resources>

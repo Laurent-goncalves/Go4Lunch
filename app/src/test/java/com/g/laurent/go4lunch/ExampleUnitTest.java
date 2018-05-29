@@ -1,5 +1,6 @@
 package com.g.laurent.go4lunch;
 
+import com.g.laurent.go4lunch.Controllers.Fragments.ListRestoFragment;
 import com.g.laurent.go4lunch.Models.List_Search_Nearby;
 import com.g.laurent.go4lunch.Models.Place_Nearby;
 import com.g.laurent.go4lunch.Models.Workmate;
@@ -87,7 +88,7 @@ public class ExampleUnitTest {
         //                     /\
         //                 current_time
 
-        Assert.assertEquals("Will open at 11h",timeCalculation.getInformationAboutOpeningAndClosure(openingHours.getPeriods(),current_time,current_day-1));
+        Assert.assertEquals("Open at 11h",timeCalculation.getInformationAboutOpeningAndClosure(openingHours.getPeriods(),current_time,current_day-1));
 
         current_time = 1200;
 
@@ -114,7 +115,7 @@ public class ExampleUnitTest {
         //                                              /\
         //                                        current_time
 
-        Assert.assertEquals("Will open at 19h",timeCalculation.getInformationAboutOpeningAndClosure(openingHours.getPeriods(),current_time,current_day-1));
+        Assert.assertEquals("Open at 19h",timeCalculation.getInformationAboutOpeningAndClosure(openingHours.getPeriods(),current_time,current_day-1));
 
         current_time = 2130;
 
@@ -143,11 +144,12 @@ public class ExampleUnitTest {
 
         String type = "restaurant";
         String radius = "500";
+        String api_key = "AIzaSyBiRkG6clZcF-KhwQIPGq5t8h-KBk-8ldA";
         LatLng latLng = new LatLng(48.6102599, 2.474805);
 
-        List_Search_Nearby list_search_nearby = new List_Search_Nearby(latLng,radius,type);
+        List_Search_Nearby list_search_nearby = new List_Search_Nearby(api_key,latLng,radius,type);
 
-        waiting_time(3000);
+        waiting_time(5000);
         Assert.assertTrue(list_search_nearby.getList_places_nearby().size()>0);
     }
 

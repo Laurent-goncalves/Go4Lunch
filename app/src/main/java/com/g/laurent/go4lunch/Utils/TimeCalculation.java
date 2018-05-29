@@ -146,7 +146,7 @@ public class TimeCalculation {
             if(shortest_timing<30){
                 text = "Opening in " + shortest_timing + " min";
             } else {
-                text = "Will open at " + get_time_hour(next_time_opening);
+                text = "Open at " + get_time_hour(next_time_opening);
             }
         }
 
@@ -181,14 +181,6 @@ public class TimeCalculation {
         }
 
         return text;
-    }
-
-    private int get_in_minutes_next_opening(int current_time, int next_opening){
-        return next_opening - current_time;
-    }
-
-    private int get_in_minutes_next_closing(int current_time, int next_closing){
-        return next_closing - current_time;
     }
 
     private String get_time_hour(int time_to_convert){

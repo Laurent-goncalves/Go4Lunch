@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:id="@+id/window_sign_in"
-    tools:context=".MainActivity">
+    tools:context=".Controllers.Activities.MainActivity">
 
     <!-- IMAGE MAIN PAGE
     <ImageView
@@ -29,7 +29,6 @@
             android:id="@+id/main_activity_button_login_google"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/connect_with_google"
             android:textColor="#fff"
             android:background="@color/colorGoogleButton"
             android:textSize="@dimen/default_text_size"
@@ -42,7 +41,6 @@
             android:id="@+id/main_activity_button_login_facebook"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/connect_with_facebook"
             android:textColor="#fff"
             android:background="@color/colorFacebookButton"
             android:textSize="@dimen/default_text_size"

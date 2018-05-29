@@ -107,7 +107,13 @@ public class RestoViewHolder extends RecyclerView.ViewHolder implements View.OnC
     // ---------------------------------- RATING RESTO ----------------------------------------------
     private void rating_calculation() {
 
-        int numStars = Math.round(place_nearby.getRating().floatValue());
+        int numStars;
+
+        if(place_nearby.getRating()!=null)
+            numStars = Math.round(place_nearby.getRating().floatValue());
+        else
+            numStars = 0;
+
         rating.removeAllViews();
 
         if(numStars>=1){

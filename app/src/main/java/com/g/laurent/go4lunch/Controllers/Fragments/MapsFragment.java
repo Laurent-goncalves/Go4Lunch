@@ -1,6 +1,7 @@
-package com.g.laurent.go4lunch;
+package com.g.laurent.go4lunch.Controllers.Fragments;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -9,21 +10,22 @@ import android.view.ViewGroup;
 import com.g.laurent.go4lunch.Models.List_Search_Nearby;
 import com.g.laurent.go4lunch.Models.Place_Nearby;
 import com.g.laurent.go4lunch.Models.Workmate;
+import com.g.laurent.go4lunch.R;
 import com.g.laurent.go4lunch.Utils.Firebase_recover;
 import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.MapsInitializer;
-import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
+
 import java.util.List;
 import butterknife.BindView;
 import butterknife.ButterKnife;
+
+import static android.content.Context.MODE_PRIVATE;
 
 public class MapsFragment extends BaseRestoFragment  {
 
@@ -32,8 +34,11 @@ public class MapsFragment extends BaseRestoFragment  {
     private LatLng currentPlaceLatLng;
     private final static String EXTRA_LAT_CURRENT = "latitude_current_location";
     private final static String EXTRA_LONG_CURRENT = "longitude_current_location";
-    private final static String EXTRA_RADIUS = "radius_for_search";
-    private final static String EXTRA_TYPE_PLACE = "type_of_place";
+    private static final String EXTRA_PREFERENCES = "preferences";
+    private static final String EXTRA_PREF_LANG = "language_preferences";
+    private static final String EXTRA_PREF_RADIUS = "radius_preferences";
+    private static final String EXTRA_PREF_TYPE_PLACE = "type_place_preferences";
+    private final String EXTRA_API_KEY = "api_key";
     private Firebase_recover firebase_recover;
     private Context context;
     private List<Workmate> list_workmates;
@@ -49,17 +54,22 @@ public class MapsFragment extends BaseRestoFragment  {
         // Inflate the layout for this fragment
         View view =inflater.inflate(R.layout.fragment_maps, container, false);
         ButterKnife.bind(this,view);
+        SharedPreferences sharedPreferences = getActivity().getSharedPreferences(EXTRA_PREFERENCES, MODE_PRIVATE);
         mMapView.onCreate(savedInstanceState);
         context = getActivity().getApplicationContext();
 
         // Recover list of restos nearby
-        if(getArguments()!=null){
+        if(getArguments()!=null) {
             currentPlaceLatLng = new LatLng(getArguments().getDouble(EXTRA_LAT_CURRENT),
                     getArguments().getDouble(EXTRA_LONG_CURRENT));
-            String radius = getArguments().getString(EXTRA_RADIUS,"500");
-            String type = getArguments().getString(EXTRA_TYPE_PLACE,"restaurant");
+            String radius = sharedPreferences.getString(EXTRA_PREF_RADIUS, "500");
+            String type = sharedPreferences.getString(EXTRA_PREF_TYPE_PLACE, "restaurant");
+            String api_key = getArguments().getString(EXTRA_API_KEY, null);
 
-            new List_Search_Nearby(currentPlaceLatLng,radius,type,this);
+            if (api_key != null) {
+                System.out.println("eeee MAPSFRAGMENT api_key = "+api_key);
+                new List_Search_Nearby(api_key, currentPlaceLatLng, radius, type, this);
+            }
         }
 
         return view;

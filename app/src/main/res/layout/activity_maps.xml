@@ -8,7 +8,7 @@
     android:layout_height="match_parent"
     android:fitsSystemWindows="true"
     tools:openDrawer="start"
-    tools:context=".MultiActivity">
+    tools:context=".Controllers.Activities.MultiActivity">
 
     <!-- 1 | MainActivity RootView -->
     <LinearLayout
@@ -30,7 +30,7 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:id="@+id/window_sign_in"
-            tools:context=".MultiActivity">
+            tools:context=".Controllers.Activities.MultiActivity">
 
             <include
                 android:id="@+id/fragment_map_view"

@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!--
     TODO: Before you run your application, you need a Google Maps API key.
@@ -19,6 +20,9 @@
 
     Once you have your key (it starts with "AIza"), replace the "google_maps_key" AIzaSyCAzX1ILkJlqSsTMkRJHSGEMAQWuqxSxKA
     string in this file.
+
+    API : AIzaSyCAzX1ILkJlqSsTMkRJHSGEMAQWuqxSxKA
+    API : AIzaSyBiRkG6clZcF-KhwQIPGq5t8h-KBk-8ldA
     -->
-    <string name="google_maps_key" templateMergeStrategy="preserve" translatable="false">AIzaSyCAzX1ILkJlqSsTMkRJHSGEMAQWuqxSxKA</string>
+    <string name="google_maps_key" templateMergeStrategy="preserve" translatable="false">AIzaSyBiRkG6clZcF-KhwQIPGq5t8h-KBk-8ldA</string>
 </resources>

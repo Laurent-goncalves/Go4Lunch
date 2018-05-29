@@ -1,2 +1,43 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources></resources>
+<resources>
+
+    <!-- MAIN PAGE -->
+    <string name="connect_with_google">Sign in with Google</string>
+    <string name="connect_with_facebook">Sign in with Facebook</string>
+
+    <!-- MAPVIEW & LISTVIEW -->
+    <string name="toolbar_mapview">I\'m hungry</string>
+
+    <!-- RESTOVIEW -->
+    <string name="call">CALL</string>
+    <string name="like">LIKE</string>
+    <string name="website">WEBSITE</string>
+    <string name="joining"> is joining!</string>
+
+    <!-- LISTRESTOVIEW -->
+    <string name="open_until">Open until </string>
+    <string name="closed_soon">Closed soon (in </string>
+    <string name="open_at">Open at </string>
+    <string name="opening_in">Opening in </string>
+    <string name="sort_by">Sort by :</string>
+    <string name="distance">distance</string>
+    <string name="stars">stars</string>
+    <string name="colleague">colleague</string>
+
+    <!-- LISTMATESVIEW -->
+    <string name="is_eating_at"> is eating at </string>
+    <string name="has_not_decided"> hasn\'t decided yet!</string>
+    <string name="available_workmates">Available workmates</string>
+
+    <!-- Settings -->
+    <string name="title_settings">Settings</string>
+    <string name="setting_radius">Radius</string>
+    <string name="type_of_place">Type of place: </string>
+    <string name="done">Done</string>
+
+    <!-- MENU -->
+    <string name="your_lunch">YOUR LUNCH</string>
+    <string name="settings">SETTINGS</string>
+    <string name="logout">LOGOUT</string>
+
+</resources>

@@ -2,17 +2,16 @@ package com.g.laurent.go4lunch.Utils;
 
 import android.content.Context;
 import android.support.annotation.NonNull;
-import com.g.laurent.go4lunch.Models.Callback_resto_fb;
+
 import com.g.laurent.go4lunch.Models.Place_Nearby;
 import com.g.laurent.go4lunch.Models.Workmate;
-import com.g.laurent.go4lunch.RestoFragment;
+import com.g.laurent.go4lunch.Controllers.Fragments.RestoFragment;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import java.util.List;
 
 public class Firebase_update implements GoogleApiClient.OnConnectionFailedListener {
 
@@ -58,6 +57,8 @@ public class Firebase_update implements GoogleApiClient.OnConnectionFailedListen
         databaseReferenceWorkmates.child(user_id).child("resto_type").setValue(resto.getTypes().get(0));
         databaseReferenceWorkmates.child(user_id).child("chosen").setValue(true);
 
+        System.out.println("eee update_chosen_status_workmate " + resto.getPlaceId());
+
         if(restoFragment!=null)
             restoFragment.modify_state_button_choose();
     }
@@ -65,7 +66,12 @@ public class Firebase_update implements GoogleApiClient.OnConnectionFailedListen
     public void create_new_user_firebase(FirebaseUser mCurrentUser){
         databaseReferenceWorkmates.child(mCurrentUser.getUid()).child("name").setValue(mCurrentUser.getDisplayName());
         databaseReferenceWorkmates.child(mCurrentUser.getUid()).child("id").setValue(mCurrentUser.getUid());
-       // databaseReferenceWorkmates.child(mCurrentUser.getUid()).child("photoUrl").setValue(mCurrentUser.getPhotoUrl());
+        databaseReferenceWorkmates.child(mCurrentUser.getUid()).child("photo_url").setValue(mCurrentUser.getPhotoUrl().toString());
+    }
+
+    public void initialize_like_status_and_chosen_restaurant(String userId){
+        databaseReferenceWorkmates.child(userId).child("resto_id").removeValue();
+        databaseReferenceWorkmates.child(userId).child("list_resto_liked").removeValue();
     }
 
     @Override
