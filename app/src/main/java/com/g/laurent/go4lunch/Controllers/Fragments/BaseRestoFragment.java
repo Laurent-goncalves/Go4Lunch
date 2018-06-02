@@ -1,7 +1,7 @@
 package com.g.laurent.go4lunch.Controllers.Fragments;
 
 import android.app.Activity;
-import android.app.Fragment;
+import android.support.v4.app.Fragment;
 
 import com.g.laurent.go4lunch.Models.Callback_DetailResto;
 import com.g.laurent.go4lunch.Models.Callback_resto_fb;

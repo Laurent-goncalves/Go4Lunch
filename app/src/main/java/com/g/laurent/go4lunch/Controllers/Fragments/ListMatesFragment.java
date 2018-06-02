@@ -2,7 +2,7 @@ package com.g.laurent.go4lunch.Controllers.Fragments;
 
 import android.content.Context;
 import android.os.Bundle;
-import android.app.Fragment;
+import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -31,6 +31,20 @@ public class ListMatesFragment extends Fragment {
 
     public ListMatesFragment() {
         // Required empty public constructor
+    }
+
+    public static ListMatesFragment newInstance(String api_key) {
+
+        // Create new fragment
+        ListMatesFragment frag = new ListMatesFragment();
+        String EXTRA_API_KEY = "api_key";
+
+        // Create bundle and add it some data
+        Bundle bundle = new Bundle();
+        bundle.putString(EXTRA_API_KEY, api_key);
+        frag.setArguments(bundle);
+
+        return(frag);
     }
 
     @Override

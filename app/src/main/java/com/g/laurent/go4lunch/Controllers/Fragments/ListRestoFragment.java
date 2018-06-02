@@ -50,6 +50,20 @@ public class ListRestoFragment extends BaseRestoFragment implements ListViewAdap
         // Required empty public constructor
     }
 
+    public static ListRestoFragment newInstance(String api_key) {
+
+        // Create new fragment
+        ListRestoFragment frag = new ListRestoFragment();
+        String EXTRA_API_KEY = "api_key";
+
+        // Create bundle and add it some data
+        Bundle bundle = new Bundle();
+        bundle.putString(EXTRA_API_KEY, api_key);
+        frag.setArguments(bundle);
+
+        return(frag);
+    }
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -66,7 +80,7 @@ public class ListRestoFragment extends BaseRestoFragment implements ListViewAdap
         current_location =new LatLng(48.866667,2.333333);
         String radius = sharedPreferences.getString(EXTRA_PREF_RADIUS,"500");
         String type = sharedPreferences.getString(EXTRA_PREF_TYPE_PLACE,"restaurant");
-        String api_key = getResources().getString(R.string.google_maps_key);
+        String api_key = getResources().getString(R.string.google_maps_key2);
 
         System.out.println("eee api_key=" + api_key);
 

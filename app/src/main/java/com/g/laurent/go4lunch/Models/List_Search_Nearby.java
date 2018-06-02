@@ -27,19 +27,19 @@ public class List_Search_Nearby {
     public List_Search_Nearby(String api_key, LatLng latLng, String radius, String type, MapsFragment mapsFragment) {
         this.mapsFragment=mapsFragment;
         list_places_nearby = new ArrayList<>();
-        launch_request_search_nearby_places(api_key, latLng, radius, type, CALLBACK_MAPS_FRAGMENT);
+      //  launch_request_search_nearby_places(api_key, latLng, radius, type, CALLBACK_MAPS_FRAGMENT);
     }
 
     public List_Search_Nearby(String api_key, LatLng latLng, String radius, String type, ListRestoFragment listRestoFragment) {
 
         this.listRestoFragment=listRestoFragment;
         list_places_nearby = new ArrayList<>();
-        launch_request_search_nearby_places(api_key,latLng, radius, type,CALLBACK_LIST_RESTO_FRAGMENT);
+      //  launch_request_search_nearby_places(api_key,latLng, radius, type,CALLBACK_LIST_RESTO_FRAGMENT);
     }
 
     public List_Search_Nearby(String api_key, LatLng latLng, String radius, String type) {
         list_places_nearby = new ArrayList<>();
-        launch_request_search_nearby_places(api_key, latLng, radius, type,null);
+       // launch_request_search_nearby_places(api_key, latLng, radius, type,null);
     }
 
     private void build_list_places_nearby(DetailsPlace detailsPlace){

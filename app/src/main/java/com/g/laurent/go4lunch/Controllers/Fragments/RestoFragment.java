@@ -9,7 +9,7 @@ import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.app.Fragment;
+import android.support.v4.app.Fragment;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.graphics.drawable.DrawableCompat;
@@ -22,13 +22,13 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import com.bumptech.glide.Glide;
 import com.g.laurent.go4lunch.Models.Callback_resto_fb;
 import com.g.laurent.go4lunch.Models.Place_Nearby;
 import com.g.laurent.go4lunch.Models.Workmate;
 import com.g.laurent.go4lunch.R;
 import com.g.laurent.go4lunch.Utils.Firebase_recover;
 import com.g.laurent.go4lunch.Utils.Firebase_update;
-import com.g.laurent.go4lunch.Views.GlideApp;
 import com.g.laurent.go4lunch.Views.Resto_Details.WorkmatesViewAdapter;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -77,7 +77,7 @@ public class RestoFragment extends BaseRestoFragment {
         mCurrentUser = FirebaseAuth.getInstance().getCurrentUser();
         placeId = getArguments().getString(EXTRA_PLACE_ID,null);
         firebase_update = new Firebase_update(context,this);
-        api_key = context.getResources().getString(R.string.google_maps_key);
+        api_key = context.getResources().getString(R.string.google_maps_key2);
         resto = new Place_Nearby(api_key,placeId,this);
 
         return view;
@@ -137,7 +137,7 @@ public class RestoFragment extends BaseRestoFragment {
                 + "&key=" + api_key;
 
         // Load the image using Glide
-        GlideApp.with(getActivity().getApplicationContext())
+        Glide.with(getActivity().getApplicationContext())
                 .load(link)
                 .into(picture_resto);
 

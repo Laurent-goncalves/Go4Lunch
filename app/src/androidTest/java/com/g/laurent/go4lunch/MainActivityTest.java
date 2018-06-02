@@ -186,7 +186,7 @@ public class MainActivityTest {
                                         withClassName(is("android.widget.LinearLayout")),
                                         0),
                                 2)));
-        circleImageView.perform(scrollTo(), click());
+        circleImageView.perform(click());
 
         waiting_time(8000);
         Firebase_recover firebase_recover = new Firebase_recover(mActivityTestRule.getActivity().getApplicationContext(),

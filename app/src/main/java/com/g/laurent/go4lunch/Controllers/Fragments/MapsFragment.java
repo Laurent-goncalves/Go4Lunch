@@ -3,6 +3,7 @@ package com.g.laurent.go4lunch.Controllers.Fragments;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -47,6 +48,20 @@ public class MapsFragment extends BaseRestoFragment  {
         // Required empty public constructor
     }
 
+    public static MapsFragment newInstance(String api_key) {
+
+        // Create new fragment
+        MapsFragment frag = new MapsFragment();
+        String EXTRA_API_KEY = "api_key";
+
+        // Create bundle and add it some data
+        Bundle bundle = new Bundle();
+        bundle.putString(EXTRA_API_KEY, api_key);
+        frag.setArguments(bundle);
+
+        return(frag);
+    }
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -55,7 +70,7 @@ public class MapsFragment extends BaseRestoFragment  {
         View view =inflater.inflate(R.layout.fragment_maps, container, false);
         ButterKnife.bind(this,view);
         SharedPreferences sharedPreferences = getActivity().getSharedPreferences(EXTRA_PREFERENCES, MODE_PRIVATE);
-        mMapView.onCreate(savedInstanceState);
+        //mMapView.onCreate(savedInstanceState);
         context = getActivity().getApplicationContext();
 
         // Recover list of restos nearby

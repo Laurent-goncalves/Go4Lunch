@@ -8,13 +8,12 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import com.bumptech.glide.Glide;
 import com.g.laurent.go4lunch.Models.Place_Nearby;
 import com.g.laurent.go4lunch.Models.Workmate;
 import com.g.laurent.go4lunch.R;
 import com.g.laurent.go4lunch.Utils.TimeCalculation;
-import com.g.laurent.go4lunch.Views.GlideApp;
 import com.google.android.gms.maps.model.LatLng;
-import com.google.firebase.storage.FirebaseStorage;
 import java.lang.ref.WeakReference;
 import java.util.List;
 import butterknife.BindView;
@@ -133,7 +132,7 @@ public class RestoViewHolder extends RecyclerView.ViewHolder implements View.OnC
                 + "&key=" + context.getResources().getString(R.string.google_maps_key);
 
         // Load the image using Glide
-        GlideApp.with(view)
+        Glide.with(view)
                     .load(link)
                     .into(picture_resto);
     }

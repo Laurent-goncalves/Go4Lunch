@@ -7,18 +7,23 @@ import android.app.SearchManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.ColorStateList;
+import android.graphics.Color;
+import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
 import android.os.Bundle;
+import android.support.design.widget.TabLayout;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.graphics.drawable.DrawableCompat;
 import android.support.v4.view.GravityCompat;
+import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -27,7 +32,6 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.SearchView;
 import android.widget.TextView;
-
 import com.bumptech.glide.Glide;
 import com.firebase.ui.auth.AuthUI;
 import com.g.laurent.go4lunch.Controllers.Fragments.ListMatesFragment;
@@ -41,7 +45,7 @@ import com.g.laurent.go4lunch.Models.Place_Nearby;
 import com.g.laurent.go4lunch.R;
 import com.g.laurent.go4lunch.Utils.Firebase_recover;
 import com.g.laurent.go4lunch.Utils.Firebase_update;
-import com.g.laurent.go4lunch.Views.GlideApp;
+import com.g.laurent.go4lunch.Views.MultiFragAdapter;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.FirebaseApp;
@@ -49,6 +53,8 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import java.util.Calendar;
 import java.util.List;
+import java.util.Objects;
+
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
@@ -78,16 +84,14 @@ public class MultiActivity extends AppCompatActivity implements AlarmReceiver.ca
     private String api_key;
     private FirebaseUser mCurrentUser;
     private ListRestoFragment listRestoFragment;
-    @BindView(R.id.map_view_button) Button buttonMap;
-    @BindView(R.id.list_view_button) Button buttonList;
-    @BindView(R.id.workmates_button) Button buttonMates;
     @BindView(R.id.activity_main_drawer_layout) DrawerLayout drawerLayout;
     @BindView(R.id.activity_main_nav_view) NavigationView navigationView;
     @BindView(R.id.activity_main_toolbar) Toolbar toolbar;
     private ImageView picture_user;
     private TextView name_user;
     private TextView email_user;
-   // @BindView(R.id.current_user_email_drawer)
+    private TabLayout tabs;
+    private MultiFragAdapter mPageAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -104,7 +108,7 @@ public class MultiActivity extends AppCompatActivity implements AlarmReceiver.ca
         if(mCurrentUser!=null)
             firebase_update.create_new_user_firebase(mCurrentUser);
 
-        api_key=getResources().getString(R.string.google_maps_key);
+        api_key=getResources().getString(R.string.google_maps_key2);
 
         mCallback_detailResto = this;
         //lastKnownPlace=findLastPlaceHighestLikelihood(savedInstanceState);
@@ -113,12 +117,61 @@ public class MultiActivity extends AppCompatActivity implements AlarmReceiver.ca
         bundle.putDouble(EXTRA_LAT_CURRENT,48.866667);
         bundle.putDouble(EXTRA_LONG_CURRENT,2.333333);
 
-        this.configure_tabs();
         this.configureDrawerLayout();
         this.configureNavigationView();
         //configureAlarmManager();
+        configureViewPagerAndTabs();
 
-        configure_and_show_MapsFragment();
+    }
+
+    private void configureViewPagerAndTabs(){
+
+        // Get ViewPager from layout
+        ViewPager pager = (ViewPager) findViewById(R.id.viewpager);
+
+        mPageAdapter = new MultiFragAdapter(getSupportFragmentManager(), api_key,getApplicationContext());
+        pager.setAdapter(mPageAdapter);
+
+        // Get TabLayout from layout
+        tabs= (TabLayout)findViewById(R.id.activity_multi_tabs);
+        tabs.setupWithViewPager(pager);
+
+        // Glue TabLayout and ViewPager together
+        configure_tabs();
+
+        // Design purpose. Tabs have the same width
+        tabs.setTabMode(TabLayout.MODE_FIXED);
+    }
+
+    private void configure_tabs(){
+
+        // Initialize tabs
+        tabs.getTabAt(0).setIcon(R.drawable.baseline_map_white_24);
+        tabs.getTabAt(0).getIcon().setColorFilter(getResources().getColor(R.color.colorIconSelected),PorterDuff.Mode.SRC_IN);
+        tabs.getTabAt(1).setIcon(R.drawable.baseline_view_list_white_24);
+        tabs.getTabAt(1).getIcon().setColorFilter(getResources().getColor(R.color.colorIconNotSelected),PorterDuff.Mode.SRC_IN);
+        tabs.getTabAt(2).setIcon(R.drawable.baseline_people_white_24);
+        tabs.getTabAt(2).getIcon().setColorFilter(getResources().getColor(R.color.colorIconNotSelected),PorterDuff.Mode.SRC_IN);
+
+
+        // Set on Tab selected listener
+        tabs.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
+          @Override
+          public void onTabSelected(TabLayout.Tab tab) {
+              if(tab.getIcon()!=null)
+              tab.getIcon().setColorFilter(getResources().getColor(R.color.colorIconSelected),PorterDuff.Mode.SRC_IN);
+          }
+
+          @Override
+          public void onTabUnselected(TabLayout.Tab tab) {
+              if(tab.getIcon()!=null)
+              tab.getIcon().setColorFilter(getResources().getColor(R.color.colorIconNotSelected), PorterDuff.Mode.SRC_IN);
+          }
+
+          @Override
+          public void onTabReselected(TabLayout.Tab tab) {
+          }
+      });
     }
 
     // ---------------------------------------------------------------------------------
@@ -151,38 +204,6 @@ public class MultiActivity extends AppCompatActivity implements AlarmReceiver.ca
     // -------------------         CONFIGURATION OF FRAGMENTS         ------------------
     // ---------------------------------------------------------------------------------
 
-    public void configure_and_show_listmatesfragment(){
-        configureToolBar("available workmates",true);
-        ListMatesFragment listMatesFragment = new ListMatesFragment();
-        FragmentTransaction fragmentTransaction = getFragmentManager().beginTransaction();
-        fragmentTransaction.replace(R.id.fragment_map_view, listMatesFragment);
-        fragmentTransaction.commit();
-    }
-
-    public void configure_and_show_MapsFragment(){
-
-        // Create new bundle
-        bundle.putString(EXTRA_API_KEY,api_key);
-
-        configureToolBar("I'm hungry!",true);
-
-        MapsFragment mapsFragment = new MapsFragment();
-        mapsFragment.setArguments(bundle);
-        FragmentTransaction fragmentTransaction = getFragmentManager().beginTransaction();
-        fragmentTransaction.replace(R.id.fragment_map_view, mapsFragment);
-        fragmentTransaction.commit();
-    }
-
-    public void configure_and_show_ListRestoFragment(){
-
-        configureToolBar("I'm hungry!",true);
-        listRestoFragment = new ListRestoFragment();
-        listRestoFragment.setArguments(bundle);
-        FragmentTransaction fragmentTransaction = getFragmentManager().beginTransaction();
-        fragmentTransaction.replace(R.id.fragment_map_view, listRestoFragment);
-        fragmentTransaction.commit();
-    }
-
     public void configure_and_show_settings_fragment(){
         configureToolBar("Settings",true);
         Intent intent = new Intent(this,SettingActivity.class);
@@ -206,7 +227,7 @@ public class MultiActivity extends AppCompatActivity implements AlarmReceiver.ca
 
         // Replace whatever is in the fragment_container view with this fragment,
         // and add the transaction to the back stack if needed
-        fragmentTransaction.replace(R.id.fragment_map_view, restoFragment);
+     //   fragmentTransaction.replace(R.id.fragment_map_view, restoFragment);
         fragmentTransaction.addToBackStack(null);
 
         // Commit the transaction
@@ -333,74 +354,6 @@ public class MultiActivity extends AppCompatActivity implements AlarmReceiver.ca
     // -------------------------------------- CONFIGURE TABS ----------------------------------------------
     // ----------------------------------------------------------------------------------------------------
 
-    private void configure_tabs(){
-
-        BUTTON_SELECTED=BUTTON_MAP_SELECTED;
-        setButtonAsSelected(true, buttonMap);
-        setButtonAsSelected(false, buttonList);
-        setButtonAsSelected(false, buttonMates);
-
-        buttonMap.setOnClickListener(v -> {
-
-            if(!BUTTON_SELECTED.equals(BUTTON_MAP_SELECTED)) {
-                setButtonAsSelected(true, buttonMap);
-                setButtonAsSelected(false, buttonList);
-                setButtonAsSelected(false, buttonMates);
-                BUTTON_SELECTED=BUTTON_MAP_SELECTED;
-                configure_and_show_MapsFragment();
-            }
-        });
-
-        buttonList.setOnClickListener(v -> {
-
-            if(!BUTTON_SELECTED.equals(BUTTON_LIST_SELECTED)) {
-                setButtonAsSelected(false, buttonMap);
-                setButtonAsSelected(true, buttonList);
-                setButtonAsSelected(false, buttonMates);
-                BUTTON_SELECTED=BUTTON_LIST_SELECTED;
-                configure_and_show_ListRestoFragment();
-            }
-        });
-
-        buttonMates.setOnClickListener(v -> {
-
-            if(!BUTTON_SELECTED.equals(BUTTON_MATES_SELECTED)) {
-                setButtonAsSelected(false, buttonMap);
-                setButtonAsSelected(false, buttonList);
-                setButtonAsSelected(true, buttonMates);
-                BUTTON_SELECTED=BUTTON_MATES_SELECTED;
-                configure_and_show_listmatesfragment();
-            }
-        });
-
-    }
-
-    private void setButtonAsSelected(Boolean select, Button button){
-
-        if(select) {
-
-            button.setTextColor(getResources().getColor(R.color.colorIconSelected));
-
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M)
-                button.setCompoundDrawableTintList(ColorStateList.valueOf(ContextCompat.getColor(getApplicationContext(),(R.color.colorIconSelected))));
-            else {
-                Drawable[] wrapDrawable = button.getCompoundDrawables();
-                DrawableCompat.setTint(wrapDrawable[0], getResources().getColor(R.color.colorIconSelected));
-            }
-
-        } else {
-
-            button.setTextColor(getResources().getColor(R.color.colorIconNotSelected));
-
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M)
-                button.setCompoundDrawableTintList(ColorStateList.valueOf(ContextCompat.getColor(getApplicationContext(),(R.color.colorIconNotSelected))));
-            else {
-                Drawable[] wrapDrawable = button.getCompoundDrawables();
-                DrawableCompat.setTint(wrapDrawable[0], getResources().getColor(R.color.colorIconNotSelected));
-            }
-        }
-    }
-
     @Override
     public void onSaveInstanceState(Bundle outState) {
         if(lastKnownPlace!=null){
@@ -454,4 +407,37 @@ public class MultiActivity extends AppCompatActivity implements AlarmReceiver.ca
 
         getNumberResults();
 
+    }*/
+
+
+  /*  public void configure_and_show_listmatesfragment(){
+        configureToolBar("available workmates",true);
+        ListMatesFragment listMatesFragment = new ListMatesFragment();
+        FragmentTransaction fragmentTransaction = getFragmentManager().beginTransaction();
+        fragmentTransaction.replace(R.id.fragment_map_view, listMatesFragment);
+        fragmentTransaction.commit();
+    }
+
+    public void configure_and_show_MapsFragment(){
+
+        // Create new bundle
+        bundle.putString(EXTRA_API_KEY,api_key);
+
+        configureToolBar("I'm hungry!",true);
+
+        MapsFragment mapsFragment = new MapsFragment();
+        mapsFragment.setArguments(bundle);
+        FragmentTransaction fragmentTransaction = getFragmentManager().beginTransaction();
+        fragmentTransaction.replace(R.id.fragment_map_view, mapsFragment);
+        fragmentTransaction.commit();
+    }
+
+    public void configure_and_show_ListRestoFragment(){
+
+        configureToolBar("I'm hungry!",true);
+        listRestoFragment = new ListRestoFragment();
+        listRestoFragment.setArguments(bundle);
+        FragmentTransaction fragmentTransaction = getFragmentManager().beginTransaction();
+        fragmentTransaction.replace(R.id.fragment_map_view, listRestoFragment);
+        fragmentTransaction.commit();
     }*/
