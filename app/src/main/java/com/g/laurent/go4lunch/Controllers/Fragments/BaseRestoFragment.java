@@ -387,12 +387,12 @@ public abstract class BaseRestoFragment extends Fragment {
 
         // This makes sure that the container activity has implemented
         // the callback interface. If not, it throws an exception
-        try {
+      /*  try {
             mCallback_detailResto = (Callback_DetailResto) activity;
         } catch (ClassCastException e) {
             throw new ClassCastException(activity.toString()
                     + " must implement Callback_DetailResto");
-        }
+        }*/
 
         try {
             mCallback_resto_fb = (Callback_resto_fb) activity;

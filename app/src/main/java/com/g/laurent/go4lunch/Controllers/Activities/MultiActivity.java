@@ -1,45 +1,33 @@
 package com.g.laurent.go4lunch.Controllers.Activities;
 
 import android.app.AlarmManager;
-import android.app.FragmentTransaction;
 import android.app.PendingIntent;
 import android.app.SearchManager;
 import android.content.Context;
 import android.content.Intent;
-import android.content.res.ColorStateList;
-import android.graphics.Color;
 import android.graphics.PorterDuff;
-import android.graphics.drawable.Drawable;
-import android.os.Build;
 import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
 import android.os.Bundle;
 import android.support.design.widget.TabLayout;
-import android.support.v4.content.ContextCompat;
-import android.support.v4.graphics.drawable.DrawableCompat;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.SearchView;
 import android.widget.TextView;
 import com.bumptech.glide.Glide;
 import com.firebase.ui.auth.AuthUI;
-import com.g.laurent.go4lunch.Controllers.Fragments.ListMatesFragment;
 import com.g.laurent.go4lunch.Controllers.Fragments.ListRestoFragment;
-import com.g.laurent.go4lunch.Controllers.Fragments.MapsFragment;
-import com.g.laurent.go4lunch.Controllers.Fragments.RestoFragment;
 import com.g.laurent.go4lunch.Models.AlarmReceiver;
-import com.g.laurent.go4lunch.Models.Callback_DetailResto;
 import com.g.laurent.go4lunch.Models.Callback_resto_fb;
 import com.g.laurent.go4lunch.Models.Place_Nearby;
 import com.g.laurent.go4lunch.R;
@@ -54,44 +42,24 @@ import com.google.firebase.auth.FirebaseUser;
 import java.util.Calendar;
 import java.util.List;
 import java.util.Objects;
-
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
 
 public class MultiActivity extends AppCompatActivity implements AlarmReceiver.callbackAlarm,
-        Callback_DetailResto, Callback_resto_fb, NavigationView.OnNavigationItemSelectedListener {
+        Callback_resto_fb, NavigationView.OnNavigationItemSelectedListener {
 
-    /** The activity MultiActivity contains :
-     *     - the MapsFragment to display the mapView
-     *     - the ListRestoFragment to display the list of restaurant
-     *     - the RestoFragment to show the detailed view of a restaurant
-     *     **/
-
-    private LatLng currentPlaceLatLng;
-    private Bundle bundle;
     private LatLng lastKnownPlace;
     private final static String EXTRA_LAT_CURRENT = "latitude_current_location";
     private final static String EXTRA_LONG_CURRENT = "longitude_current_location";
-    private final static String BUTTON_MAP_SELECTED = "button_map_selected";
-    private final static String BUTTON_LIST_SELECTED = "button_list_view_selected";
-    private final static String BUTTON_MATES_SELECTED = "button_workmates_selected";
-    private final static String EXTRA_PLACE_ID = "placeId_resto";
     private static final int SIGN_OUT_TASK = 10;
-    private String BUTTON_SELECTED;
-    private Callback_DetailResto mCallback_detailResto;
     private final String EXTRA_API_KEY = "api_key";
     private String api_key;
     private FirebaseUser mCurrentUser;
-    private ListRestoFragment listRestoFragment;
     @BindView(R.id.activity_main_drawer_layout) DrawerLayout drawerLayout;
     @BindView(R.id.activity_main_nav_view) NavigationView navigationView;
     @BindView(R.id.activity_main_toolbar) Toolbar toolbar;
-    private ImageView picture_user;
-    private TextView name_user;
-    private TextView email_user;
     private TabLayout tabs;
-    private MultiFragAdapter mPageAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -110,10 +78,9 @@ public class MultiActivity extends AppCompatActivity implements AlarmReceiver.ca
 
         api_key=getResources().getString(R.string.google_maps_key2);
 
-        mCallback_detailResto = this;
         //lastKnownPlace=findLastPlaceHighestLikelihood(savedInstanceState);
-        currentPlaceLatLng=new LatLng(48.866667,2.333333);
-        bundle = new Bundle();
+
+        Bundle bundle = new Bundle();
         bundle.putDouble(EXTRA_LAT_CURRENT,48.866667);
         bundle.putDouble(EXTRA_LONG_CURRENT,2.333333);
 
@@ -122,18 +89,23 @@ public class MultiActivity extends AppCompatActivity implements AlarmReceiver.ca
         //configureAlarmManager();
         configureViewPagerAndTabs();
 
+        SwipeRefreshLayout swipeRefreshLayout = this.findViewById(R.id.swiperefresh);
+        swipeRefreshLayout.setOnRefreshListener(
+                this::configureViewPagerAndTabs
+        );
+
     }
 
     private void configureViewPagerAndTabs(){
 
         // Get ViewPager from layout
-        ViewPager pager = (ViewPager) findViewById(R.id.viewpager);
+        ViewPager pager = findViewById(R.id.viewpager);
 
-        mPageAdapter = new MultiFragAdapter(getSupportFragmentManager(), api_key,getApplicationContext());
-        pager.setAdapter(mPageAdapter);
+        MultiFragAdapter pageAdapter = new MultiFragAdapter(getSupportFragmentManager(), api_key, getApplicationContext());
+        pager.setAdapter(pageAdapter);
 
         // Get TabLayout from layout
-        tabs= (TabLayout)findViewById(R.id.activity_multi_tabs);
+        tabs= findViewById(R.id.activity_multi_tabs);
         tabs.setupWithViewPager(pager);
 
         // Glue TabLayout and ViewPager together
@@ -146,13 +118,15 @@ public class MultiActivity extends AppCompatActivity implements AlarmReceiver.ca
     private void configure_tabs(){
 
         // Initialize tabs
-        tabs.getTabAt(0).setIcon(R.drawable.baseline_map_white_24);
-        tabs.getTabAt(0).getIcon().setColorFilter(getResources().getColor(R.color.colorIconSelected),PorterDuff.Mode.SRC_IN);
-        tabs.getTabAt(1).setIcon(R.drawable.baseline_view_list_white_24);
-        tabs.getTabAt(1).getIcon().setColorFilter(getResources().getColor(R.color.colorIconNotSelected),PorterDuff.Mode.SRC_IN);
-        tabs.getTabAt(2).setIcon(R.drawable.baseline_people_white_24);
-        tabs.getTabAt(2).getIcon().setColorFilter(getResources().getColor(R.color.colorIconNotSelected),PorterDuff.Mode.SRC_IN);
+        Objects.requireNonNull(tabs.getTabAt(0)).setIcon(R.drawable.baseline_map_white_24);
+        Objects.requireNonNull(Objects.requireNonNull(tabs.getTabAt(0)).getIcon()).setColorFilter(getResources().getColor(R.color.colorIconSelected), PorterDuff.Mode.SRC_IN);
+        Objects.requireNonNull(tabs.getTabAt(1)).setIcon(R.drawable.baseline_view_list_white_24);
+        Objects.requireNonNull(Objects.requireNonNull(tabs.getTabAt(1)).getIcon()).setColorFilter(getResources().getColor(R.color.colorIconNotSelected),PorterDuff.Mode.SRC_IN);
+        Objects.requireNonNull(tabs.getTabAt(2)).setIcon(R.drawable.baseline_people_white_24);
+        Objects.requireNonNull(Objects.requireNonNull(tabs.getTabAt(2)).getIcon()).setColorFilter(getResources().getColor(R.color.colorIconNotSelected),PorterDuff.Mode.SRC_IN);
 
+        // configure toolbar
+        configureToolBar("I'm hungry",true);
 
         // Set on Tab selected listener
         tabs.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
@@ -160,6 +134,11 @@ public class MultiActivity extends AppCompatActivity implements AlarmReceiver.ca
           public void onTabSelected(TabLayout.Tab tab) {
               if(tab.getIcon()!=null)
               tab.getIcon().setColorFilter(getResources().getColor(R.color.colorIconSelected),PorterDuff.Mode.SRC_IN);
+
+              if(Objects.requireNonNull(tab.getText()).equals(getResources().getString(R.string.workmates)))
+                  configureToolBar("Available workmates",true);
+              else
+                  configureToolBar("I'm hungry!",true);
           }
 
           @Override
@@ -208,30 +187,6 @@ public class MultiActivity extends AppCompatActivity implements AlarmReceiver.ca
         configureToolBar("Settings",true);
         Intent intent = new Intent(this,SettingActivity.class);
         startActivity(intent);
-    }
-
-    @Override
-    public void configure_and_show_restofragment(String placeId) {
-
-        // Create new bundle
-        Bundle bundle = new Bundle();
-        bundle.putString(EXTRA_PLACE_ID,placeId);
-
-        // Create new fragment and transaction
-        RestoFragment restoFragment = new RestoFragment();
-        restoFragment.setArguments(bundle);
-        FragmentTransaction fragmentTransaction = getFragmentManager().beginTransaction();
-
-        // Configuration toolbar
-        configureToolBar(null,false);
-
-        // Replace whatever is in the fragment_container view with this fragment,
-        // and add the transaction to the back stack if needed
-     //   fragmentTransaction.replace(R.id.fragment_map_view, restoFragment);
-        fragmentTransaction.addToBackStack(null);
-
-        // Commit the transaction
-        fragmentTransaction.commit();
     }
 
     // ---------------------------------------------------------------------------------
@@ -295,9 +250,9 @@ public class MultiActivity extends AppCompatActivity implements AlarmReceiver.ca
 
         if(mCurrentUser!=null){
 
-            picture_user = navigationView.getHeaderView(0).findViewById(R.id.current_user_image_drawer);
-            name_user = navigationView.getHeaderView(0).findViewById(R.id.current_user_name_drawer);
-            email_user = navigationView.getHeaderView(0).findViewById(R.id.current_user_email_drawer);
+            ImageView picture_user = navigationView.getHeaderView(0).findViewById(R.id.current_user_image_drawer);
+            TextView name_user = navigationView.getHeaderView(0).findViewById(R.id.current_user_name_drawer);
+            TextView email_user = navigationView.getHeaderView(0).findViewById(R.id.current_user_email_drawer);
 
             name_user.setText(mCurrentUser.getDisplayName());
             email_user.setText(mCurrentUser.getEmail());
@@ -373,9 +328,14 @@ public class MultiActivity extends AppCompatActivity implements AlarmReceiver.ca
 
     }
 
-    public ListRestoFragment getListRestoFragment() {
-        return listRestoFragment;
+    @Override
+    protected void onRestart() {
+        super.onRestart();
+        configureViewPagerAndTabs();
     }
+
+
+
 
 /*
     private void configureOnClickRecyclerView(){

@@ -7,6 +7,7 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.content.ContextCompat;
 import android.util.Log;
+import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -30,8 +31,11 @@ public class Google_Maps_Utils extends FragmentActivity implements GoogleApiClie
     private LatLng lastKnownPlace;
     private Place currentPlace;
     private LatLng currentPlaceLatLng;
+    private Context context;
 
     public Google_Maps_Utils(Context context) {
+
+        this.context=context;
 
         mGoogleApiClient = new GoogleApiClient
                 .Builder(context)
@@ -42,9 +46,25 @@ public class Google_Maps_Utils extends FragmentActivity implements GoogleApiClie
 
     }
 
-    public GoogleApiClient getGoogleApiClient() {
-        return mGoogleApiClient;
+
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode,
+                                           @NonNull String permissions[],
+                                           @NonNull int[] grantResults) {
+        mLocationPermissionGranted = false;
+        switch (requestCode) {
+            case PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION: {
+                // If request is cancelled, the result arrays are empty.
+                if (grantResults.length > 0
+                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    mLocationPermissionGranted = true;
+                }
+            }
+        }
+        updateLocationUI();
     }
+
 
     public LatLng getNumberResults() {
 
@@ -100,26 +120,8 @@ public class Google_Maps_Utils extends FragmentActivity implements GoogleApiClie
         return placeHighestLikelihood;
     }
 
-  /*  private LatLng findLastPlaceHighestLikelihood(Bundle savedInstanceState) {
-
-        float latitude=0;
-        float longitude=0;
-
-        if(savedInstanceState!=null){
-            latitude = savedInstanceState.getFloat(EXTRA_LAT_CURRENT,0);
-            longitude = savedInstanceState.getFloat(EXTRA_LONG_CURRENT,0);
-        }
-
-        LatLng lastLatLng = null;
-
-        if(latitude!=0 && longitude!=0 )
-            lastLatLng = new LatLng(latitude,longitude);
-
-        return lastLatLng;
-    }*/
-
     private void updateLocationUI() {
-     /*   if (mMap == null) {
+    /*    if (mMap == null) {
             return;
         }
         try {
@@ -154,8 +156,33 @@ public class Google_Maps_Utils extends FragmentActivity implements GoogleApiClie
         }
     }
 
+    public GoogleApiClient getGoogleApiClient() {
+        return mGoogleApiClient;
+    }
+
     @Override
     public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
-
+        Toast toast = Toast.makeText(context,"Problem with geolocalization",Toast.LENGTH_SHORT);
+        toast.show();
     }
 }
+
+
+
+  /*  private LatLng findLastPlaceHighestLikelihood(Bundle savedInstanceState) {
+
+        float latitude=0;
+        float longitude=0;
+
+        if(savedInstanceState!=null){
+            latitude = savedInstanceState.getFloat(EXTRA_LAT_CURRENT,0);
+            longitude = savedInstanceState.getFloat(EXTRA_LONG_CURRENT,0);
+        }
+
+        LatLng lastLatLng = null;
+
+        if(latitude!=0 && longitude!=0 )
+            lastLatLng = new LatLng(latitude,longitude);
+
+        return lastLatLng;
+    }*/

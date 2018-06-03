@@ -9,7 +9,7 @@ import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
+import android.app.Fragment;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.graphics.drawable.DrawableCompat;
@@ -23,7 +23,6 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import com.bumptech.glide.Glide;
-import com.g.laurent.go4lunch.Models.Callback_resto_fb;
 import com.g.laurent.go4lunch.Models.Place_Nearby;
 import com.g.laurent.go4lunch.Models.Workmate;
 import com.g.laurent.go4lunch.R;
@@ -32,6 +31,7 @@ import com.g.laurent.go4lunch.Utils.Firebase_update;
 import com.g.laurent.go4lunch.Views.Resto_Details.WorkmatesViewAdapter;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import java.util.ArrayList;
 import java.util.List;
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -40,7 +40,7 @@ import de.hdodenhof.circleimageview.CircleImageView;
 /**
  * A simple {@link Fragment} subclass.
  */
-public class RestoFragment extends BaseRestoFragment {
+public class RestoFragment extends Fragment {
 
     @BindView(R.id.picture_of_restaurant) ImageView picture_resto;
     @BindView(R.id.name_resto) TextView name_resto;
@@ -84,12 +84,25 @@ public class RestoFragment extends BaseRestoFragment {
     }
 
     public void recover_list_workmates() {
+
         Firebase_recover firebase_recover = new Firebase_recover(context,this);
         firebase_recover.recover_list_workmates();
     }
 
-    public void set_list_of_workmates(List<Workmate> list_workmates) {
-        this.list_workmates=list_workmates;
+    public void set_list_of_workmates(List<Workmate> list_workmates_resto) {
+
+        this.list_workmates = new ArrayList<>();
+
+        // get list of workmates which chose this restaurant
+        for(Workmate workmate : list_workmates_resto){
+            if(workmate!=null){
+                if(workmate.getResto_id()!=null){
+                    if(workmate.getResto_id().equals(placeId))
+                        this.list_workmates.add(workmate);
+                }
+            }
+        }
+
         configure_views_with_resto();
     }
 
@@ -113,17 +126,6 @@ public class RestoFragment extends BaseRestoFragment {
             configure_buttons_call_and_website();
             configure_button_like();
             configure_button_choose_resto();
-        }
-    }
-
-    @Override
-    public void onAttach(Activity activity) {
-        super.onAttach(activity);
-        try {
-            mCallback_resto_fb = (Callback_resto_fb) activity;
-        } catch (ClassCastException e) {
-            throw new ClassCastException(activity.toString()
-                    + " must implement Callback_DetailResto");
         }
     }
 
@@ -297,16 +299,12 @@ public class RestoFragment extends BaseRestoFragment {
 
     private void configure_button_choose_resto() {
 
-        System.out.println("eee configure_button_choose_resto");
-
         // Button choose resto
         if(did_I_choose_resto(list_workmates)) {
-            System.out.println("resto chosen");
             setRestoChosen(true);
             button_valid.setEnabled(false);
         } else {
             setRestoChosen(false);
-            System.out.println("configure_button_choose_resto");
             setOnClickListenerButtonRestoValid();
         }
     }

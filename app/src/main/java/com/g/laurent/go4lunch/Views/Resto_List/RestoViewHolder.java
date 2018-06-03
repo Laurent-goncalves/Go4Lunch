@@ -2,6 +2,7 @@ package com.g.laurent.go4lunch.Views.Resto_List;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.content.Intent;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
@@ -9,6 +10,8 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import com.bumptech.glide.Glide;
+import com.g.laurent.go4lunch.Controllers.Activities.MultiActivity;
+import com.g.laurent.go4lunch.Controllers.Activities.RestoActivity;
 import com.g.laurent.go4lunch.Models.Place_Nearby;
 import com.g.laurent.go4lunch.Models.Workmate;
 import com.g.laurent.go4lunch.R;
@@ -35,6 +38,7 @@ public class RestoViewHolder extends RecyclerView.ViewHolder implements View.OnC
     private LatLng current_loc;
     private WeakReference<ListViewAdapter.Listener> callbackWeakRef;
     private Context context;
+    private final static String EXTRA_PLACE_ID = "placeId_resto";
 
     public RestoViewHolder(View itemView) {
         super(itemView);
@@ -218,10 +222,11 @@ public class RestoViewHolder extends RecyclerView.ViewHolder implements View.OnC
 
     @Override
     public void onClick(View v) {
-        ListViewAdapter.Listener callback = callbackWeakRef.get();
-        if (callback != null){
-            callback.onClickShowRestoDetails(place_nearby.getPlaceId());
-        }
+
+        Intent intent = new Intent(context,RestoActivity.class);
+        intent.putExtra(EXTRA_PLACE_ID,place_nearby.getPlaceId());
+        context.startActivity(intent);
+
     }
 }
 

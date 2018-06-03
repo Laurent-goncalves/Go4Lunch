@@ -1,9 +1,11 @@
 package com.g.laurent.go4lunch.Utils;
 
 import android.content.Context;
+import android.content.Intent;
 import android.provider.ContactsContract;
 
 import com.g.laurent.go4lunch.Controllers.Activities.MultiActivity;
+import com.g.laurent.go4lunch.Controllers.Activities.RestoActivity;
 import com.g.laurent.go4lunch.Controllers.Fragments.ListMatesFragment;
 import com.g.laurent.go4lunch.Controllers.Fragments.ListRestoFragment;
 import com.g.laurent.go4lunch.Controllers.Fragments.MapsFragment;
@@ -32,7 +34,9 @@ public class Firebase_recover {
     private final static String CALLBACK_LISTRESTOFRAGMENT = "callback_listrestofragment";
     private final static String CALLBACK_LISTMATESFRAGMENT = "callback_listmatesfragment";
     private final static String CALLBACK_MAPSFRAGMENT = "callback_mapsfragment";
+    private final static String EXTRA_PLACE_ID = "placeId_resto";
     private String callback;
+    private Context context;
 
     public Firebase_recover(Context context, ListRestoFragment listRestoFragment) {
         FirebaseApp.initializeApp(context);
@@ -69,6 +73,7 @@ public class Firebase_recover {
     public Firebase_recover(Context context, MultiActivity multiActivity, String userId) {
         FirebaseApp.initializeApp(context);
         this.multiActivity=multiActivity;
+        this.context = context;
         DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference();
         databaseReferenceWorkmates= databaseReference.child("workmates").child(userId).child("resto_id");
     }
@@ -170,8 +175,10 @@ public class Firebase_recover {
             @Override
             public void onDataChange(DataSnapshot data) {
                 if(data!=null) {
-                    if(multiActivity!=null)
-                        multiActivity.configure_and_show_restofragment((String) data.getValue());
+
+                    Intent intent = new Intent(context,RestoActivity.class);
+                    intent.putExtra(EXTRA_PLACE_ID,(String) data.getValue());
+                    context.startActivity(intent);
                 }
             }
 
@@ -213,7 +220,7 @@ public class Firebase_recover {
         return new Workmate(
                 (String) datas.child("name").getValue(),
                 (String) datas.child("id").getValue(),
-                (String) datas.child("photoUrl").getValue(),
+                (String) datas.child("photo_url").getValue(),
                 (Boolean) datas.child("chosen").getValue(),
                 (String) datas.child("resto_id").getValue(),
                 (String) datas.child("resto_name").getValue(),

@@ -50,10 +50,6 @@ public class Place_Nearby {
     public Place_Nearby(String api_key,String placeId, RestoFragment restofragment) {
         this.restofragment=restofragment;
         this.placeId=placeId;
-
-
-        System.out.println("eee Place_Nearby   constructor");
-
         disposable = Maps_API_stream.streamFetchgetDetailsPlaces(api_key, placeId)
                 .subscribeWith(getSubscriber());
     }

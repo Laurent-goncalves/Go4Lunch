@@ -15,6 +15,8 @@ import com.g.laurent.go4lunch.Utils.Firebase_recover;
 import com.g.laurent.go4lunch.Views.Resto_Details.WorkmatesViewAdapter;
 
 import java.util.List;
+import java.util.Objects;
+
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
@@ -53,7 +55,7 @@ public class ListMatesFragment extends Fragment {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_user, container, false);
         ButterKnife.bind(this,view);
-        context = getActivity().getApplicationContext();
+        context = Objects.requireNonNull(getActivity()).getApplicationContext();
 
         // Get list of workmates on firebase
         Firebase_recover firebase_recover = new Firebase_recover(context,this);

@@ -55,7 +55,8 @@
         <activity
             android:name=".Controllers.Activities.MultiActivity"
             android:label="@string/title_activity_maps" />
-        <activity android:name=".Controllers.Activities.SettingActivity"></activity>
+        <activity android:name=".Controllers.Activities.SettingActivity" />
+        <activity android:name=".Controllers.Activities.RestoActivity"></activity>
     </application>
 
 </manifest>

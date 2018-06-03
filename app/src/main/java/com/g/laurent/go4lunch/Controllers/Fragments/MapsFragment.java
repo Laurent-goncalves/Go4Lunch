@@ -13,6 +13,7 @@ import com.g.laurent.go4lunch.Models.Place_Nearby;
 import com.g.laurent.go4lunch.Models.Workmate;
 import com.g.laurent.go4lunch.R;
 import com.g.laurent.go4lunch.Utils.Firebase_recover;
+import com.g.laurent.go4lunch.Utils.Google_Maps_Utils;
 import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -70,8 +71,12 @@ public class MapsFragment extends BaseRestoFragment  {
         View view =inflater.inflate(R.layout.fragment_maps, container, false);
         ButterKnife.bind(this,view);
         SharedPreferences sharedPreferences = getActivity().getSharedPreferences(EXTRA_PREFERENCES, MODE_PRIVATE);
-        //mMapView.onCreate(savedInstanceState);
+        mMapView.onCreate(savedInstanceState);
         context = getActivity().getApplicationContext();
+
+        Google_Maps_Utils google_maps_utils = new Google_Maps_Utils(context);
+
+
 
         // Recover list of restos nearby
         if(getArguments()!=null) {
@@ -81,10 +86,10 @@ public class MapsFragment extends BaseRestoFragment  {
             String type = sharedPreferences.getString(EXTRA_PREF_TYPE_PLACE, "restaurant");
             String api_key = getArguments().getString(EXTRA_API_KEY, null);
 
-            if (api_key != null) {
-                System.out.println("eeee MAPSFRAGMENT api_key = "+api_key);
+            System.out.println("eee  currentPlaceLatLng=" + currentPlaceLatLng.toString());
+
+            if (api_key != null)
                 new List_Search_Nearby(api_key, currentPlaceLatLng, radius, type, this);
-            }
         }
 
         return view;
