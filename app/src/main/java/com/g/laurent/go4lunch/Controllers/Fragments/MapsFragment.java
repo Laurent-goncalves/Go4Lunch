@@ -86,8 +86,6 @@ public class MapsFragment extends BaseRestoFragment  {
             String type = sharedPreferences.getString(EXTRA_PREF_TYPE_PLACE, "restaurant");
             String api_key = getArguments().getString(EXTRA_API_KEY, null);
 
-            System.out.println("eee  currentPlaceLatLng=" + currentPlaceLatLng.toString());
-
             if (api_key != null)
                 new List_Search_Nearby(api_key, currentPlaceLatLng, radius, type, this);
         }
@@ -154,4 +152,10 @@ public class MapsFragment extends BaseRestoFragment  {
         launch_map_view();
     }
 
+    @Override
+    public void onResume() {
+        super.onResume();
+        if(firebase_recover!=null)
+            firebase_recover.recover_list_workmates();
+    }
 }

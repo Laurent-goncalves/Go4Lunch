@@ -30,6 +30,7 @@ public class ListMatesFragment extends Fragment {
     private WorkmatesViewAdapter adapter;
     private List<Workmate> list_workmates;
     private Context context;
+    private Firebase_recover firebase_recover;
 
     public ListMatesFragment() {
         // Required empty public constructor
@@ -58,7 +59,7 @@ public class ListMatesFragment extends Fragment {
         context = Objects.requireNonNull(getActivity()).getApplicationContext();
 
         // Get list of workmates on firebase
-        Firebase_recover firebase_recover = new Firebase_recover(context,this);
+        firebase_recover = new Firebase_recover(context,this);
         firebase_recover.recover_list_workmates();
 
         return view;
@@ -77,5 +78,12 @@ public class ListMatesFragment extends Fragment {
     public void set_list_of_workmates(List<Workmate> list_workmates){
         this.list_workmates=list_workmates;
         configure_recycler_view();
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        if(firebase_recover!=null)
+            firebase_recover.recover_list_workmates();
     }
 }

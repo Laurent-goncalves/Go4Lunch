@@ -60,6 +60,7 @@ public class MultiActivity extends AppCompatActivity implements AlarmReceiver.ca
     @BindView(R.id.activity_main_nav_view) NavigationView navigationView;
     @BindView(R.id.activity_main_toolbar) Toolbar toolbar;
     private TabLayout tabs;
+    private MultiFragAdapter pageAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -101,7 +102,7 @@ public class MultiActivity extends AppCompatActivity implements AlarmReceiver.ca
         // Get ViewPager from layout
         ViewPager pager = findViewById(R.id.viewpager);
 
-        MultiFragAdapter pageAdapter = new MultiFragAdapter(getSupportFragmentManager(), api_key, getApplicationContext());
+        pageAdapter = new MultiFragAdapter(getSupportFragmentManager(), api_key, getApplicationContext());
         pager.setAdapter(pageAdapter);
 
         // Get TabLayout from layout
@@ -328,16 +329,11 @@ public class MultiActivity extends AppCompatActivity implements AlarmReceiver.ca
 
     }
 
-    @Override
-    protected void onRestart() {
-        super.onRestart();
-        configureViewPagerAndTabs();
+    public MultiFragAdapter getPageAdapter() {
+        return pageAdapter;
     }
 
-
-
-
-/*
+    /*
     private void configureOnClickRecyclerView(){
         ItemClickSupport.addTo(recyclerView, R.layout.fragment_main_item)
                 .setOnItemClickListener(new ItemClickSupport.OnItemClickListener() {

@@ -12,9 +12,11 @@ import android.view.ViewParent;
 
 import com.g.laurent.go4lunch.Controllers.Activities.MultiActivity;
 import com.g.laurent.go4lunch.Controllers.Fragments.ListRestoFragment;
+import com.g.laurent.go4lunch.Controllers.Fragments.MapsFragment;
 import com.g.laurent.go4lunch.R;
 import com.g.laurent.go4lunch.Utils.Firebase_recover;
 import com.g.laurent.go4lunch.Utils.Firebase_update;
+import com.g.laurent.go4lunch.Views.MultiFragAdapter;
 
 import junit.framework.Assert;
 
@@ -24,6 +26,8 @@ import org.hamcrest.TypeSafeMatcher;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+
+import java.util.List;
 
 import static android.support.test.espresso.Espresso.onData;
 import static android.support.test.espresso.Espresso.onView;
@@ -47,138 +51,64 @@ public class MainActivityTest {
     public ActivityTestRule<MultiActivity> mActivityTestRule = new ActivityTestRule<>(MultiActivity.class);
 
     @Test
-    public void Test_navigation_between_menus() {
+    public void check_liked_and_chosen_resto() {
 
-        mActivityTestRule.getActivity().configure_and_show_MapsFragment();
-
-        // Click on List view menu
-        ViewInteraction appCompatButton2 = onView(
-                allOf(withId(R.id.list_view_button), withText("List View"),
-                        childAtPosition(
-                                childAtPosition(
-                                        withId(R.id.window_sign_in),
-                                        1),
-                                1),
-                        isDisplayed()));
-        appCompatButton2.perform(click());
-
-        // Added a sleep statement to match the app's execution delay.
-        // The recommended way to handle such scenarios is to use Espresso idling resources:
-        // https://google.github.io/android-testing-support-library/docs/espresso/idling-resource/index.html
-        try {
-            Thread.sleep(5000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-
-        // Click on menu workmates
-        ViewInteraction appCompatButton3 = onView(
-                allOf(withId(R.id.workmates_button), withText("Workmates"),
-                        childAtPosition(
-                                childAtPosition(
-                                        withId(R.id.window_sign_in),
-                                        1),
-                                2),
-                        isDisplayed()));
-        appCompatButton3.perform(click());
-
-        // Click on menu list view
-        ViewInteraction appCompatButton4 = onView(
-                allOf(withId(R.id.list_view_button), withText("List View"),
-                        childAtPosition(
-                                childAtPosition(
-                                        withId(R.id.window_sign_in),
-                                        1),
-                                1),
-                        isDisplayed()));
-        appCompatButton4.perform(click());
-
-        try {
-            Thread.sleep(5000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-
-        // Click on restaurant item in the list
-        onView(withId(R.id.list_view_resto))
-                .perform(RecyclerViewActions.actionOnItemAtPosition(0, click()));
-
-        // Click on menu workmates
-        ViewInteraction appCompatButton5 = onView(
-                allOf(withId(R.id.workmates_button), withText("Workmates"),
-                        childAtPosition(
-                                childAtPosition(
-                                        withId(R.id.window_sign_in),
-                                        1),
-                                2),
-                        isDisplayed()));
-        appCompatButton5.perform(click());
-
-        // Click to open naviation drawer
-        ViewInteraction appCompatImageButton = onView(
-                allOf(withContentDescription("Open navigation drawer"),
-                        childAtPosition(
-                                allOf(withId(R.id.activity_main_toolbar),
-                                        childAtPosition(
-                                                withClassName(is("android.widget.LinearLayout")),
-                                                0)),
-                                0),
-                        isDisplayed()));
-        appCompatImageButton.perform(click());
-
-        // Click on setting menu
-        ViewInteraction navigationMenuItemView = onView(
-                allOf(childAtPosition(
-                        allOf(withId(R.id.design_navigation_view),
-                                childAtPosition(
-                                        withId(R.id.activity_main_nav_view),
-                                        0)),
-                        3),
-                        isDisplayed()));
-        navigationMenuItemView.perform(click());
-
-        // Added a sleep statement to match the app's execution delay.
-        // The recommended way to handle such scenarios is to use Espresso idling resources:
-        // https://google.github.io/android-testing-support-library/docs/espresso/idling-resource/index.html
-        try {
-            Thread.sleep(5000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-
-        // Click on button DONE
-        ViewInteraction appCompatButton6 = onView(
-                allOf(withId(R.id.done_button), withText("Done"),
-                        childAtPosition(
-                                childAtPosition(
-                                        withId(R.id.setting_activity_main),
-                                        1),
-                                1),
-                        isDisplayed()));
-        appCompatButton6.perform(click());
-
-    }
-
-    @Test
-    public void Test_restoId_saving_on_Firebase() {
-
-        // Re-initialize list of restaurants liked and the restaurant chosen by the userId
         Firebase_update firebase_update = new Firebase_update(mActivityTestRule.getActivity().getApplicationContext());
         firebase_update.initialize_like_status_and_chosen_restaurant("UXKUE5wPVUfwqgkeSelNRi0MoQU2");
 
         waiting_time(1000);
-        mActivityTestRule.getActivity().configure_and_show_ListRestoFragment();
 
-        waiting_time(15000);
+        // Click on List Restos View
+        ViewInteraction tabView = onView(
+                allOf(childAtPosition(
+                        childAtPosition(
+                                withId(R.id.activity_multi_tabs),
+                                0),
+                        1),
+                        isDisplayed()));
+        tabView.perform(click());
+        waiting_time(2000);
 
-        ListRestoFragment list_restos_fragment = mActivityTestRule.getActivity().getListRestoFragment();
+        // click on Workmates fragment
+        ViewInteraction tabView2 = onView(
+                allOf(childAtPosition(
+                        childAtPosition(
+                                withId(R.id.activity_multi_tabs),
+                                0),
+                        2),
+                        isDisplayed()));
+        tabView2.perform(click());
+        waiting_time(2000);
+
+        // Click on List Restos View
+        ViewInteraction tabView3 = onView(
+                allOf(childAtPosition(
+                        childAtPosition(
+                                withId(R.id.activity_multi_tabs),
+                                0),
+                        1),
+                        isDisplayed()));
+        tabView3.perform(click());
+        waiting_time(2000);
+
+        // click on 1st item of recyclerView
+        ViewInteraction recyclerView = onView(
+                allOf(withId(R.id.list_view_resto),
+                        childAtPosition(
+                                withClassName(is("android.widget.RelativeLayout")),
+                                2)));
+        recyclerView.perform(actionOnItemAtPosition(0, click()));
+
+        // Find the id of the first item
+        MultiFragAdapter adapter= mActivityTestRule.getActivity().getPageAdapter();
+
+        waiting_time(2000);
+
+        ListRestoFragment list_restos_fragment = adapter.getListRestoFragment();
         String placeId_ref = list_restos_fragment.getList_places_nearby().get(0).getPlaceId();
 
-        // Click on restaurant item in the list
-        onView(withId(R.id.list_view_resto))
-                .perform(RecyclerViewActions.actionOnItemAtPosition(0, click()));
 
-        // Click on button choose restaurant
+        // click on button to choose the restaurant
         ViewInteraction circleImageView = onView(
                 allOf(withId(R.id.valid_restaurant),
                         childAtPosition(
@@ -186,16 +116,47 @@ public class MainActivityTest {
                                         withClassName(is("android.widget.LinearLayout")),
                                         0),
                                 2)));
-        circleImageView.perform(click());
+        circleImageView.perform(scrollTo(), click());
+        waiting_time(2000);
 
-        waiting_time(8000);
+        // click on button to like the restaurant
+        ViewInteraction appCompatButton2 = onView(
+                allOf(withId(R.id.like_button), withText("LIKE"),
+                        childAtPosition(
+                                childAtPosition(
+                                        withClassName(is("android.widget.LinearLayout")),
+                                        1),
+                                1)));
+        appCompatButton2.perform(scrollTo(), click());
+        waiting_time(2000);
+
+        // Recover the list of liked restos and the resto chosen by the user
         Firebase_recover firebase_recover = new Firebase_recover(mActivityTestRule.getActivity().getApplicationContext(),
-                list_restos_fragment);
+                "UXKUE5wPVUfwqgkeSelNRi0MoQU2");
 
-        firebase_recover.recover_workmate_restoId("UXKUE5wPVUfwqgkeSelNRi0MoQU2");
-        waiting_time(8000);
-        Assert.assertEquals(placeId_ref,list_restos_fragment.getPlaceId());
+        firebase_recover.recover_workmate_liked_restos();
+        firebase_recover.recover_workmate_chosen_resto();
+        waiting_time(5000);
+
+
+        // Check if the resto liked is among resto_id of the list on Firebase
+        List<String> list_places = firebase_recover.getList_restos_liked();
+        Boolean resto_chosen = false;
+
+        for(String restoid : list_places){
+            if(restoid.equals(placeId_ref))
+                resto_chosen=true;
+        }
+
+        Assert.assertTrue(resto_chosen);
+
+        // Check if the resto_id on Firebase is the one chosen by the user
+        String restoid_chosen=firebase_recover.getResto_id_chosen();
+        Assert.assertEquals(placeId_ref,restoid_chosen);
+
     }
+
+
 
   /*  @Test
     public void Test_like_resto_saving_on_Firebase() {
@@ -257,3 +218,43 @@ public class MainActivityTest {
         }
     }
 }
+/*
+        ViewInteraction appCompatImageButton = onView(
+                allOf(withContentDescription("Open navigation drawer"),
+                        childAtPosition(
+                                allOf(withId(R.id.activity_main_toolbar),
+                                        childAtPosition(
+                                                withClassName(is("android.widget.LinearLayout")),
+                                                0)),
+                                0),
+                        isDisplayed()));
+        appCompatImageButton.perform(click());
+
+        ViewInteraction navigationMenuItemView = onView(
+                allOf(childAtPosition(
+                        allOf(withId(R.id.design_navigation_view),
+                                childAtPosition(
+                                        withId(R.id.activity_main_nav_view),
+                                        0)),
+                        3),
+                        isDisplayed()));
+        navigationMenuItemView.perform(click());
+
+        // Added a sleep statement to match the app's execution delay.
+        // The recommended way to handle such scenarios is to use Espresso idling resources:
+        // https://google.github.io/android-testing-support-library/docs/espresso/idling-resource/index.html
+        try {
+            Thread.sleep(3586940);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+        ViewInteraction appCompatButton3 = onView(
+                allOf(withId(R.id.done_button), withText("Done"),
+                        childAtPosition(
+                                childAtPosition(
+                                        withId(R.id.setting_activity_main),
+                                        1),
+                                1),
+                        isDisplayed()));
+        appCompatButton3.perform(click());*/

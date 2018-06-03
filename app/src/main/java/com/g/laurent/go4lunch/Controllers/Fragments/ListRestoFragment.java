@@ -82,8 +82,6 @@ public class ListRestoFragment extends BaseRestoFragment implements ListViewAdap
         String type = sharedPreferences.getString(EXTRA_PREF_TYPE_PLACE,"restaurant");
         String api_key = getResources().getString(R.string.google_maps_key2);
 
-        System.out.println("eee api_key=" + api_key);
-
         new List_Search_Nearby(api_key, current_location,radius,type,this);
 
         create_onclicklistener_for_sorting_buttons();
@@ -93,6 +91,8 @@ public class ListRestoFragment extends BaseRestoFragment implements ListViewAdap
     @Override
     public void onResume() {
         super.onResume();
+        if(firebase_recover!=null)
+            firebase_recover.recover_list_workmates();
     }
 
     private void configure_recycler_view(){
@@ -201,4 +201,5 @@ public class ListRestoFragment extends BaseRestoFragment implements ListViewAdap
     }
 
     // ------------------------ UNUSED METHODS -----------------------------------
+
 }

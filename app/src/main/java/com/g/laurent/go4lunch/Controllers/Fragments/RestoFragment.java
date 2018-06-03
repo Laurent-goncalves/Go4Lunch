@@ -57,7 +57,8 @@ public class RestoFragment extends Fragment {
     private String placeId;
     private Context context;
     private Firebase_update firebase_update;
-    private List<Workmate> list_workmates;
+    private List<Workmate> list_workmates_joining;
+    private List<Workmate> list_workmates_liked;
     private FirebaseUser mCurrentUser;
     private String api_key;
 
@@ -91,14 +92,28 @@ public class RestoFragment extends Fragment {
 
     public void set_list_of_workmates(List<Workmate> list_workmates_resto) {
 
-        this.list_workmates = new ArrayList<>();
+        this.list_workmates_joining = new ArrayList<>();
+        this.list_workmates_liked= new ArrayList<>();
 
-        // get list of workmates which chose this restaurant
+        // create list of workmates which chose this restaurant
         for(Workmate workmate : list_workmates_resto){
             if(workmate!=null){
                 if(workmate.getResto_id()!=null){
                     if(workmate.getResto_id().equals(placeId))
-                        this.list_workmates.add(workmate);
+                        this.list_workmates_joining.add(workmate);
+                }
+            }
+        }
+
+        // create list of workmates which like this restaurant
+        for(Workmate workmate : list_workmates_resto){
+            if(workmate!=null){
+                if(workmate.getList_resto_liked()!=null){
+
+                    for(String id_resto : workmate.getList_resto_liked()){
+                        if(id_resto.equals(placeId))
+                            this.list_workmates_liked.add(workmate);
+                    }
                 }
             }
         }
@@ -112,11 +127,13 @@ public class RestoFragment extends Fragment {
         if(resto!=null){
             apply_picture_restaurant();                         // PICTURE RESTO
 
-            if(resto.getName_restaurant().length()>=15) {
-                String name = resto.getName_restaurant().substring(0, 15) + "...";
-                name_resto.setText(name); // NAME RESTO
-            } else
-                name_resto.setText(resto.getName_restaurant()); // NAME RESTO
+            if(resto.getName_restaurant()!=null) {
+                if (resto.getName_restaurant().length() >= 15) {
+                    String name = resto.getName_restaurant().substring(0, 15) + "...";
+                    name_resto.setText(name); // NAME RESTO
+                } else
+                    name_resto.setText(resto.getName_restaurant()); // NAME RESTO
+            }
 
             address_resto.setText(resto.getAddress());          // ADDRESS RESTO
             getRating(resto.getRating());                       // RATING RESTO
@@ -173,7 +190,7 @@ public class RestoFragment extends Fragment {
     private void configure_recycler_view(){
 
         // Create adapter passing in the sample user data
-        WorkmatesViewAdapter adapter = new WorkmatesViewAdapter(context, list_workmates, TYPE_DISPLAY_WORKMATES_BY_RESTO);
+        WorkmatesViewAdapter adapter = new WorkmatesViewAdapter(context, list_workmates_joining, TYPE_DISPLAY_WORKMATES_BY_RESTO);
         // Attach the adapter to the recyclerview to populate items
         list_workmates_recycler.setAdapter(adapter);
         // Set layout manager to position the items
@@ -227,7 +244,7 @@ public class RestoFragment extends Fragment {
     private void configure_button_like() {
 
         // Button choose resto
-        if(did_I_like_resto(list_workmates)) {
+        if(did_I_like_resto(list_workmates_liked)) {
             setColorButton(like_button, R.color.colorStars);
             like_button.setEnabled(false);
         } else {
@@ -300,7 +317,7 @@ public class RestoFragment extends Fragment {
     private void configure_button_choose_resto() {
 
         // Button choose resto
-        if(did_I_choose_resto(list_workmates)) {
+        if(did_I_choose_resto(list_workmates_joining)) {
             setRestoChosen(true);
             button_valid.setEnabled(false);
         } else {
@@ -356,7 +373,6 @@ public class RestoFragment extends Fragment {
                     if(mCurrentUser!=null)
                         firebase_update.update_chosen_status_workmate(mCurrentUser.getUid(), resto);
                     else {
-                        System.out.println("setOnClickListenerButtonRestoValid");
                         firebase_update.update_chosen_status_workmate("UXKUE5wPVUfwqgkeSelNRi0MoQU2", resto);
                     }
                 }

@@ -13,6 +13,9 @@ public class MultiFragAdapter extends FragmentPagerAdapter {
 
     private String api_key;
     private Context context;
+    private MapsFragment mapsFragment;
+    private ListRestoFragment listRestoFragment;
+    private ListMatesFragment listMatesFragment;
 
     public MultiFragAdapter(FragmentManager fm, String api_key, Context context) {
         super(fm);
@@ -24,11 +27,14 @@ public class MultiFragAdapter extends FragmentPagerAdapter {
     public Fragment getItem(int position) {
         switch (position){
             case 0: //Page number 1
-                return MapsFragment.newInstance(api_key);
+                mapsFragment = MapsFragment.newInstance(api_key);
+                return mapsFragment;
             case 1: //Page number 2
-                return ListRestoFragment.newInstance(api_key);
+                listRestoFragment = ListRestoFragment.newInstance(api_key);
+                return listRestoFragment;
             case 2: //Page number 3
-                return ListMatesFragment.newInstance(api_key);
+                listMatesFragment=ListMatesFragment.newInstance(api_key);
+                return listMatesFragment;
             default:
                 return null;
         }
@@ -51,5 +57,17 @@ public class MultiFragAdapter extends FragmentPagerAdapter {
             default:
                 return null;
         }
+    }
+
+    public MapsFragment getMapsFragment() {
+        return mapsFragment;
+    }
+
+    public ListRestoFragment getListRestoFragment() {
+        return listRestoFragment;
+    }
+
+    public ListMatesFragment getListMatesFragment() {
+        return listMatesFragment;
     }
 }

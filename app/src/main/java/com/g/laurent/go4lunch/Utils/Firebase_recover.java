@@ -37,6 +37,8 @@ public class Firebase_recover {
     private final static String EXTRA_PLACE_ID = "placeId_resto";
     private String callback;
     private Context context;
+    private List<String> list_restos_liked;
+    private String resto_id_chosen;
 
     public Firebase_recover(Context context, ListRestoFragment listRestoFragment) {
         FirebaseApp.initializeApp(context);
@@ -76,6 +78,14 @@ public class Firebase_recover {
         this.context = context;
         DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference();
         databaseReferenceWorkmates= databaseReference.child("workmates").child(userId).child("resto_id");
+    }
+
+    public Firebase_recover(Context context, String userId) {
+        FirebaseApp.initializeApp(context);
+        this.context = context;
+        list_restos_liked = new ArrayList<>();
+        DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference();
+        databaseReferenceWorkmates= databaseReference.child("workmates").child(userId);
     }
 
     // ----------------------------------------------------------------------------------------------
@@ -145,29 +155,43 @@ public class Firebase_recover {
         });
     }
 
-    public void recover_workmate_like(String userId, String restoId_liked){
+    public void recover_workmate_liked_restos(){
 
-        databaseReferenceWorkmates= databaseReferenceWorkmates.child(userId).child("list_resto_liked");
+        DatabaseReference databaseReferenceListResto= databaseReferenceWorkmates.child("list_resto_liked");
 
-        databaseReferenceWorkmates.addListenerForSingleValueEvent(new ValueEventListener() {
+        databaseReferenceListResto.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot data) {
                 if(data!=null) {
-
-                    for(DataSnapshot datas : data.getChildren()){
-
-
-                    }
-                    listRestoFragment.setPlaceId((String) data.getValue());
+                    for(DataSnapshot datas : data.getChildren())
+                        list_restos_liked.add((String) datas.getValue());
                 }
             }
 
             @Override
             public void onCancelled(DatabaseError databaseError) {
-                System.out.println("eee Cancellation");
             }
         });
     }
+
+    public void recover_workmate_chosen_resto(){
+
+        DatabaseReference databaseReferenceChosenResto= databaseReferenceWorkmates.child("resto_id");
+
+        databaseReferenceChosenResto.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot data) {
+                if(data!=null) {
+                    resto_id_chosen = (String) data.getValue();
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+            }
+        });
+    }
+
 
     public void show_lunch_current_user(){
 
@@ -233,4 +257,12 @@ public class Firebase_recover {
     // ----------------------------------- TOOLS , GETTER AND SETTER --------------------------------
     // ----------------------------------------------------------------------------------------------
 
+
+    public List<String> getList_restos_liked() {
+        return list_restos_liked;
+    }
+
+    public String getResto_id_chosen() {
+        return resto_id_chosen;
+    }
 }
