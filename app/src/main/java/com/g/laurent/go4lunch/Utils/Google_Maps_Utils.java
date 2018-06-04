@@ -43,7 +43,6 @@ public class Google_Maps_Utils extends FragmentActivity implements GoogleApiClie
                 .addApi(Places.PLACE_DETECTION_API)
                 .enableAutoManage(this, this)
                 .build();
-
     }
 
 

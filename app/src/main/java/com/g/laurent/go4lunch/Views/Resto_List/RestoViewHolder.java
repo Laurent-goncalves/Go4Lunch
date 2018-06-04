@@ -15,6 +15,7 @@ import com.g.laurent.go4lunch.Controllers.Activities.RestoActivity;
 import com.g.laurent.go4lunch.Models.Place_Nearby;
 import com.g.laurent.go4lunch.Models.Workmate;
 import com.g.laurent.go4lunch.R;
+import com.g.laurent.go4lunch.Utils.DistanceCalculation;
 import com.g.laurent.go4lunch.Utils.TimeCalculation;
 import com.google.android.gms.maps.model.LatLng;
 import java.lang.ref.WeakReference;
@@ -176,11 +177,11 @@ public class RestoViewHolder extends RecyclerView.ViewHolder implements View.OnC
             if (place_nearby.getOpeningHours().getOpenNow()!=null) {
                 if (place_nearby.getOpeningHours().getOpenNow()){
 
-                    TimeCalculation timeCalculation = new TimeCalculation();
+                    TimeCalculation timeCalculation = new TimeCalculation(context);
                     opening = timeCalculation.getTextOpeningHours(place_nearby);
 
                 }else
-                    opening = "Closed now";
+                    opening = context.getResources().getString(R.string.closed_now);
             }
         }
         opening_hours.setText(opening);
@@ -192,41 +193,25 @@ public class RestoViewHolder extends RecyclerView.ViewHolder implements View.OnC
 
         if(current_loc!=null && place_nearby.getGeometry()!=null) {
 
-            if(place_nearby.getGeometry().getLocation()!=null)
-                distance.setText(calulate_distance(
-                        current_loc.latitude,
+            if(place_nearby.getGeometry().getLocation()!=null){
+
+                DistanceCalculation tool_distance_calcul = new DistanceCalculation();
+
+                String text = tool_distance_calcul.calulate_distance(current_loc.latitude,
                         current_loc.longitude,
                         place_nearby.getGeometry().getLocation().getLat(),
-                        place_nearby.getGeometry().getLocation().getLng()));
+                        place_nearby.getGeometry().getLocation().getLng());
+
+                distance.setText(text);
+            }
         }
-    }
-
-    private String calulate_distance(double lat1, double lon1, double lat2, double lon2) {
-
-        String distance;
-
-        Double latitude1 = lat1 * Math.PI / 180;
-        Double latitude2 = lat2 * Math.PI / 180;
-        Double longitude1 = lon1 * Math.PI / 180;
-        Double longitude2 = lon2 * Math.PI / 180;
-
-        Double Radius = 6371d;
-        Double d = 1000 * Radius * Math.acos(Math.cos(latitude1) * Math.cos(latitude2) *
-                Math.cos(longitude2 - longitude1) + Math.sin(latitude1) *
-                Math.sin(latitude2));
-
-        distance = Math.round(d) + " m";
-
-        return distance;
     }
 
     @Override
     public void onClick(View v) {
-
         Intent intent = new Intent(context,RestoActivity.class);
         intent.putExtra(EXTRA_PLACE_ID,place_nearby.getPlaceId());
         context.startActivity(intent);
-
     }
 }
 

@@ -42,9 +42,9 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setLanguageForApp();
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
-        set_language_button();
 
     }
 
@@ -140,33 +140,24 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private void set_language_button(){
+    private void setLanguageForApp(){
 
         SharedPreferences sharedPreferences = getSharedPreferences(EXTRA_PREFERENCES,MODE_PRIVATE);
-        res = getApplicationContext().getResources();
-        conf = res.getConfiguration();
+        String lang = sharedPreferences.getString(EXTRA_PREF_LANG,"en");
 
-        if(sharedPreferences!=null){
-
-            String lang = sharedPreferences.getString(EXTRA_PREF_LANG,"En");
-
-            switch (lang) {
-                case "Fr":
-                    conf.locale = Locale.FRANCE;
-                    break;
-                case "En":
-                    conf.locale = Locale.FRANCE;
-                    break;
-                default:
-                    sharedPreferences.edit().putString(EXTRA_PREF_LANG, "En").apply();
-                    conf.locale = Locale.FRANCE;
-                    break;
-            }
-
-            res.updateConfiguration(conf, res.getDisplayMetrics());
-            button_google.setText(getApplicationContext().createConfigurationContext(conf).getResources().getString(R.string.connect_with_google));
-            button_facebook.setText(getApplicationContext().createConfigurationContext(conf).getResources().getString(R.string.connect_with_facebook));
+        Locale locale;
+        if(lang.equals("not-set")){ //use any value for default
+            locale = Locale.getDefault();
         }
+        else {
+            locale = new Locale(lang);
+        }
+
+        Locale.setDefault(locale);
+        Configuration config = new Configuration();
+        config.locale = locale;
+        getBaseContext().getResources().updateConfiguration(config,
+                getBaseContext().getResources().getDisplayMetrics());
     }
 
 }

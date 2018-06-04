@@ -17,6 +17,7 @@
     <!-- LISTRESTOVIEW -->
     <string name="open_until">Open until </string>
     <string name="closed_soon">Closed soon (in </string>
+    <string name="closed_now">Closed now</string>
     <string name="open_at">Open at </string>
     <string name="opening_in">Opening in </string>
     <string name="sort_by">Sort by :</string>

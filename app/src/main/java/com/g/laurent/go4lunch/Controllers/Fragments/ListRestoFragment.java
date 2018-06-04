@@ -78,7 +78,7 @@ public class ListRestoFragment extends BaseRestoFragment implements ListViewAdap
 
         // Recover list of restos nearby
         current_location =new LatLng(48.866667,2.333333);
-        String radius = sharedPreferences.getString(EXTRA_PREF_RADIUS,"500");
+        String radius = String.valueOf(sharedPreferences.getInt(EXTRA_PREF_RADIUS, 500));
         String type = sharedPreferences.getString(EXTRA_PREF_TYPE_PLACE,"restaurant");
         String api_key = getResources().getString(R.string.google_maps_key2);
 

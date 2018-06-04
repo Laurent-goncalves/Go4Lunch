@@ -1,10 +1,15 @@
 package com.g.laurent.go4lunch.Controllers.Activities;
 
 import android.app.FragmentTransaction;
+import android.content.Context;
+import android.content.res.Configuration;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.FrameLayout;
+
 import com.g.laurent.go4lunch.Controllers.Fragments.SettingsFragment;
 import com.g.laurent.go4lunch.R;
 import butterknife.BindView;
@@ -45,5 +50,17 @@ public class SettingActivity extends AppCompatActivity {
             } else
                 toolbar.setVisibility(View.GONE);
         });
+    }
+
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        System.out.println("eee onConfigurationChanged");
+
+        /*FrameLayout frameLayout = getActivity().findViewById(R.id.framelayout_setting_frag);
+        frameLayout.removeAllViews();
+        LayoutInflater inflater = (LayoutInflater) getActivity().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        View view = inflater.inflate(R.layout.fragment_settings, null);
+        frameLayout.addView(view);*/
     }
 }

@@ -1,6 +1,9 @@
 package com.g.laurent.go4lunch.Utils;
 
+import android.content.Context;
+
 import com.g.laurent.go4lunch.Models.Place_Nearby;
+import com.g.laurent.go4lunch.R;
 import com.g.laurent.go4lunch.Utils.DetailsPlace.Period;
 import com.g.laurent.go4lunch.Utils.DetailsPlace.OpeningHours;
 import java.util.ArrayList;
@@ -15,9 +18,10 @@ public class TimeCalculation {
     private String current_hour;
     private String current_minute;
     private int current_time;
+    private Context context;
+    public TimeCalculation(Context context) {
 
-    public TimeCalculation() {
-
+        this.context=context;
         calendar = Calendar.getInstance();
         current_day = calendar.get(Calendar.DAY_OF_WEEK);
         current_hour= String.valueOf(calendar.get(Calendar.HOUR_OF_DAY));
@@ -124,7 +128,7 @@ public class TimeCalculation {
 
         // if the current time is after last closure...
         if(after_last_closure)
-            text = "Closed now";
+            text = context.getResources().getString(R.string.closed_now);
         else { // if not, check what is the next time of opening
 
             // define the next opening
@@ -144,9 +148,9 @@ public class TimeCalculation {
             }
 
             if(shortest_timing<30){
-                text = "Opening in " + shortest_timing + " min";
+                text = context.getResources().getString(R.string.opening_in) + shortest_timing + " min";
             } else {
-                text = "Open at " + get_time_hour(next_time_opening);
+                text = context.getResources().getString(R.string.open_at) + get_time_hour(next_time_opening);
             }
         }
 
@@ -175,9 +179,9 @@ public class TimeCalculation {
         }
 
         if(shortest_timing < 30){
-            text = "Closed soon (in " + shortest_timing + " min)";
+            text = context.getResources().getString(R.string.closed_soon) + shortest_timing + " min)";
         } else {
-            text = "Open until " + get_time_hour(next_time_closing);
+            text = context.getResources().getString(R.string.open_until) + get_time_hour(next_time_closing);
         }
 
         return text;

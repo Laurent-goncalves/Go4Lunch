@@ -21,10 +21,12 @@ public class WorkmatesViewHolder extends RecyclerView.ViewHolder {
     @BindView(R.id.workmates_line_separator) View line_separator;
     private final static String TYPE_DISPLAY_WORKMATES_LIST = "list_of_workmates";
     private final static String TYPE_DISPLAY_WORKMATES_BY_RESTO = "list_of_workmates_by_resto";
+    private Context context;
 
-    public WorkmatesViewHolder(View itemView) {
+    public WorkmatesViewHolder(View itemView, Context context) {
         super(itemView);
         ButterKnife.bind(this, itemView);
+        this.context=context;
     }
 
     public void show_workmates(Context context, Workmate workmates, String type_display) {
@@ -53,12 +55,12 @@ public class WorkmatesViewHolder extends RecyclerView.ViewHolder {
             case TYPE_DISPLAY_WORKMATES_LIST:
                     if(workmates!=null){
                         if(workmates.getChosen()){
-                            text = workmates.getName() + " is eating at restaurant " + workmates.getResto_name();
+                            text = workmates.getName() + context.getResources().getString(R.string.is_eating_at) + workmates.getResto_name();
                             workmates_text.setText(text);
                             workmates_text.setTextColor(Color.BLACK);
                             workmates_text.setTypeface(null, Typeface.NORMAL);
                         } else {
-                            text = workmates.getName() + " hasn't decided yet";
+                            text = workmates.getName() + context.getResources().getString(R.string.has_not_decided);
                             workmates_text.setText(text);
                             workmates_text.setTextColor(Color.DKGRAY);
                             workmates_text.setTypeface(null, Typeface.ITALIC);
@@ -70,7 +72,7 @@ public class WorkmatesViewHolder extends RecyclerView.ViewHolder {
                 if(workmates!=null){
                     if(workmates.getChosen()!=null){
                         if(workmates.getChosen()) {
-                            text = workmates.getName() + " is joining!";
+                            text = workmates.getName() + context.getResources().getString(R.string.joining);
                             workmates_text.setText(text);
                         }
                     }

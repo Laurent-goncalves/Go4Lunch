@@ -33,6 +33,7 @@
             android:background="@color/colorGoogleButton"
             android:textSize="@dimen/default_text_size"
             android:drawableStart="@drawable/ic_google"
+            android:text="@string/connect_with_google"
             android:layout_margin="@dimen/default_large_margin"
             android:padding="10dp"/>
 
@@ -45,6 +46,7 @@
             android:background="@color/colorFacebookButton"
             android:textSize="@dimen/default_text_size"
             android:drawableStart="@drawable/ic_facebook"
+            android:text="@string/connect_with_facebook"
             android:layout_margin="@dimen/default_large_margin"
             android:padding="10dp"/>
 

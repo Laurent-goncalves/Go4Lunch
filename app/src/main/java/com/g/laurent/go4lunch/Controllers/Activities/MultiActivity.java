@@ -34,7 +34,11 @@ import com.g.laurent.go4lunch.R;
 import com.g.laurent.go4lunch.Utils.Firebase_recover;
 import com.g.laurent.go4lunch.Utils.Firebase_update;
 import com.g.laurent.go4lunch.Views.MultiFragAdapter;
+import com.google.android.gms.common.GooglePlayServicesNotAvailableException;
+import com.google.android.gms.common.GooglePlayServicesRepairableException;
+import com.google.android.gms.location.places.ui.PlaceAutocomplete;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.auth.FirebaseAuth;
@@ -89,11 +93,35 @@ public class MultiActivity extends AppCompatActivity implements AlarmReceiver.ca
         this.configureNavigationView();
         //configureAlarmManager();
         configureViewPagerAndTabs();
+        configure_autocomplete_request();
 
         SwipeRefreshLayout swipeRefreshLayout = this.findViewById(R.id.swiperefresh);
         swipeRefreshLayout.setOnRefreshListener(
                 this::configureViewPagerAndTabs
         );
+
+    }
+
+    private void configure_autocomplete_request(){
+
+        int PLACE_AUTOCOMPLETE_REQUEST_CODE = 1;
+
+    /*   try {
+            Intent intent =
+                    new PlaceAutocomplete.IntentBuilder(PlaceAutocomplete.MODE_FULLSCREEN)
+                            .setBoundsBias(new LatLngBounds(
+                                    new LatLng(-33.880490, 151.184363),
+                                    new LatLng(-33.858754, 151.229596)));
+                            .build(this);
+            startActivityForResult(intent, PLACE_AUTOCOMPLETE_REQUEST_CODE);
+
+
+        } catch (GooglePlayServicesRepairableException e) {
+            // TODO: Handle the error.
+        } catch (GooglePlayServicesNotAvailableException e) {
+            // TODO: Handle the error.
+        }
+*/
 
     }
 

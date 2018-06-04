@@ -82,7 +82,7 @@ public class MapsFragment extends BaseRestoFragment  {
         if(getArguments()!=null) {
             currentPlaceLatLng = new LatLng(getArguments().getDouble(EXTRA_LAT_CURRENT),
                     getArguments().getDouble(EXTRA_LONG_CURRENT));
-            String radius = sharedPreferences.getString(EXTRA_PREF_RADIUS, "500");
+            String radius = String.valueOf(sharedPreferences.getInt(EXTRA_PREF_RADIUS, 500));
             String type = sharedPreferences.getString(EXTRA_PREF_TYPE_PLACE, "restaurant");
             String api_key = getArguments().getString(EXTRA_API_KEY, null);
 
