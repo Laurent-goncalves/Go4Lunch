@@ -1,25 +1,40 @@
 package com.g.laurent.go4lunch;
 
 
+import android.content.Context;
 import android.support.test.espresso.ViewInteraction;
 import android.support.test.espresso.contrib.RecyclerViewActions;
 import android.support.test.rule.ActivityTestRule;
 import android.support.test.runner.AndroidJUnit4;
+import android.test.mock.MockContext;
 import android.test.suitebuilder.annotation.LargeTest;
+import android.text.TextPaint;
+import android.text.style.CharacterStyle;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewParent;
-
 import com.g.laurent.go4lunch.Controllers.Activities.MultiActivity;
 import com.g.laurent.go4lunch.Controllers.Fragments.ListRestoFragment;
 import com.g.laurent.go4lunch.Controllers.Fragments.MapsFragment;
-import com.g.laurent.go4lunch.R;
+import com.g.laurent.go4lunch.Models.List_Search_Nearby;
+import com.g.laurent.go4lunch.Utils.DistanceCalculation;
 import com.g.laurent.go4lunch.Utils.Firebase_recover;
 import com.g.laurent.go4lunch.Utils.Firebase_update;
+import com.g.laurent.go4lunch.Utils.Google_Maps_Utils;
 import com.g.laurent.go4lunch.Views.MultiFragAdapter;
+import com.google.android.gms.common.data.DataBufferUtils;
+import com.google.android.gms.location.places.AutocompletePrediction;
+import com.google.android.gms.location.places.AutocompletePredictionBufferResponse;
+import com.google.android.gms.location.places.GeoDataClient;
+import com.google.android.gms.location.places.Places;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.LatLngBounds;
+import com.google.android.gms.tasks.RuntimeExecutionException;
+import com.google.android.gms.tasks.Task;
+import com.google.android.gms.tasks.Tasks;
 
 import junit.framework.Assert;
-
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
 import org.hamcrest.TypeSafeMatcher;
@@ -27,21 +42,24 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
-import static android.support.test.espresso.Espresso.onData;
+import static android.content.ContentValues.TAG;
 import static android.support.test.espresso.Espresso.onView;
 import static android.support.test.espresso.action.ViewActions.click;
 import static android.support.test.espresso.action.ViewActions.scrollTo;
 import static android.support.test.espresso.contrib.RecyclerViewActions.actionOnItemAtPosition;
 import static android.support.test.espresso.matcher.ViewMatchers.isDisplayed;
 import static android.support.test.espresso.matcher.ViewMatchers.withClassName;
-import static android.support.test.espresso.matcher.ViewMatchers.withContentDescription;
 import static android.support.test.espresso.matcher.ViewMatchers.withId;
 import static android.support.test.espresso.matcher.ViewMatchers.withText;
 import static org.hamcrest.Matchers.allOf;
 import static org.hamcrest.Matchers.is;
-import static org.hamcrest.core.IsAnything.anything;
+
 
 @LargeTest
 @RunWith(AndroidJUnit4.class)
@@ -50,6 +68,14 @@ public class MainActivityTest {
     @Rule
     public ActivityTestRule<MultiActivity> mActivityTestRule = new ActivityTestRule<>(MultiActivity.class);
 
+    @Test
+    public void faketest() {
+
+        Assert.assertEquals(1,1);
+
+    }
+
+    /*
     @Test
     public void check_liked_and_chosen_resto() {
 
@@ -190,7 +216,72 @@ public class MainActivityTest {
         waiting_time(3000);
         Assert.assertEquals(placeId_ref,list_restos_fragment.getPlaceId());
     }
-*/
+
+
+    @Test
+    public void TEST_bounds() {
+
+        Context context = mActivityTestRule.getActivity().getApplicationContext();
+
+        LatLng current_location = new LatLng(48.87116360802959,2.337829608029594);
+        int radius = 500;
+
+        DistanceCalculation tool_calcul_distance = new DistanceCalculation();
+        LatLngBounds bounds = tool_calcul_distance.create_LatLngBounds(radius, current_location);
+
+
+        //Google_Maps_Utils google_maps_utils = new Google_Maps_Utils(context);
+
+        googleplacespredictions("Starbuck",context);
+
+
+        String distance = tool_calcul_distance.calulate_distance(bounds.southwest.latitude,bounds.southwest.longitude,current_location.latitude,current_location.longitude);
+
+        // System.out.println(bounds);
+        // Assert.assertEquals(String.valueOf(radius),distance);
+
+    }*/
+
+
+    public void googleplacespredictions(String query, Context context){
+
+        List<String> list_places_nearby = new ArrayList<>();
+        LatLngBounds bounds = new LatLngBounds(new LatLng(38.46572222050097, -107.75668023304138),new LatLng(39.913037779499035, -105.88929176695862));
+        GeoDataClient mGeoDataClient = Places.getGeoDataClient(context);
+
+        Task<AutocompletePredictionBufferResponse> results =
+                mGeoDataClient.getAutocompletePredictions(query, bounds, GeoDataClient.BoundsMode.STRICT, null);
+
+        try {
+            Tasks.await(results, 60, TimeUnit.SECONDS);
+        } catch (ExecutionException | InterruptedException | TimeoutException e) {
+            e.printStackTrace();
+        }
+
+        try {
+            AutocompletePredictionBufferResponse autocompletePredictions = results.getResult();
+
+            // Freeze the results immutable representation that can be stored safely.
+            ArrayList<AutocompletePrediction> al = DataBufferUtils.freezeAndClose(autocompletePredictions);
+
+            for (AutocompletePrediction p : al) {
+                list_places_nearby.add(p.getPlaceId());
+            }
+
+            MapsFragment mapsFragment = mActivityTestRule.getActivity().getPageAdapter().getMapsFragment();
+
+            List_Search_Nearby list_search_nearby = new List_Search_Nearby("AIzaSyCAzX1ILkJlqSsTMkRJHSGEMAQWuqxSxKA",list_places_nearby,mapsFragment);
+
+            waiting_time(5000);
+
+
+        } catch (RuntimeExecutionException e) {
+            // If the query did not complete successfully return null
+            Log.e(TAG, "Error getting autocomplete prediction API call", e);
+        }
+    }
+
+
     private static Matcher<View> childAtPosition(
             final Matcher<View> parentMatcher, final int position) {
 

@@ -9,6 +9,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.g.laurent.go4lunch.Models.Place_Nearby;
 import com.g.laurent.go4lunch.Models.Workmate;
 import com.g.laurent.go4lunch.R;
 import com.g.laurent.go4lunch.Utils.Firebase_recover;
@@ -46,7 +47,6 @@ public class ListMatesFragment extends Fragment {
         Bundle bundle = new Bundle();
         bundle.putString(EXTRA_API_KEY, api_key);
         frag.setArguments(bundle);
-
         return(frag);
     }
 

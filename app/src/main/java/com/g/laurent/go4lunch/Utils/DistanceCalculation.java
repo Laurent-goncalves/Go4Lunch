@@ -10,7 +10,7 @@ public class DistanceCalculation {
 
         LatLngBounds bounds;
 
-        double radiusDegrees = (radius*180)/(Math.PI * 61);
+        double radiusDegrees = (2*radius*180)/(Math.PI * 1000 * 6371);
         LatLng northEast = new LatLng(center.latitude + radiusDegrees, center.longitude + radiusDegrees);
         LatLng southWest = new LatLng(center.latitude - radiusDegrees, center.longitude - radiusDegrees);
 

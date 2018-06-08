@@ -1,5 +1,8 @@
 package com.g.laurent.go4lunch;
 
+import android.content.Context;
+import android.test.mock.MockContext;
+
 import com.g.laurent.go4lunch.Controllers.Fragments.ListRestoFragment;
 import com.g.laurent.go4lunch.Models.List_Search_Nearby;
 import com.g.laurent.go4lunch.Models.Place_Nearby;
@@ -10,8 +13,12 @@ import com.g.laurent.go4lunch.Utils.DetailsPlace.OpeningHours;
 import com.g.laurent.go4lunch.Utils.DetailsPlace.Period;
 import com.g.laurent.go4lunch.Utils.DetailsPlace.Geometry;
 import com.g.laurent.go4lunch.Utils.DetailsPlace.Location;
+import com.g.laurent.go4lunch.Utils.DistanceCalculation;
+import com.g.laurent.go4lunch.Utils.Google_Maps_Utils;
 import com.g.laurent.go4lunch.Utils.TimeCalculation;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.LatLngBounds;
+
 import junit.framework.Assert;
 import org.junit.Test;
 import org.mockito.Mockito;
@@ -79,7 +86,7 @@ public class ExampleUnitTest {
 
         Place_Nearby place_nearby = Mockito.mock(Place_Nearby.class);
         OpeningHours openingHours = set_fake_openingHours();
-        TimeCalculation timeCalculation = new TimeCalculation();
+        TimeCalculation timeCalculation = new TimeCalculation(new MockContext());
         int current_day = 2;
         int current_time = 1000;
 
@@ -152,6 +159,7 @@ public class ExampleUnitTest {
         waiting_time(5000);
         Assert.assertTrue(list_search_nearby.getList_places_nearby().size()>0);
     }
+
 
     private OpeningHours set_fake_openingHours(){
 

@@ -2,12 +2,12 @@ package com.g.laurent.go4lunch.Controllers.Fragments;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-
 import com.g.laurent.go4lunch.Models.List_Search_Nearby;
 import com.g.laurent.go4lunch.Models.Place_Nearby;
 import com.g.laurent.go4lunch.Models.Workmate;
@@ -22,12 +22,19 @@ import com.google.android.gms.maps.MapsInitializer;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
-
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
 import java.util.List;
 import butterknife.BindView;
 import butterknife.ButterKnife;
-
 import static android.content.Context.MODE_PRIVATE;
+
 
 public class MapsFragment extends BaseRestoFragment  {
 
@@ -44,6 +51,7 @@ public class MapsFragment extends BaseRestoFragment  {
     private Firebase_recover firebase_recover;
     private Context context;
     private List<Workmate> list_workmates;
+
 
     public MapsFragment() {
         // Required empty public constructor
@@ -76,14 +84,16 @@ public class MapsFragment extends BaseRestoFragment  {
 
         Google_Maps_Utils google_maps_utils = new Google_Maps_Utils(context);
 
-
+        currentPlaceLatLng = new LatLng(48.866667, 2.333333);
 
         // Recover list of restos nearby
         if(getArguments()!=null) {
-            currentPlaceLatLng = new LatLng(getArguments().getDouble(EXTRA_LAT_CURRENT),
-                    getArguments().getDouble(EXTRA_LONG_CURRENT));
-            String radius = String.valueOf(sharedPreferences.getInt(EXTRA_PREF_RADIUS, 500));
-            String type = sharedPreferences.getString(EXTRA_PREF_TYPE_PLACE, "restaurant");
+
+            // String radius = String.valueOf(sharedPreferences.getInt(EXTRA_PREF_RADIUS, 500));
+            // String type = sharedPreferences.getString(EXTRA_PREF_TYPE_PLACE, "restaurant");
+
+            String radius = "500";
+            String type = "restaurant";
             String api_key = getArguments().getString(EXTRA_API_KEY, null);
 
             if (api_key != null)
@@ -91,33 +101,6 @@ public class MapsFragment extends BaseRestoFragment  {
         }
 
         return view;
-    }
-
-    private void create_marker_for_each_place_nearby(List<Place_Nearby> list_places_nearby,GoogleMap mMap){
-
-        for(Place_Nearby place_nearby : list_places_nearby){
-
-            if(place_nearby!=null){
-                if(place_nearby.getGeometry()!=null){
-                    if(place_nearby.getGeometry().getLocation()!=null){
-                        LatLng city = new LatLng(place_nearby.getGeometry().getLocation().getLat(), place_nearby.getGeometry().getLocation().getLng());
-                        String text = place_nearby.getName_restaurant();
-
-                        if(is_resto_chosen_by_workmates(place_nearby,list_workmates)) {
-                            mMap.addMarker(new MarkerOptions()
-                                    .position(city)
-                                    .title(text)
-                                    .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN)));
-                        } else {
-                            mMap.addMarker(new MarkerOptions()
-                                    .position(city)
-                                    .title(text)
-                                    .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_ORANGE)));
-                        }
-                    }
-                }
-            }
-        }
     }
 
     public void recover_list_workmates(List<Place_Nearby> list_resto) {
@@ -129,7 +112,7 @@ public class MapsFragment extends BaseRestoFragment  {
     private void launch_map_view(){
 
         try {
-            MapsInitializer.initialize(getActivity().getApplicationContext());
+            MapsInitializer.initialize(context);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -147,6 +130,86 @@ public class MapsFragment extends BaseRestoFragment  {
 
     }
 
+    private void create_marker_for_each_place_nearby(List<Place_Nearby> list_places_nearby,GoogleMap mMap){
+
+        mMap.clear();
+
+        for(Place_Nearby place_nearby : list_places_nearby){
+
+            if(place_nearby!=null){
+                if(place_nearby.getGeometry()!=null){
+                    if(place_nearby.getGeometry().getLocation()!=null){
+                        LatLng city = new LatLng(place_nearby.getGeometry().getLocation().getLat(), place_nearby.getGeometry().getLocation().getLng());
+                        String text = place_nearby.getName_restaurant();
+
+                        System.out.println("eee  text=" + text);
+
+                        if(is_resto_chosen_by_workmates(place_nearby,list_workmates)) {
+
+                            mMap.addMarker(new MarkerOptions()
+                                    .position(city)
+                                    .title(text)
+                               //   .icon(BitmapDescriptorFactory.fromPath(place_nearby.getIcon_url())));
+                                    .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN)));
+
+                        } else {
+                            mMap.addMarker(new MarkerOptions()
+                                    .position(city)
+                                    .title(text)
+                             //     .icon(BitmapDescriptorFactory.fromPath(place_nearby.getIcon_url())));
+                                    .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_ORANGE)));
+
+
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+
+
+    public static Bitmap getBitmapFromURL(String url) {
+        Bitmap bitmap = null;
+        InputStream in = null;
+        BufferedOutputStream out = null;
+        int IO_BUFFER_SIZE = 4 * 1024;
+        try {
+            URI uri = new URI(url);
+            url = uri.toASCIIString();
+            in = new BufferedInputStream(new URL(url).openStream(),
+                    IO_BUFFER_SIZE);
+            final ByteArrayOutputStream dataStream = new ByteArrayOutputStream();
+            out = new BufferedOutputStream(dataStream, IO_BUFFER_SIZE);
+            int bytesRead;
+            byte[] buffer = new byte[IO_BUFFER_SIZE];
+            while ((bytesRead = in.read(buffer)) != -1) {
+                out.write(buffer, 0, bytesRead);
+            }
+            out.flush();
+            final byte[] data = dataStream.toByteArray();
+            BitmapFactory.Options options = new BitmapFactory.Options();
+            bitmap = BitmapFactory.decodeByteArray(data, 0, data.length,
+                    options);
+        } catch (IOException e) {
+            return null;
+        } catch (URISyntaxException e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                if(in!=null)
+                    in.close();
+                if(out!=null)
+                out.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        return bitmap;
+    }
+
+
+
     public void set_list_of_workmates(List<Workmate> list_workmates){
         this.list_workmates=list_workmates;
         launch_map_view();
@@ -159,3 +222,39 @@ public class MapsFragment extends BaseRestoFragment  {
             firebase_recover.recover_list_workmates();
     }
 }
+
+
+/*
+
+
+
+                            if(place_nearby.getIcon_url()!=null){
+                                mMap.addMarker(new MarkerOptions()
+                                        .position(city)
+                                        .title(text)
+                                        .icon(BitmapDescriptorFactory.fromBitmap(getBitmapFromURL(place_nearby.getIcon_url()))));
+                            } else {
+                                mMap.addMarker(new MarkerOptions()
+                                        .position(city)
+                                        .title(text)
+                                        .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN)));
+                            }
+
+                        } else {
+                            if(place_nearby.getIcon_url()!=null){
+                                mMap.addMarker(new MarkerOptions()
+                                        .position(city)
+                                        .title(text)
+                                        .icon(BitmapDescriptorFactory.fromBitmap(getBitmapFromURL(place_nearby.getIcon_url()))));
+                            } else {
+                                mMap.addMarker(new MarkerOptions()
+                                        .position(city)
+                                        .title(text)
+                                        .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_ORANGE)));
+                            }
+
+
+
+
+
+ */

@@ -27,19 +27,19 @@ public class List_Search_Nearby {
     public List_Search_Nearby(String api_key, LatLng latLng, String radius, String type, MapsFragment mapsFragment) {
         this.mapsFragment=mapsFragment;
         list_places_nearby = new ArrayList<>();
-        //launch_request_search_nearby_places(api_key, latLng, radius, type, CALLBACK_MAPS_FRAGMENT);
+        launch_request_search_nearby_places(api_key, latLng, radius, type, CALLBACK_MAPS_FRAGMENT);
     }
 
     public List_Search_Nearby(String api_key, LatLng latLng, String radius, String type, ListRestoFragment listRestoFragment) {
 
         this.listRestoFragment=listRestoFragment;
         list_places_nearby = new ArrayList<>();
-       // launch_request_search_nearby_places(api_key,latLng, radius, type,CALLBACK_LIST_RESTO_FRAGMENT);
+        launch_request_search_nearby_places(api_key,latLng, radius, type,CALLBACK_LIST_RESTO_FRAGMENT);
     }
 
     public List_Search_Nearby(String api_key, LatLng latLng, String radius, String type) {
         list_places_nearby = new ArrayList<>();
-       // launch_request_search_nearby_places(api_key, latLng, radius, type,null);
+        launch_request_search_nearby_places(api_key, latLng, radius, type,null);
     }
 
     private void build_list_places_nearby(DetailsPlace detailsPlace){
@@ -103,7 +103,7 @@ public class List_Search_Nearby {
 
             @Override
             public void onComplete() {
-                //disposable.dispose();
+
                 if(callback!=null){
                     switch(callback){
 
@@ -120,6 +120,70 @@ public class List_Search_Nearby {
             }
         };
     }
+
+    // ------------------------------------------------------------------------------------------------
+    // ------------------------------ AUTOCOMPLETE ----------------------------------------------------
+    // ------------------------------------------------------------------------------------------------
+
+    public List_Search_Nearby(String api_key, List<String> list_placeId, MapsFragment mapsFragment) {
+        // CONSTRUCTOR FOR AUTOCOMPLETE METHOD
+        this.mapsFragment=mapsFragment;
+        list_places_nearby = new ArrayList<>();
+        launch_request_search_nearby_places_autocomplete(api_key, list_placeId, CALLBACK_MAPS_FRAGMENT);
+    }
+
+    public List_Search_Nearby(String api_key, List<String> list_placeId, ListRestoFragment listRestoFragment) {
+        // CONSTRUCTOR FOR AUTOCOMPLETE METHOD
+        this.listRestoFragment=listRestoFragment;
+        list_places_nearby = new ArrayList<>();
+        launch_request_search_nearby_places_autocomplete(api_key, list_placeId, CALLBACK_LIST_RESTO_FRAGMENT);
+    }
+
+    private void launch_request_search_nearby_places_autocomplete(String api_key, List<String> list_places_Id, String callback){
+
+        disposable = Observable.just(list_places_Id)
+                .flatMapIterable(ids -> ids)
+                .flatMap(result -> Maps_API_stream.streamFetchgetDetailsPlaces(api_key,result))
+                .subscribeWith(getSubscriberAutocomplete(callback));
+    }
+
+    private DisposableObserver<DetailsPlace> getSubscriberAutocomplete(String callback){
+        return new DisposableObserver<DetailsPlace>() {
+            @Override
+            public void onNext(DetailsPlace detailsPlace) {
+                build_list_places_nearby(detailsPlace);
+            }
+
+            @Override
+            public void onError(Throwable e) {
+                Log.e("TAG","On Error"+Log.getStackTraceString(e));
+            }
+
+            @Override
+            public void onComplete() {
+
+                if(callback!=null && list_places_nearby!=null){
+                    switch(callback){
+
+                        case CALLBACK_MAPS_FRAGMENT:
+                            System.out.println("eee  recover workmates mapsFragment");
+                            mapsFragment.recover_list_workmates(list_places_nearby);
+                            break;
+                        case CALLBACK_LIST_RESTO_FRAGMENT:
+                            System.out.println("eee  recover workmates listRestoFragment");
+                            listRestoFragment.recover_list_workmates(list_places_nearby);
+                            break;
+                    }
+                }
+
+                Log.e("TAG","On Complete !!");
+            }
+        };
+    }
+
+    // ------------------------------------------------------------------------------------------------
+    // ------------------------------ GETTER and SETTER -----------------------------------------------
+    // ------------------------------------------------------------------------------------------------
 
     public List<Place_Nearby> getList_places_nearby() {
         return list_places_nearby;

@@ -7,7 +7,10 @@ import android.support.v4.app.Fragment;
 import com.g.laurent.go4lunch.Controllers.Fragments.ListMatesFragment;
 import com.g.laurent.go4lunch.Controllers.Fragments.ListRestoFragment;
 import com.g.laurent.go4lunch.Controllers.Fragments.MapsFragment;
+import com.g.laurent.go4lunch.Models.Place_Nearby;
 import com.g.laurent.go4lunch.R;
+
+import java.util.List;
 
 public class MultiFragAdapter extends FragmentPagerAdapter {
 
@@ -33,7 +36,7 @@ public class MultiFragAdapter extends FragmentPagerAdapter {
                 listRestoFragment = ListRestoFragment.newInstance(api_key);
                 return listRestoFragment;
             case 2: //Page number 3
-                listMatesFragment=ListMatesFragment.newInstance(api_key);
+                listMatesFragment = ListMatesFragment.newInstance(api_key);
                 return listMatesFragment;
             default:
                 return null;
