@@ -89,7 +89,7 @@ public class ExampleUnitTest {
         String api_key = "AIzaSyBiRkG6clZcF-KhwQIPGq5t8h-KBk-8ldA";
         LatLng latLng = new LatLng(48.6102599, 2.474805);
 
-        List_Search_Nearby list_search_nearby = new List_Search_Nearby(api_key,latLng,radius,type);
+        List_Search_Nearby list_search_nearby = new List_Search_Nearby(api_key,latLng,radius,type,null);
 
         waiting_time(5000);
         Assert.assertTrue(list_search_nearby.getList_places_nearby().size()>0);
@@ -109,10 +109,10 @@ public class ExampleUnitTest {
         geometry1.setLocation(location1);
         Double rating1 = 3.3d;
         List<Workmate> list_workmates1 = new ArrayList<>();
-        list_workmates1.add(new Workmate("Jean",null,null,null,null,null,null,null));
-        list_workmates1.add(new Workmate("Kevin",null,null,null,null,null,null,null));
-        list_workmates1.add(new Workmate("Sami",null,null,null,null,null,null,null));
-        list_workmates1.add(new Workmate("Caro",null,null,null,null,null,null,null));
+        list_workmates1.add(new Workmate("Jean",null,null,null,null,null,null,null,null));
+        list_workmates1.add(new Workmate("Kevin",null,null,null,null,null,null,null,null));
+        list_workmates1.add(new Workmate("Sami",null,null,null,null,null,null,null,null));
+        list_workmates1.add(new Workmate("Caro",null,null,null,null,null,null,null,null));
 
         String id2 = "ID2";
         Geometry geometry2 = new Geometry();
@@ -122,9 +122,9 @@ public class ExampleUnitTest {
         geometry2.setLocation(location2);
         Double rating2 = 2.3d;
         List<Workmate> list_workmates2 = new ArrayList<>();
-        list_workmates2.add(new Workmate("Jean",null,null,null,null,null,null,null));
-        list_workmates2.add(new Workmate("Kevin",null,null,null,null,null,null,null));
-        list_workmates2.add(new Workmate("Sami",null,null,null,null,null,null,null));
+        list_workmates2.add(new Workmate("Jean",null,null,null,null,null,null,null,null));
+        list_workmates2.add(new Workmate("Kevin",null,null,null,null,null,null,null,null));
+        list_workmates2.add(new Workmate("Sami",null,null,null,null,null,null,null,null));
 
 
         String id3 = "ID3";
@@ -135,8 +135,8 @@ public class ExampleUnitTest {
         geometry3.setLocation(location3);
         Double rating3 = 1.6d;
         List<Workmate> list_workmates3 = new ArrayList<>();
-        list_workmates3.add(new Workmate("Jean",null,null,null,null,null,null,null));
-        list_workmates3.add(new Workmate("Kevin",null,null,null,null,null,null,null));
+        list_workmates3.add(new Workmate("Jean",null,null,null,null,null,null,null,null));
+        list_workmates3.add(new Workmate("Kevin",null,null,null,null,null,null,null,null));
 
 
         String id4 = "ID4";
@@ -147,7 +147,7 @@ public class ExampleUnitTest {
         geometry4.setLocation(location4);
         Double rating4 = 0.9d;
         List<Workmate> list_workmates4 = new ArrayList<>();
-        list_workmates4.add(new Workmate("Jean",null,null,null,null,null,null,null));
+        list_workmates4.add(new Workmate("Jean",null,null,null,null,null,null,null,null));
 
         new_list_places_nearby.add(new Place_Nearby(null,id4,geometry4,null,rating4,null,null,null,null,null,null));
         new_list_places_nearby.add(new Place_Nearby(null,id1,geometry1,null,rating1,null,null,null,null,null,null));
@@ -161,17 +161,17 @@ public class ExampleUnitTest {
 
         List<Workmate> new_list_workmates = new ArrayList<>();
 
-        new_list_workmates.add(new Workmate("Jean",null,null,null,"ID1",null,null,null));
-        new_list_workmates.add(new Workmate("Kevin",null,null,null,"ID4",null,null,null));
-        new_list_workmates.add(new Workmate("Sami",null,null,null,"ID1",null,null,null));
-        new_list_workmates.add(new Workmate("Caro",null,null,null,"ID1",null,null,null));
-        new_list_workmates.add(new Workmate("Jean",null,null,null,"ID3",null,null,null));
-        new_list_workmates.add(new Workmate("Kevin",null,null,null,"ID2",null,null,null));
-        new_list_workmates.add(new Workmate("Sami",null,null,null,"ID3",null,null,null));
-        new_list_workmates.add(new Workmate("Sami",null,null,null,"ID4",null,null,null));
-        new_list_workmates.add(new Workmate("Sami",null,null,null,"ID3",null,null,null));
-        new_list_workmates.add(new Workmate("Sami",null,null,null,"ID1",null,null,null));
-        new_list_workmates.add(new Workmate("Sami",null,null,null,"ID3",null,null,null));
+        new_list_workmates.add(new Workmate("Jean",null,null,null,"ID1",null,null,null,null));
+        new_list_workmates.add(new Workmate("Kevin",null,null,null,"ID4",null,null,null,null));
+        new_list_workmates.add(new Workmate("Sami",null,null,null,"ID1",null,null,null,null));
+        new_list_workmates.add(new Workmate("Caro",null,null,null,"ID1",null,null,null,null));
+        new_list_workmates.add(new Workmate("Jean",null,null,null,"ID3",null,null,null,null));
+        new_list_workmates.add(new Workmate("Kevin",null,null,null,"ID2",null,null,null,null));
+        new_list_workmates.add(new Workmate("Sami",null,null,null,"ID3",null,null,null,null));
+        new_list_workmates.add(new Workmate("Sami",null,null,null,"ID4",null,null,null,null));
+        new_list_workmates.add(new Workmate("Sami",null,null,null,"ID3",null,null,null,null));
+        new_list_workmates.add(new Workmate("Sami",null,null,null,"ID1",null,null,null,null));
+        new_list_workmates.add(new Workmate("Sami",null,null,null,"ID3",null,null,null,null));
 
         return new_list_workmates;
     }

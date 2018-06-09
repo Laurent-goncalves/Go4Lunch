@@ -61,10 +61,10 @@ public class MainActivityTest {
 
         waiting_time(5000);
 
-        firebase_update.update_full_workmate_data(new Workmate("Sean","ID1","https://i.pinimg.com/originals/e7/c4/dc/e7c4dc04867ad87c2437f22cc1859f5d.jpg",true,"IDresto1","McDo",null,null));
-        firebase_update.update_full_workmate_data(new Workmate("Hugh","ID2","https://upload.wikimedia.org/wikipedia/commons/thumb/f/f7/Hugh_Jackman_%282017%29.jpg/1200px-Hugh_Jackman_%282017%29.jpg",false,null,null,null,null));
-        firebase_update.update_full_workmate_data(new Workmate("George","ID3","https://gal.img.pmdstatic.net/fit/http.3A.2F.2Fprd2-bone-image.2Es3-website-eu-west-1.2Eamazonaws.2Ecom.2Fprismamedia_people.2F2017.2F06.2F30.2F2249dbc4-7761-4990-87af-258d04ba95ee.2Ejpeg/2419x1677/quality/80/george-clooney.jpg",true,"IDresto3","Le Trucanous",null,null));
-        firebase_update.update_full_workmate_data(new Workmate("Brigitte","ID4","https://pbs.twimg.com/profile_images/898819805083467776/IqAVGrO4_400x400.jpg",false,null,null,null,null));
+        firebase_update.update_full_workmate_data(new Workmate("Sean","ID1","https://i.pinimg.com/originals/e7/c4/dc/e7c4dc04867ad87c2437f22cc1859f5d.jpg",true,"IDresto1","McDo",null,null,null));
+        firebase_update.update_full_workmate_data(new Workmate("Hugh","ID2","https://upload.wikimedia.org/wikipedia/commons/thumb/f/f7/Hugh_Jackman_%282017%29.jpg/1200px-Hugh_Jackman_%282017%29.jpg",false,null,null,null,null,null));
+        firebase_update.update_full_workmate_data(new Workmate("George","ID3","https://gal.img.pmdstatic.net/fit/http.3A.2F.2Fprd2-bone-image.2Es3-website-eu-west-1.2Eamazonaws.2Ecom.2Fprismamedia_people.2F2017.2F06.2F30.2F2249dbc4-7761-4990-87af-258d04ba95ee.2Ejpeg/2419x1677/quality/80/george-clooney.jpg",true,"IDresto3",null,"Le Trucanous",null,null));
+        firebase_update.update_full_workmate_data(new Workmate("Brigitte","ID4","https://pbs.twimg.com/profile_images/898819805083467776/IqAVGrO4_400x400.jpg",false,null,null,null,null,null));
     }
 
     @Test

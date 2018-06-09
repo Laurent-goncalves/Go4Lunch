@@ -36,6 +36,11 @@
     <string name="type_of_place">Type d\'établissement: </string>
     <string name="done">Terminé</string>
 
+    <!-- NOTIFICATIONS MESSAGE -->
+    <string name="you_lunch">Ce midi, vous déjeunez au restaurant</string>
+    <string name="at_the_address">à l\'adresse</string>
+    <string name="with">avec</string>
+
     <!-- MENU -->
     <string name="your_lunch">VOTRE REPAS</string>
     <string name="settings">PARAMETRES</string>

@@ -36,6 +36,11 @@
     <string name="type_of_place">Type of place: </string>
     <string name="done">Done</string>
 
+    <!-- NOTIFICATIONS MESSAGE -->
+    <string name="you_lunch">At noon, you go to lunch to restaurant</string>
+    <string name="at_the_address">at the address</string>
+    <string name="with">with</string>
+
     <!-- MENU -->
     <string name="your_lunch">YOUR LUNCH</string>
     <string name="settings">SETTINGS</string>

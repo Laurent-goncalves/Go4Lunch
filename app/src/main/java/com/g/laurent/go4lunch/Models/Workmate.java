@@ -10,10 +10,11 @@ public class Workmate {
     private String resto_id;
     private String resto_type;
     private String resto_name;
+    private String resto_address;
     private String photoUrl;
     private List<String> list_resto_liked;
 
-    public Workmate(String name, String id, String photoUrl, Boolean chosen, String resto_id, String resto_name, String resto_type, List<String> list_resto_liked) {
+    public Workmate(String name, String id, String photoUrl, Boolean chosen, String resto_id, String resto_name,String resto_address, String resto_type, List<String> list_resto_liked) {
         this.name = name;
         this.id=id;
         this.photoUrl=photoUrl;
@@ -21,6 +22,7 @@ public class Workmate {
         this.resto_id = resto_id;
         this.resto_type=resto_type;
         this.resto_name=resto_name;
+        this.resto_address=resto_address;
         this.list_resto_liked=list_resto_liked;
     }
 
@@ -78,6 +80,14 @@ public class Workmate {
 
     public void setResto_name(String resto_name) {
         this.resto_name = resto_name;
+    }
+
+    public String getResto_address() {
+        return resto_address;
+    }
+
+    public void setResto_address(String resto_address) {
+        this.resto_address = resto_address;
     }
 
     public List<String> getList_resto_liked() {

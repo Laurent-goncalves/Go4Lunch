@@ -86,7 +86,7 @@ public class RestoFragment extends Fragment {
         String resto_json = getArguments().getString(EXTRA_RESTO_DETAILS,null);
         resto = gson.fromJson(resto_json,Place_Nearby.class);
         placeId = resto.getPlaceId();
-        
+
         firebase_update = new Firebase_update(context,this);
         api_key = context.getResources().getString(R.string.google_maps_key2);
         recover_list_workmates();

@@ -26,19 +26,6 @@ public class List_Search_Nearby {
     private final static String CALLBACK_LIST_RESTO_FRAGMENT = "callbasck_list_resto_fragment";
 
 
-    public List_Search_Nearby(String api_key, LatLng latLng, String radius, String type, MapsFragment mapsFragment) {
-        this.mapsFragment=mapsFragment;
-        list_places_nearby = new ArrayList<>();
-      //  launch_request_search_nearby_places(api_key, latLng, radius, type, CALLBACK_MAPS_FRAGMENT);
-    }
-
-    public List_Search_Nearby(String api_key, LatLng latLng, String radius, String type, ListRestoFragment listRestoFragment) {
-
-        this.listRestoFragment=listRestoFragment;
-        list_places_nearby = new ArrayList<>();
-       // launch_request_search_nearby_places(api_key,latLng, radius, type,CALLBACK_LIST_RESTO_FRAGMENT);
-    }
-
     public List_Search_Nearby(String api_key, LatLng latLng, String radius, String type, CallbackMultiActivity callbackMultiActivity) {
         list_places_nearby = new ArrayList<>();
         launch_request_search_nearby_places(api_key, latLng, radius, type, callbackMultiActivity);

@@ -9,6 +9,7 @@ import com.g.laurent.go4lunch.Controllers.Activities.RestoActivity;
 import com.g.laurent.go4lunch.Controllers.Fragments.ListMatesFragment;
 import com.g.laurent.go4lunch.Controllers.Fragments.ListRestoFragment;
 import com.g.laurent.go4lunch.Controllers.Fragments.MapsFragment;
+import com.g.laurent.go4lunch.Models.Callback_alarm;
 import com.g.laurent.go4lunch.Models.Workmate;
 import com.g.laurent.go4lunch.Controllers.Fragments.RestoFragment;
 import com.google.firebase.FirebaseApp;
@@ -19,6 +20,8 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import java.util.ArrayList;
 import java.util.List;
+
+import javax.security.auth.callback.Callback;
 
 
 public class Firebase_recover {
@@ -34,10 +37,12 @@ public class Firebase_recover {
     private final static String CALLBACK_LISTRESTOFRAGMENT = "callback_listrestofragment";
     private final static String CALLBACK_LISTMATESFRAGMENT = "callback_listmatesfragment";
     private final static String CALLBACK_MAPSFRAGMENT = "callback_mapsfragment";
+    private final static String CALLBACK_ALARM = "callback_alarm";
     private final static String RENEW_LIST_WORKMATES = "renew_list_workmates";
     private final static String INITIAL_LIST_WORKMATES = "initial_list_workmates";
     private final static String EXTRA_PLACE_ID = "placeId_resto";
     private String callback;
+    private Callback_alarm callback_alarm;
     private Context context;
     private List<String> list_restos_liked;
     private String resto_id_chosen;
@@ -90,6 +95,14 @@ public class Firebase_recover {
         databaseReferenceWorkmates= databaseReference.child("workmates").child(userId);
     }
 
+    public Firebase_recover(Context context, Callback_alarm callback){
+        FirebaseApp.initializeApp(context);
+        this.callback = CALLBACK_ALARM;
+        this.callback_alarm = callback;
+        DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference();
+        databaseReferenceWorkmates= databaseReference.child("workmates");
+    }
+
     // ----------------------------------------------------------------------------------------------
     // ------------------------------- RECOVER WORKMATES --------------------------------------------
     // ----------------------------------------------------------------------------------------------
@@ -126,6 +139,12 @@ public class Firebase_recover {
                         case CALLBACK_MAPSFRAGMENT:
                             if(mapsFragment!=null)
                                 mapsFragment.set_list_of_workmates(list_workmates);
+                            break;
+                        case CALLBACK_ALARM:
+                            System.out.println("eee   CALLBACK_ALARM  ");
+
+                            if(callback_alarm!=null)
+                                callback_alarm.send_notification(list_workmates);
                             break;
                     }
                 }
@@ -250,6 +269,7 @@ public class Firebase_recover {
                 (Boolean) datas.child("chosen").getValue(),
                 (String) datas.child("resto_id").getValue(),
                 (String) datas.child("resto_name").getValue(),
+                (String) datas.child("resto_address").getValue(),
                 (String) datas.child("resto_type").getValue(),
                 list_resto_liked);
 

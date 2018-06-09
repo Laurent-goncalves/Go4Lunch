@@ -54,6 +54,7 @@ public class Firebase_update implements GoogleApiClient.OnConnectionFailedListen
     public void update_chosen_status_workmate(String user_id, Place_Nearby resto){
         databaseReferenceWorkmates.child(user_id).child("resto_id").setValue(resto.getPlaceId());
         databaseReferenceWorkmates.child(user_id).child("resto_name").setValue(resto.getName_restaurant());
+        databaseReferenceWorkmates.child(user_id).child("resto_address").setValue(resto.getAddress());
         databaseReferenceWorkmates.child(user_id).child("resto_type").setValue(resto.getTypes().get(0));
         databaseReferenceWorkmates.child(user_id).child("chosen").setValue(true);
 

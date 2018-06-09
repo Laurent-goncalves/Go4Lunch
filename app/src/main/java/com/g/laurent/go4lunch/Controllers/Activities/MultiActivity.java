@@ -71,13 +71,13 @@ import butterknife.ButterKnife;
 import static android.content.ContentValues.TAG;
 
 
-public class MultiActivity extends AppCompatActivity implements AlarmReceiver.callbackAlarm,
-        Callback_resto_fb, NavigationView.OnNavigationItemSelectedListener,CallbackMultiActivity {
+public class MultiActivity extends AppCompatActivity implements Callback_resto_fb, NavigationView.OnNavigationItemSelectedListener,CallbackMultiActivity {
 
     private LatLng lastKnownPlace;
     private final static String EXTRA_LAT_CURRENT = "latitude_current_location";
     private final static String EXTRA_LONG_CURRENT = "longitude_current_location";
     private static final String EXTRA_PREF_RADIUS = "radius_preferences";
+    private static final String EXTRA_USER_ID = "user_id_alarm";
     private static final int SIGN_OUT_TASK = 10;
     private final String EXTRA_API_KEY = "api_key";
     private String api_key;
@@ -114,7 +114,7 @@ public class MultiActivity extends AppCompatActivity implements AlarmReceiver.ca
 
         this.configureDrawerLayout();
         this.configureNavigationView();
-        //configureAlarmManager();
+        this.configureAlarmManager();
         LatLng currentPlaceLatLng = new LatLng(48.866667, 2.333333);
         String radius = "500";
         String type = "restaurant";
@@ -228,13 +228,10 @@ public class MultiActivity extends AppCompatActivity implements AlarmReceiver.ca
 
     private void configureAlarmManager() {
 
-        // Configuration of alarm for saving feeling each day
-        AlarmReceiver.callbackAlarm mcallbackAlarm = this;
-        AlarmReceiver alarmReceiver = new AlarmReceiver();
-        alarmReceiver.createCallbackAlarm(mcallbackAlarm);
-
-        Intent alarmIntent = new Intent(getApplicationContext(), alarmReceiver.getClass());
-        PendingIntent pendingIntent = PendingIntent.getBroadcast(getApplicationContext(), 0, alarmIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+        AlarmManager alarmMgr = (AlarmManager) getApplicationContext().getSystemService(Context.ALARM_SERVICE);
+        Intent intent = new Intent(getApplicationContext(), AlarmReceiver.class);
+        intent.putExtra(EXTRA_USER_ID,mCurrentUser.getUid());
+        PendingIntent alarmIntent = PendingIntent.getBroadcast(getApplicationContext(), 0, intent, 0);
 
         // Set the alarm to start at 12:00 p.m.
         Calendar calendar = Calendar.getInstance();
@@ -242,10 +239,11 @@ public class MultiActivity extends AppCompatActivity implements AlarmReceiver.ca
         calendar.set(Calendar.HOUR_OF_DAY, 12);
         calendar.set(Calendar.MINUTE, 0);
 
-        // Create alarm to ring it every day at noon
-        AlarmManager manager = (AlarmManager) getApplicationContext().getSystemService(Context.ALARM_SERVICE);
-        if (manager != null)
-            manager.setRepeating(AlarmManager.RTC, calendar.getTimeInMillis(), AlarmManager.INTERVAL_DAY, pendingIntent);
+        // setRepeating() lets you specify a precise custom interval
+        if (alarmMgr != null)
+        alarmMgr.setRepeating(AlarmManager.RTC, calendar.getTimeInMillis(),
+                AlarmManager.INTERVAL_DAY, alarmIntent);
+
     }
 
     // ---------------------------------------------------------------------------------
@@ -444,10 +442,6 @@ System.out.println("eee    onClose!!");
 
     }
 
-    @Override
-    public void create_new_list_nearby_places() {
-
-    }
 
     public MultiFragAdapter getPageAdapter() {
         return pageAdapter;
