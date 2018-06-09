@@ -8,22 +8,22 @@ import com.g.laurent.go4lunch.R;
 
 public class RestoActivity extends AppCompatActivity {
 
-    private final static String EXTRA_PLACE_ID = "placeId_resto";
+    private final static String EXTRA_RESTO_DETAILS = "resto_details";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_resto);
 
-        String placeId = getIntent().getStringExtra(EXTRA_PLACE_ID);
-        configure_and_show_restofragment(placeId);
+        String resto_details = getIntent().getStringExtra(EXTRA_RESTO_DETAILS);
+        configure_and_show_restofragment(resto_details);
     }
 
-    public void configure_and_show_restofragment(String placeId) {
+    public void configure_and_show_restofragment(String resto_details) {
 
         // Create new bundle
         Bundle bundle = new Bundle();
-        bundle.putString(EXTRA_PLACE_ID,placeId);
+        bundle.putString(EXTRA_RESTO_DETAILS,resto_details);
 
         // Create new fragment and transaction
         RestoFragment restoFragment = new RestoFragment();

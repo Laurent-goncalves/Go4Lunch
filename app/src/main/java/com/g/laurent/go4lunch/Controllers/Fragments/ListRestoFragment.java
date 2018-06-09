@@ -20,6 +20,10 @@ import com.g.laurent.go4lunch.R;
 import com.g.laurent.go4lunch.Utils.Firebase_recover;
 import com.g.laurent.go4lunch.Views.Resto_List.ListViewAdapter;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
+
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
 import butterknife.BindView;
@@ -37,11 +41,7 @@ public class ListRestoFragment extends BaseRestoFragment implements ListViewAdap
     @BindView(R.id.sort_by_number_workmates) Button button_workmates;
     @BindView(R.id.sort_by_number_stars) Button button_stars;
     @BindView(R.id.sort_by_distance) Button button_distance;
-    private LatLng current_location;
-    private final static String EXTRA_LAT_CURRENT = "latitude_current_location";
-    private final static String EXTRA_LONG_CURRENT = "longitude_current_location";
     private static final String EXTRA_PREFERENCES = "preferences";
-    private static final String EXTRA_PREF_LANG = "language_preferences";
     private static final String EXTRA_PREF_RADIUS = "radius_preferences";
     private static final String EXTRA_PREF_TYPE_PLACE = "type_place_preferences";
     private String placeId;
@@ -52,28 +52,21 @@ public class ListRestoFragment extends BaseRestoFragment implements ListViewAdap
         // Required empty public constructor
     }
 
-    public static ListRestoFragment newInstance(String api_key) {
+    public static ListRestoFragment newInstance(String api_key, List<Place_Nearby> list_restos) {
 
         // Create new fragment
         ListRestoFragment frag = new ListRestoFragment();
-        String EXTRA_API_KEY = "api_key";
 
-        // Create bundle and add it some data
+        // Create bundle and add the list of restaurants to the bundle
         Bundle bundle = new Bundle();
-        bundle.putString(EXTRA_API_KEY, api_key);
+        Gson gson = new Gson();
+        String list_restos_json = gson.toJson(list_restos);
+        bundle.putString(EXTRA_LIST_RESTOS_JSON, list_restos_json);
+
         frag.setArguments(bundle);
 
         return(frag);
     }
-
-   /* @Override
-    public void onAttach(Activity activity) {
-        super.onAttach(activity);
-
-        mListener = (interface) activity;
-
-
-    }*/
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -88,12 +81,22 @@ public class ListRestoFragment extends BaseRestoFragment implements ListViewAdap
         firebase_recover = new Firebase_recover(context,this);
 
         // Recover list of restos nearby
-        current_location =new LatLng(48.866667,2.333333);
-        String radius = String.valueOf(sharedPreferences.getInt(EXTRA_PREF_RADIUS, 500));
-        String type = sharedPreferences.getString(EXTRA_PREF_TYPE_PLACE,"restaurant");
+        currentPlaceLatLng =new LatLng(48.866667,2.333333);
+
         String api_key = getResources().getString(R.string.google_maps_key2);
 
-        new List_Search_Nearby(api_key, current_location,radius,type,this);
+        if(getArguments()!=null) {
+
+            Gson gson = new Gson();
+            String json = getArguments().getString(EXTRA_LIST_RESTOS_JSON,null);
+            Type list_places = new TypeToken<ArrayList<Place_Nearby>>(){}.getType();
+            list_places_nearby = gson.fromJson(json,list_places);
+        }
+
+
+        recover_list_workmates(list_places_nearby);
+
+        //new List_Search_Nearby(api_key, current_location,radius,type,this);
 
         create_onclicklistener_for_sorting_buttons();
         return view;
@@ -110,7 +113,7 @@ public class ListRestoFragment extends BaseRestoFragment implements ListViewAdap
 
         if(context!=null) {
             // Create adapter passing in the sample user data
-            ListViewAdapter adapter = new ListViewAdapter(context, list_places_nearby, list_workmates, current_location, this);
+            ListViewAdapter adapter = new ListViewAdapter(context, list_places_nearby, list_workmates, currentPlaceLatLng, this);
             // Attach the adapter to the recyclerview to populate items
             recyclerView.setAdapter(adapter);
             // Set layout manager to position the items
@@ -118,14 +121,31 @@ public class ListRestoFragment extends BaseRestoFragment implements ListViewAdap
         }
     }
 
+    public void recover_previous_state(){
+
+        if(list_places_nearby_OLD!=null){
+            if(list_places_nearby_OLD.size()>0){
+
+                this.list_places_nearby = new ArrayList<>();
+                this.list_places_nearby.addAll(list_places_nearby_OLD);
+                list_places_nearby_OLD.clear();
+                configure_recycler_view();
+            }
+        }
+    }
+
     private void getLatLng_current_location(){
         // recover the latitude and longitude inside the bundle
-        current_location = new LatLng(getArguments().getDouble(EXTRA_LAT_CURRENT,0),
+        currentPlaceLatLng = new LatLng(getArguments().getDouble(EXTRA_LAT_CURRENT,0),
                                           getArguments().getDouble(EXTRA_LONG_CURRENT,0));
     }
 
     @Override
     public void onClickShowRestoDetails(String placeId) {
+
+
+
+
         mCallback_detailResto.configure_and_show_restofragment(placeId);
     }
 
@@ -177,7 +197,7 @@ public class ListRestoFragment extends BaseRestoFragment implements ListViewAdap
         if(list_places_nearby!=null){
 
             if(!type_sorting.equals("workmates")) {
-                list_to_sort_dbl=create_list_to_sort(list_places_nearby, type_sorting,current_location);
+                list_to_sort_dbl=create_list_to_sort(list_places_nearby, type_sorting,currentPlaceLatLng);
                 list_index.addAll(set_list_sorted_dbl(list_to_sort_dbl,type_sorting));
                 new_list_place_nearby=create_list_place_nearby_sorted(list_index);
                 list_places_nearby.clear();
@@ -189,11 +209,19 @@ public class ListRestoFragment extends BaseRestoFragment implements ListViewAdap
     }
 
     public void setCurrent_location(LatLng current_location) {
-        this.current_location = current_location;
+        this.currentPlaceLatLng = current_location;
     }
 
     public void recover_list_workmates(List<Place_Nearby> list_resto) {
+
+        if(list_places_nearby_OLD!=null && list_places_nearby!=null){
+            if(list_places_nearby_OLD.size()==0){ // if there is no place nearby in the old list, it means this method is called for the search
+                list_places_nearby_OLD.addAll(list_places_nearby);
+            }
+        }
+
         this.list_places_nearby = list_resto;
+
         firebase_recover = new Firebase_recover(context,this);
         firebase_recover.recover_list_workmates();
     }

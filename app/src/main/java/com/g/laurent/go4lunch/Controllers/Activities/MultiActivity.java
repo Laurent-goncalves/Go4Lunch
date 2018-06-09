@@ -6,12 +6,14 @@ import android.app.SearchManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
 import android.os.Bundle;
 import android.support.design.widget.TabLayout;
 import android.support.v4.view.GravityCompat;
+import android.support.v4.view.MenuItemCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v4.widget.SwipeRefreshLayout;
@@ -26,7 +28,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
-import android.widget.SearchView;
+import android.support.v7.widget.SearchView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -34,7 +36,9 @@ import com.bumptech.glide.Glide;
 import com.firebase.ui.auth.AuthUI;
 import com.g.laurent.go4lunch.Controllers.Fragments.ListRestoFragment;
 import com.g.laurent.go4lunch.Models.AlarmReceiver;
+import com.g.laurent.go4lunch.Models.CallbackMultiActivity;
 import com.g.laurent.go4lunch.Models.Callback_resto_fb;
+import com.g.laurent.go4lunch.Models.List_Search_Nearby;
 import com.g.laurent.go4lunch.Models.Place_Nearby;
 import com.g.laurent.go4lunch.R;
 import com.g.laurent.go4lunch.Utils.DistanceCalculation;
@@ -68,7 +72,7 @@ import static android.content.ContentValues.TAG;
 
 
 public class MultiActivity extends AppCompatActivity implements AlarmReceiver.callbackAlarm,
-        Callback_resto_fb, NavigationView.OnNavigationItemSelectedListener, PlaceSelectionListener {
+        Callback_resto_fb, NavigationView.OnNavigationItemSelectedListener,CallbackMultiActivity {
 
     private LatLng lastKnownPlace;
     private final static String EXTRA_LAT_CURRENT = "latitude_current_location";
@@ -86,6 +90,8 @@ public class MultiActivity extends AppCompatActivity implements AlarmReceiver.ca
     private int PLACE_AUTOCOMPLETE_REQUEST_CODE = 1;
     private int current_page;
     private ViewPager pager;
+    private SearchView searchView;
+    private MenuItem searchItem;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -109,8 +115,11 @@ public class MultiActivity extends AppCompatActivity implements AlarmReceiver.ca
         this.configureDrawerLayout();
         this.configureNavigationView();
         //configureAlarmManager();
-        configureViewPagerAndTabs();
-        //configure_autocomplete_request();
+        LatLng currentPlaceLatLng = new LatLng(48.866667, 2.333333);
+        String radius = "500";
+        String type = "restaurant";
+
+        new List_Search_Nearby(api_key, currentPlaceLatLng, radius, type, this);
 
         SwipeRefreshLayout swipeRefreshLayout = this.findViewById(R.id.swiperefresh);
         swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
@@ -121,67 +130,35 @@ public class MultiActivity extends AppCompatActivity implements AlarmReceiver.ca
                     (mSwipeRefreshLayout.isRefreshing()) {
                         mSwipeRefreshLayout.setRefreshing(false);     } // à mettre dans classe interne*/
                 }
-
-
-
             }
         );
-
-
-
-      /*  PlaceAutocompleteFragment autocompleteFragment = (PlaceAutocompleteFragment)
-                getFragmentManager().findFragmentById(R.id.place_autocomplete_fragment);
-
-        // Register a listener to receive callbacks when a place has been selected or an error has
-        // occurred.
-        autocompleteFragment.setOnPlaceSelectedListener(this);*/
-
-
     }
 
-
-   /* private void configure_autocomplete_request() {
-
-        String EXTRA_PREFERENCES = "preferences";
-        SharedPreferences sharedPreferences = getSharedPreferences(EXTRA_PREFERENCES, MODE_PRIVATE);
-        LatLng current_location = new LatLng(48.866667, 2.333333);
-        int radius = sharedPreferences.getInt(EXTRA_PREF_RADIUS, 500);
-
-        configure_autocomplete(current_location, radius);
-
-    }
-
-    public void configure_autocomplete(LatLng center, int radius) {
-
-        // Define bounds for search
-        DistanceCalculation tool_calcul_distance = new DistanceCalculation();
-        LatLngBounds bounds = tool_calcul_distance.create_LatLngBounds(radius, center);
-
-        try {
-
-
-            // Creation of an intent
-            Intent intent =
-                    new PlaceAutocomplete.IntentBuilder(PlaceAutocomplete.MODE_FULLSCREEN)
-                            .setFilter(typeFilter)
-                            .setBoundsBias(bounds)
-                            .build(this);
-
-            startActivityForResult(intent, PLACE_AUTOCOMPLETE_REQUEST_CODE);
-
-        } catch (GooglePlayServicesRepairableException | GooglePlayServicesNotAvailableException e) {
-            Toast toast = Toast.makeText(getApplicationContext(), "Error autocomplete request \r\n" + e, Toast.LENGTH_SHORT);
-            toast.show();
-        }
-    }*/
-
-    private void configureViewPagerAndTabs() {
+    @Override
+    public void configureViewPagerAndTabs(List<Place_Nearby> list_restos) {
 
         // Get ViewPager from layout
         pager = findViewById(R.id.viewpager);
 
-        pageAdapter = new MultiFragAdapter(getSupportFragmentManager(), api_key, getApplicationContext());
-        pager.setAdapter(pageAdapter);
+        pageAdapter = new MultiFragAdapter(getSupportFragmentManager(), api_key, getApplicationContext(), list_restos);
+
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                pager.setAdapter(pageAdapter);
+
+                // Get TabLayout from layout
+                tabs = findViewById(R.id.activity_multi_tabs);
+                tabs.setupWithViewPager(pager);
+
+                // Glue TabLayout and ViewPager together
+                configure_tabs();
+
+                // Design purpose. Tabs have the same width
+                tabs.setTabMode(TabLayout.MODE_FIXED);
+            }
+        });
+
 
         pager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
             @Override
@@ -200,16 +177,6 @@ public class MultiActivity extends AppCompatActivity implements AlarmReceiver.ca
             }
         });
 
-
-        // Get TabLayout from layout
-        tabs = findViewById(R.id.activity_multi_tabs);
-        tabs.setupWithViewPager(pager);
-
-        // Glue TabLayout and ViewPager together
-        configure_tabs();
-
-        // Design purpose. Tabs have the same width
-        tabs.setTabMode(TabLayout.MODE_FIXED);
     }
 
     private void configure_tabs() {
@@ -236,6 +203,11 @@ public class MultiActivity extends AppCompatActivity implements AlarmReceiver.ca
                     configureToolBar("Available workmates", true);
                 else
                     configureToolBar("I'm hungry!", true);
+
+
+                if(searchItem!=null) {
+                    searchItem.collapseActionView();
+                }
             }
 
             @Override
@@ -311,6 +283,10 @@ public class MultiActivity extends AppCompatActivity implements AlarmReceiver.ca
         switch (item.getItemId()) {
             case android.R.id.home:
                 drawerLayout.openDrawer(GravityCompat.START);  // OPEN DRAWER
+
+                if(searchItem!=null) {
+                    searchItem.collapseActionView();
+                }
                 return true;
         }
         return true;
@@ -322,7 +298,8 @@ public class MultiActivity extends AppCompatActivity implements AlarmReceiver.ca
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.options_menu, menu);
 
-        SearchView searchView = (SearchView) menu.findItem(R.id.search).getActionView();
+        searchItem = menu.findItem(R.id.search);
+        searchView = (SearchView) searchItem.getActionView();
 
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
@@ -352,12 +329,32 @@ public class MultiActivity extends AppCompatActivity implements AlarmReceiver.ca
 
             @Override
             public boolean onQueryTextChange(String s) {
+                searchView.setBackgroundColor(Color.WHITE);
                 return false;
             }
         });
 
+        searchView.setOnCloseListener(new SearchView.OnCloseListener() {
+            @Override
+            public boolean onClose() {
+System.out.println("eee    onClose!!");
+                switch(current_page){
+                    case 0:
+                        pageAdapter.getMapsFragment().recover_previous_state();
+                        break;
+                    case 1:
+                        pageAdapter.getListRestoFragment().recover_previous_state();
+                        break;
+                }
+                return false;
+            }
+        });
+        searchView.setIconifiedByDefault(true);
+
         return true;
     }
+
+
 
     // ---------------------------------------------------------------------------------
     // -----------------     CONFIGURATION OF DRAWER  ----------------------------------
@@ -456,15 +453,6 @@ public class MultiActivity extends AppCompatActivity implements AlarmReceiver.ca
         return pageAdapter;
     }
 
-    @Override
-    public void onPlaceSelected(Place place) {
-
-    }
-
-    @Override
-    public void onError(Status status) {
-
-    }
 
     /*
     private void configureOnClickRecyclerView(){

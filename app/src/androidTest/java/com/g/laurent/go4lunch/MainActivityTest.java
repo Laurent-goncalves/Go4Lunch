@@ -1,28 +1,25 @@
 package com.g.laurent.go4lunch;
 
-
 import android.content.Context;
-import android.support.test.espresso.ViewInteraction;
-import android.support.test.espresso.contrib.RecyclerViewActions;
 import android.support.test.rule.ActivityTestRule;
 import android.support.test.runner.AndroidJUnit4;
 import android.test.mock.MockContext;
 import android.test.suitebuilder.annotation.LargeTest;
-import android.text.TextPaint;
-import android.text.style.CharacterStyle;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewParent;
 import com.g.laurent.go4lunch.Controllers.Activities.MultiActivity;
-import com.g.laurent.go4lunch.Controllers.Fragments.ListRestoFragment;
 import com.g.laurent.go4lunch.Controllers.Fragments.MapsFragment;
 import com.g.laurent.go4lunch.Models.List_Search_Nearby;
-import com.g.laurent.go4lunch.Utils.DistanceCalculation;
-import com.g.laurent.go4lunch.Utils.Firebase_recover;
+import com.g.laurent.go4lunch.Models.Place_Nearby;
+import com.g.laurent.go4lunch.Models.Workmate;
+import com.g.laurent.go4lunch.Utils.DetailsPlace.Close;
+import com.g.laurent.go4lunch.Utils.DetailsPlace.Open;
+import com.g.laurent.go4lunch.Utils.DetailsPlace.OpeningHours;
+import com.g.laurent.go4lunch.Utils.DetailsPlace.Period;
 import com.g.laurent.go4lunch.Utils.Firebase_update;
-import com.g.laurent.go4lunch.Utils.Google_Maps_Utils;
-import com.g.laurent.go4lunch.Views.MultiFragAdapter;
+import com.g.laurent.go4lunch.Utils.TimeCalculation;
 import com.google.android.gms.common.data.DataBufferUtils;
 import com.google.android.gms.location.places.AutocompletePrediction;
 import com.google.android.gms.location.places.AutocompletePredictionBufferResponse;
@@ -33,7 +30,6 @@ import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.tasks.RuntimeExecutionException;
 import com.google.android.gms.tasks.Task;
 import com.google.android.gms.tasks.Tasks;
-
 import junit.framework.Assert;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
@@ -41,24 +37,14 @@ import org.hamcrest.TypeSafeMatcher;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mockito;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
-
 import static android.content.ContentValues.TAG;
-import static android.support.test.espresso.Espresso.onView;
-import static android.support.test.espresso.action.ViewActions.click;
-import static android.support.test.espresso.action.ViewActions.scrollTo;
-import static android.support.test.espresso.contrib.RecyclerViewActions.actionOnItemAtPosition;
-import static android.support.test.espresso.matcher.ViewMatchers.isDisplayed;
-import static android.support.test.espresso.matcher.ViewMatchers.withClassName;
-import static android.support.test.espresso.matcher.ViewMatchers.withId;
-import static android.support.test.espresso.matcher.ViewMatchers.withText;
-import static org.hamcrest.Matchers.allOf;
-import static org.hamcrest.Matchers.is;
 
 
 @LargeTest
@@ -69,10 +55,115 @@ public class MainActivityTest {
     public ActivityTestRule<MultiActivity> mActivityTestRule = new ActivityTestRule<>(MultiActivity.class);
 
     @Test
-    public void faketest() {
+    public void create_new_users_firebase() {
+        Firebase_update firebase_update = new Firebase_update(mActivityTestRule.getActivity().getApplicationContext());
 
-        Assert.assertEquals(1,1);
 
+        waiting_time(5000);
+
+        firebase_update.update_full_workmate_data(new Workmate("Sean","ID1","https://i.pinimg.com/originals/e7/c4/dc/e7c4dc04867ad87c2437f22cc1859f5d.jpg",true,"IDresto1","McDo",null,null));
+        firebase_update.update_full_workmate_data(new Workmate("Hugh","ID2","https://upload.wikimedia.org/wikipedia/commons/thumb/f/f7/Hugh_Jackman_%282017%29.jpg/1200px-Hugh_Jackman_%282017%29.jpg",false,null,null,null,null));
+        firebase_update.update_full_workmate_data(new Workmate("George","ID3","https://gal.img.pmdstatic.net/fit/http.3A.2F.2Fprd2-bone-image.2Es3-website-eu-west-1.2Eamazonaws.2Ecom.2Fprismamedia_people.2F2017.2F06.2F30.2F2249dbc4-7761-4990-87af-258d04ba95ee.2Ejpeg/2419x1677/quality/80/george-clooney.jpg",true,"IDresto3","Le Trucanous",null,null));
+        firebase_update.update_full_workmate_data(new Workmate("Brigitte","ID4","https://pbs.twimg.com/profile_images/898819805083467776/IqAVGrO4_400x400.jpg",false,null,null,null,null));
+    }
+
+    @Test
+    public void TEST_text_opening_hours() {
+
+        OpeningHours openingHours = set_fake_openingHours();
+        TimeCalculation timeCalculation = new TimeCalculation(mActivityTestRule.getActivity().getApplicationContext());
+        int current_day = 2;
+        int current_time = 1000;
+
+        //      0h                  11h         13h15            19h          22h30            23h59
+        //      |____________________|oooooooooooo|_______________|ooooooooooooo|________________|
+        //                     /\
+        //                 current_time
+
+        Assert.assertEquals("Open at 11h",timeCalculation.getInformationAboutOpeningAndClosure(openingHours.getPeriods(),current_time,current_day-1));
+
+        current_time = 1200;
+
+        //      0h                  11h         13h15            19h          22h30            23h59
+        //      |____________________|oooooooooooo|_______________|ooooooooooooo|________________|
+        //                                /\
+        //                          current_time
+
+        Assert.assertEquals("Open until 13h15",timeCalculation.getInformationAboutOpeningAndClosure(openingHours.getPeriods(),current_time,current_day-1));
+
+        current_time = 1300;
+
+        //      0h                  11h         13h15            19h          22h30            23h59
+        //      |____________________|oooooooooooo|_______________|ooooooooooooo|________________|
+        //                                      /\
+        //                                 current_time
+
+        Assert.assertEquals("Closed soon (in 15 min)",timeCalculation.getInformationAboutOpeningAndClosure(openingHours.getPeriods(),current_time,current_day-1));
+
+        current_time = 1400;
+
+        //      0h                  11h         13h15            19h          22h30            23h59
+        //      |____________________|oooooooooooo|_______________|ooooooooooooo|________________|
+        //                                              /\
+        //                                        current_time
+
+        Assert.assertEquals("Open at 19h",timeCalculation.getInformationAboutOpeningAndClosure(openingHours.getPeriods(),current_time,current_day-1));
+
+        current_time = 2130;
+
+        //      0h                  11h         13h15            19h          22h30            23h59
+        //      |____________________|oooooooooooo|_______________|ooooooooooooo|________________|
+        //                                                                /\
+        //                                                            current_time
+
+        Assert.assertEquals("Open until 22h30",timeCalculation.getInformationAboutOpeningAndClosure(openingHours.getPeriods(),current_time,current_day-1));
+
+
+        current_time = 2300;
+
+        //      0h                  11h         13h15            19h          22h30            23h59
+        //      |____________________|oooooooooooo|_______________|ooooooooooooo|________________|
+        //                                                                            /\
+        //                                                                       current_time
+
+        Assert.assertEquals("Closed now",timeCalculation.getInformationAboutOpeningAndClosure(openingHours.getPeriods(),current_time,current_day-1));
+
+
+    }
+
+    private OpeningHours set_fake_openingHours(){
+
+        OpeningHours openingHours = new OpeningHours();
+        List<Period> periods = new ArrayList<>();
+
+        Open open1 = new Open();
+        Close close1 = new Close();
+        open1.setDay(1);
+        open1.setTime("1100");
+        close1.setDay(1);
+        close1.setTime("1315");
+        Period period1 = new Period();
+        period1.setClose(close1);
+        period1.setOpen(open1);
+
+
+        Open open2 = new Open();
+        Close close2 = new Close();
+        open2.setDay(1);
+        open2.setTime("1900");
+        close2.setDay(1);
+        close2.setTime("2230");
+        Period period2 = new Period();
+        period2.setClose(close2);
+        period2.setOpen(open2);
+
+
+        periods.add(period1);
+        periods.add(period2);
+
+        openingHours.setPeriods(periods);
+
+        return openingHours;
     }
 
     /*
@@ -280,7 +371,6 @@ public class MainActivityTest {
             Log.e(TAG, "Error getting autocomplete prediction API call", e);
         }
     }
-
 
     private static Matcher<View> childAtPosition(
             final Matcher<View> parentMatcher, final int position) {

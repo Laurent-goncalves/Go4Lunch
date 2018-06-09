@@ -19,21 +19,23 @@ public class MultiFragAdapter extends FragmentPagerAdapter {
     private MapsFragment mapsFragment;
     private ListRestoFragment listRestoFragment;
     private ListMatesFragment listMatesFragment;
+    private List<Place_Nearby> list_restos;
 
-    public MultiFragAdapter(FragmentManager fm, String api_key, Context context) {
+    public MultiFragAdapter(FragmentManager fm, String api_key, Context context, List<Place_Nearby> list_restos) {
         super(fm);
         this.api_key=api_key;
         this.context=context;
+        this.list_restos=list_restos;
     }
 
     @Override
     public Fragment getItem(int position) {
         switch (position){
             case 0: //Page number 1
-                mapsFragment = MapsFragment.newInstance(api_key);
+                mapsFragment = MapsFragment.newInstance(api_key,list_restos);
                 return mapsFragment;
             case 1: //Page number 2
-                listRestoFragment = ListRestoFragment.newInstance(api_key);
+                listRestoFragment = ListRestoFragment.newInstance(api_key,list_restos);
                 return listRestoFragment;
             case 2: //Page number 3
                 listMatesFragment = ListMatesFragment.newInstance(api_key);

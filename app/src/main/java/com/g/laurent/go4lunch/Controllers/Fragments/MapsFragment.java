@@ -22,14 +22,19 @@ import com.google.android.gms.maps.MapsInitializer;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
+
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.Type;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.List;
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -38,16 +43,14 @@ import static android.content.Context.MODE_PRIVATE;
 
 public class MapsFragment extends BaseRestoFragment  {
 
-    private List<Place_Nearby> list_places_nearby;
     @BindView(R.id.mapview) MapView mMapView;
-    private LatLng currentPlaceLatLng;
-    private final static String EXTRA_LAT_CURRENT = "latitude_current_location";
-    private final static String EXTRA_LONG_CURRENT = "longitude_current_location";
+
+
     private static final String EXTRA_PREFERENCES = "preferences";
     private static final String EXTRA_PREF_LANG = "language_preferences";
     private static final String EXTRA_PREF_RADIUS = "radius_preferences";
     private static final String EXTRA_PREF_TYPE_PLACE = "type_place_preferences";
-    private final String EXTRA_API_KEY = "api_key";
+
     private Firebase_recover firebase_recover;
     private Context context;
     private List<Workmate> list_workmates;
@@ -57,15 +60,17 @@ public class MapsFragment extends BaseRestoFragment  {
         // Required empty public constructor
     }
 
-    public static MapsFragment newInstance(String api_key) {
+    public static MapsFragment newInstance(String api_key, List<Place_Nearby> list_restos) {
 
         // Create new fragment
         MapsFragment frag = new MapsFragment();
-        String EXTRA_API_KEY = "api_key";
 
-        // Create bundle and add it some data
+        // Create bundle and add the list of restaurants to the bundle
         Bundle bundle = new Bundle();
-        bundle.putString(EXTRA_API_KEY, api_key);
+        Gson gson = new Gson();
+        String list_restos_json = gson.toJson(list_restos);
+        bundle.putString(EXTRA_LIST_RESTOS_JSON, list_restos_json);
+
         frag.setArguments(bundle);
 
         return(frag);
@@ -81,13 +86,24 @@ public class MapsFragment extends BaseRestoFragment  {
         SharedPreferences sharedPreferences = getActivity().getSharedPreferences(EXTRA_PREFERENCES, MODE_PRIVATE);
         mMapView.onCreate(savedInstanceState);
         context = getActivity().getApplicationContext();
-
+        list_places_nearby_OLD = new ArrayList<>();
         Google_Maps_Utils google_maps_utils = new Google_Maps_Utils(context);
 
         currentPlaceLatLng = new LatLng(48.866667, 2.333333);
 
-        // Recover list of restos nearby
+
         if(getArguments()!=null) {
+
+            Gson gson = new Gson();
+            String json = getArguments().getString(EXTRA_LIST_RESTOS_JSON,null);
+            Type list_places = new TypeToken<ArrayList<Place_Nearby>>(){}.getType();
+            list_places_nearby = gson.fromJson(json,list_places);
+        }
+
+        System.out.println("eee list_places=" + list_places_nearby.size());
+        recover_list_workmates(list_places_nearby);
+        // Recover list of restos nearby
+        /*if(getArguments()!=null) {
 
             // String radius = String.valueOf(sharedPreferences.getInt(EXTRA_PREF_RADIUS, 500));
             // String type = sharedPreferences.getString(EXTRA_PREF_TYPE_PLACE, "restaurant");
@@ -98,13 +114,21 @@ public class MapsFragment extends BaseRestoFragment  {
 
             if (api_key != null)
                 new List_Search_Nearby(api_key, currentPlaceLatLng, radius, type, this);
-        }
+        }*/
 
         return view;
     }
 
     public void recover_list_workmates(List<Place_Nearby> list_resto) {
+
+        if(list_places_nearby_OLD!=null && list_places_nearby!=null){
+            if(list_places_nearby_OLD.size()==0){ // if there is no place nearby in the old list, it means this method is called for the search
+                list_places_nearby_OLD.addAll(list_places_nearby);
+            }
+        }
+
         this.list_places_nearby = list_resto;
+
         firebase_recover = new Firebase_recover(context,this);
         firebase_recover.recover_list_workmates();
     }
@@ -142,8 +166,6 @@ public class MapsFragment extends BaseRestoFragment  {
                         LatLng city = new LatLng(place_nearby.getGeometry().getLocation().getLat(), place_nearby.getGeometry().getLocation().getLng());
                         String text = place_nearby.getName_restaurant();
 
-                        System.out.println("eee  text=" + text);
-
                         if(is_resto_chosen_by_workmates(place_nearby,list_workmates)) {
 
                             mMap.addMarker(new MarkerOptions()
@@ -166,8 +188,6 @@ public class MapsFragment extends BaseRestoFragment  {
             }
         }
     }
-
-
 
     public static Bitmap getBitmapFromURL(String url) {
         Bitmap bitmap = null;
@@ -208,11 +228,22 @@ public class MapsFragment extends BaseRestoFragment  {
         return bitmap;
     }
 
-
-
     public void set_list_of_workmates(List<Workmate> list_workmates){
         this.list_workmates=list_workmates;
         launch_map_view();
+    }
+
+    public void recover_previous_state(){
+
+        if(list_places_nearby_OLD!=null){
+            if(list_places_nearby_OLD.size()>0){
+
+                this.list_places_nearby = new ArrayList<>();
+                this.list_places_nearby.addAll(list_places_nearby_OLD);
+                list_places_nearby_OLD.clear();
+                launch_map_view();
+            }
+        }
     }
 
     @Override

@@ -18,6 +18,8 @@ import com.g.laurent.go4lunch.R;
 import com.g.laurent.go4lunch.Utils.DistanceCalculation;
 import com.g.laurent.go4lunch.Utils.TimeCalculation;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.gson.Gson;
+
 import java.lang.ref.WeakReference;
 import java.util.List;
 import butterknife.BindView;
@@ -39,7 +41,7 @@ public class RestoViewHolder extends RecyclerView.ViewHolder implements View.OnC
     private LatLng current_loc;
     private WeakReference<ListViewAdapter.Listener> callbackWeakRef;
     private Context context;
-    private final static String EXTRA_PLACE_ID = "placeId_resto";
+    private final static String EXTRA_RESTO_DETAILS = "resto_details";
 
     public RestoViewHolder(View itemView) {
         super(itemView);
@@ -210,7 +212,10 @@ public class RestoViewHolder extends RecyclerView.ViewHolder implements View.OnC
     @Override
     public void onClick(View v) {
         Intent intent = new Intent(context,RestoActivity.class);
-        intent.putExtra(EXTRA_PLACE_ID,place_nearby.getPlaceId());
+
+        Gson gson = new Gson();
+        String resto_json = gson.toJson(place_nearby);
+        intent.putExtra(EXTRA_RESTO_DETAILS,resto_json);
         context.startActivity(intent);
     }
 }

@@ -82,71 +82,6 @@ public class ExampleUnitTest {
     }
 
     @Test
-    public void TEST_text_opening_hours() {
-
-        Place_Nearby place_nearby = Mockito.mock(Place_Nearby.class);
-        OpeningHours openingHours = set_fake_openingHours();
-        TimeCalculation timeCalculation = new TimeCalculation(new MockContext());
-        int current_day = 2;
-        int current_time = 1000;
-
-        //      0h                  11h         13h15            19h          22h30            23h59
-        //      |____________________|oooooooooooo|_______________|ooooooooooooo|________________|
-        //                     /\
-        //                 current_time
-
-        Assert.assertEquals("Open at 11h",timeCalculation.getInformationAboutOpeningAndClosure(openingHours.getPeriods(),current_time,current_day-1));
-
-        current_time = 1200;
-
-        //      0h                  11h         13h15            19h          22h30            23h59
-        //      |____________________|oooooooooooo|_______________|ooooooooooooo|________________|
-        //                                /\
-        //                          current_time
-
-        Assert.assertEquals("Open until 13h15",timeCalculation.getInformationAboutOpeningAndClosure(openingHours.getPeriods(),current_time,current_day-1));
-
-        current_time = 1300;
-
-        //      0h                  11h         13h15            19h          22h30            23h59
-        //      |____________________|oooooooooooo|_______________|ooooooooooooo|________________|
-        //                                      /\
-        //                                 current_time
-
-        Assert.assertEquals("Closed soon (in 15 min)",timeCalculation.getInformationAboutOpeningAndClosure(openingHours.getPeriods(),current_time,current_day-1));
-
-        current_time = 1400;
-
-        //      0h                  11h         13h15            19h          22h30            23h59
-        //      |____________________|oooooooooooo|_______________|ooooooooooooo|________________|
-        //                                              /\
-        //                                        current_time
-
-        Assert.assertEquals("Open at 19h",timeCalculation.getInformationAboutOpeningAndClosure(openingHours.getPeriods(),current_time,current_day-1));
-
-        current_time = 2130;
-
-        //      0h                  11h         13h15            19h          22h30            23h59
-        //      |____________________|oooooooooooo|_______________|ooooooooooooo|________________|
-        //                                                                /\
-        //                                                            current_time
-
-        Assert.assertEquals("Open until 22h30",timeCalculation.getInformationAboutOpeningAndClosure(openingHours.getPeriods(),current_time,current_day-1));
-
-
-        current_time = 2300;
-
-        //      0h                  11h         13h15            19h          22h30            23h59
-        //      |____________________|oooooooooooo|_______________|ooooooooooooo|________________|
-        //                                                                            /\
-        //                                                                       current_time
-
-        Assert.assertEquals("Closed now",timeCalculation.getInformationAboutOpeningAndClosure(openingHours.getPeriods(),current_time,current_day-1));
-
-
-    }
-
-    @Test
     public void TEST_request_places_nearby() {
 
         String type = "restaurant";
@@ -161,40 +96,6 @@ public class ExampleUnitTest {
     }
 
 
-    private OpeningHours set_fake_openingHours(){
-
-        OpeningHours openingHours = new OpeningHours();
-        List<Period> periods = new ArrayList<>();
-
-        Open open1 = new Open();
-        Close close1 = new Close();
-        open1.setDay(1);
-        open1.setTime("1100");
-        close1.setDay(1);
-        close1.setTime("1315");
-        Period period1 = new Period();
-        period1.setClose(close1);
-        period1.setOpen(open1);
-
-
-        Open open2 = new Open();
-        Close close2 = new Close();
-        open2.setDay(1);
-        open2.setTime("1900");
-        close2.setDay(1);
-        close2.setTime("2230");
-        Period period2 = new Period();
-        period2.setClose(close2);
-        period2.setOpen(open2);
-
-
-        periods.add(period1);
-        periods.add(period2);
-
-        openingHours.setPeriods(periods);
-
-        return openingHours;
-    }
 
     private List<Place_Nearby> build_fake_list_place_nearby(){
 
@@ -274,6 +175,7 @@ public class ExampleUnitTest {
 
         return new_list_workmates;
     }
+
 
     private void waiting_time(int time){
         try {

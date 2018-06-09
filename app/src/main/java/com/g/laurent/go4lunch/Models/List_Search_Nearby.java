@@ -7,6 +7,7 @@ import com.g.laurent.go4lunch.Utils.DetailsPlace.DetailsPlace;
 import com.g.laurent.go4lunch.Utils.DetailsPlace.Photo;
 import com.g.laurent.go4lunch.Utils.DetailsPlace.Result;
 import com.g.laurent.go4lunch.Utils.Maps_API_stream;
+import com.g.laurent.go4lunch.Views.MultiFragAdapter;
 import com.google.android.gms.maps.model.LatLng;
 import java.util.ArrayList;
 import java.util.List;
@@ -24,22 +25,23 @@ public class List_Search_Nearby {
     private final static String CALLBACK_MAPS_FRAGMENT = "callbasck_maps_fragment";
     private final static String CALLBACK_LIST_RESTO_FRAGMENT = "callbasck_list_resto_fragment";
 
+
     public List_Search_Nearby(String api_key, LatLng latLng, String radius, String type, MapsFragment mapsFragment) {
         this.mapsFragment=mapsFragment;
         list_places_nearby = new ArrayList<>();
-        launch_request_search_nearby_places(api_key, latLng, radius, type, CALLBACK_MAPS_FRAGMENT);
+      //  launch_request_search_nearby_places(api_key, latLng, radius, type, CALLBACK_MAPS_FRAGMENT);
     }
 
     public List_Search_Nearby(String api_key, LatLng latLng, String radius, String type, ListRestoFragment listRestoFragment) {
 
         this.listRestoFragment=listRestoFragment;
         list_places_nearby = new ArrayList<>();
-        launch_request_search_nearby_places(api_key,latLng, radius, type,CALLBACK_LIST_RESTO_FRAGMENT);
+       // launch_request_search_nearby_places(api_key,latLng, radius, type,CALLBACK_LIST_RESTO_FRAGMENT);
     }
 
-    public List_Search_Nearby(String api_key, LatLng latLng, String radius, String type) {
+    public List_Search_Nearby(String api_key, LatLng latLng, String radius, String type, CallbackMultiActivity callbackMultiActivity) {
         list_places_nearby = new ArrayList<>();
-        launch_request_search_nearby_places(api_key, latLng, radius, type,null);
+        launch_request_search_nearby_places(api_key, latLng, radius, type, callbackMultiActivity);
     }
 
     private void build_list_places_nearby(DetailsPlace detailsPlace){
@@ -78,7 +80,7 @@ public class List_Search_Nearby {
         }
     }
 
-    private void launch_request_search_nearby_places(String api_key,LatLng latLng, String radius, String type, String callback){
+    private void launch_request_search_nearby_places(String api_key,LatLng latLng, String radius, String type, CallbackMultiActivity callbackMultiActivity){
 
         String location = String.valueOf(latLng.latitude) + "," + String.valueOf(latLng.longitude);
 
@@ -86,10 +88,10 @@ public class List_Search_Nearby {
                 .flatMap(userResponse -> Observable.just(userResponse.getResults()))
                 .flatMapIterable(ids -> ids)
                 .flatMap(result -> Maps_API_stream.streamFetchgetDetailsPlaces(api_key,result))
-                .subscribeWith(getSubscriber(callback));
+                .subscribeWith(getSubscriber(callbackMultiActivity));
     }
 
-    private DisposableObserver<DetailsPlace> getSubscriber(String callback){
+    private DisposableObserver<DetailsPlace> getSubscriber(CallbackMultiActivity callbackMultiActivity){
         return new DisposableObserver<DetailsPlace>() {
             @Override
             public void onNext(DetailsPlace detailsPlace) {
@@ -104,17 +106,7 @@ public class List_Search_Nearby {
             @Override
             public void onComplete() {
 
-                if(callback!=null){
-                    switch(callback){
-
-                        case CALLBACK_MAPS_FRAGMENT:
-                            mapsFragment.recover_list_workmates(list_places_nearby);
-                            break;
-                        case CALLBACK_LIST_RESTO_FRAGMENT:
-                            listRestoFragment.recover_list_workmates(list_places_nearby);
-                            break;
-                    }
-                }
+                callbackMultiActivity.configureViewPagerAndTabs(list_places_nearby);
 
                 Log.e("TAG","On Complete !!");
             }
@@ -129,14 +121,14 @@ public class List_Search_Nearby {
         // CONSTRUCTOR FOR AUTOCOMPLETE METHOD
         this.mapsFragment=mapsFragment;
         list_places_nearby = new ArrayList<>();
-        launch_request_search_nearby_places_autocomplete(api_key, list_placeId, CALLBACK_MAPS_FRAGMENT);
+      //  launch_request_search_nearby_places_autocomplete(api_key, list_placeId, CALLBACK_MAPS_FRAGMENT);
     }
 
     public List_Search_Nearby(String api_key, List<String> list_placeId, ListRestoFragment listRestoFragment) {
         // CONSTRUCTOR FOR AUTOCOMPLETE METHOD
         this.listRestoFragment=listRestoFragment;
         list_places_nearby = new ArrayList<>();
-        launch_request_search_nearby_places_autocomplete(api_key, list_placeId, CALLBACK_LIST_RESTO_FRAGMENT);
+      //  launch_request_search_nearby_places_autocomplete(api_key, list_placeId, CALLBACK_LIST_RESTO_FRAGMENT);
     }
 
     private void launch_request_search_nearby_places_autocomplete(String api_key, List<String> list_places_Id, String callback){
@@ -193,3 +185,52 @@ public class List_Search_Nearby {
         this.list_places_nearby = list_places_nearby;
     }
 }
+
+
+
+/*
+
+private void launch_request_search_nearby_places(String api_key,LatLng latLng, String radius, String type, String callback){
+
+        String location = String.valueOf(latLng.latitude) + "," + String.valueOf(latLng.longitude);
+
+        disposable = Maps_API_stream.streamFetchgetSearchNearbyPlaces(api_key,type,radius,location)
+                .flatMap(userResponse -> Observable.just(userResponse.getResults()))
+                .flatMapIterable(ids -> ids)
+                .flatMap(result -> Maps_API_stream.streamFetchgetDetailsPlaces(api_key,result))
+                .subscribeWith(getSubscriber(callback));
+    }
+
+    private DisposableObserver<DetailsPlace> getSubscriber(String callback){
+        return new DisposableObserver<DetailsPlace>() {
+            @Override
+            public void onNext(DetailsPlace detailsPlace) {
+                build_list_places_nearby(detailsPlace);
+            }
+
+            @Override
+            public void onError(Throwable e) {
+                Log.e("TAG","On Error"+Log.getStackTraceString(e));
+            }
+
+            @Override
+            public void onComplete() {
+
+                if(callback!=null){
+                    switch(callback){
+
+                        case CALLBACK_MAPS_FRAGMENT:
+                            mapsFragment.recover_list_workmates(list_places_nearby);
+                            break;
+                        case CALLBACK_LIST_RESTO_FRAGMENT:
+                            listRestoFragment.recover_list_workmates(list_places_nearby);
+                            break;
+                    }
+                }
+
+                Log.e("TAG","On Complete !!");
+            }
+        };
+    }
+
+ */

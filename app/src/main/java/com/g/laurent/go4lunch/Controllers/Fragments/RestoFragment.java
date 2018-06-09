@@ -31,6 +31,8 @@ import com.g.laurent.go4lunch.Utils.Firebase_update;
 import com.g.laurent.go4lunch.Views.Resto_Details.WorkmatesViewAdapter;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.gson.Gson;
+
 import java.util.ArrayList;
 import java.util.List;
 import butterknife.BindView;
@@ -52,7 +54,9 @@ public class RestoFragment extends Fragment {
     @BindView(R.id.website_button) Button website_button;
     @BindView(R.id.list_workmates_joining_resto) RecyclerView list_workmates_recycler;
     private final static String TYPE_DISPLAY_WORKMATES_BY_RESTO = "list_of_workmates_by_resto";
-    private final static String EXTRA_PLACE_ID = "placeId_resto";
+    private final static String EXTRA_RESTO_DETAILS = "resto_details";
+    private final static String RENEW_LIST_WORKMATES = "renew_list_workmates";
+    private final static String INITIAL_LIST_WORKMATES = "initial_list_workmates";
     private Place_Nearby resto;
     private String placeId;
     private Context context;
@@ -76,10 +80,16 @@ public class RestoFragment extends Fragment {
         // Initialize variables
         context = getActivity().getApplicationContext();
         mCurrentUser = FirebaseAuth.getInstance().getCurrentUser();
-        placeId = getArguments().getString(EXTRA_PLACE_ID,null);
+
+        // Create Place_Nearby from resto in json format
+        Gson gson = new Gson();
+        String resto_json = getArguments().getString(EXTRA_RESTO_DETAILS,null);
+        resto = gson.fromJson(resto_json,Place_Nearby.class);
+        placeId = resto.getPlaceId();
+        
         firebase_update = new Firebase_update(context,this);
         api_key = context.getResources().getString(R.string.google_maps_key2);
-        resto = new Place_Nearby(api_key,placeId,this);
+        recover_list_workmates();
 
         return view;
     }
@@ -90,7 +100,13 @@ public class RestoFragment extends Fragment {
         firebase_recover.recover_list_workmates();
     }
 
-    public void set_list_of_workmates(List<Workmate> list_workmates_resto) {
+    public void renew_list_workmates() {
+
+        Firebase_recover firebase_recover = new Firebase_recover(context,this);
+        firebase_recover.renew_list_workmates();
+    }
+
+    public void set_list_of_workmates(List<Workmate> list_workmates_resto, String type) {
 
         this.list_workmates_joining = new ArrayList<>();
         this.list_workmates_liked= new ArrayList<>();
@@ -118,7 +134,18 @@ public class RestoFragment extends Fragment {
             }
         }
 
-        configure_views_with_resto();
+        switch(type){
+
+            case INITIAL_LIST_WORKMATES:
+                configure_views_with_resto();
+                break;
+
+            case RENEW_LIST_WORKMATES:
+                configure_recycler_view();
+                configure_button_like();
+                configure_button_choose_resto();
+                break;
+        }
     }
 
     public void configure_views_with_resto(){
@@ -234,7 +261,6 @@ public class RestoFragment extends Fragment {
                 startActivity(new Intent(Intent.ACTION_CALL, Uri.parse("tel:" + resto.getPhone_number())));
             }
         });
-
     }
 
     // ----------------------------------------------------------------------------------------------
@@ -305,9 +331,7 @@ public class RestoFragment extends Fragment {
     public void modify_state_button_like() {
         setColorButton(like_button, R.color.colorStars);
         like_button.setEnabled(false);
-
-        // update list of workmates
-        resto = new Place_Nearby(api_key,placeId,this);
+        renew_list_workmates();
     }
 
     // ----------------------------------------------------------------------------------------------
@@ -382,9 +406,6 @@ public class RestoFragment extends Fragment {
     public void modify_state_button_choose() {
         setRestoChosen(true);
         button_valid.setEnabled(false);
-
-        // update list of workmates
-        resto = new Place_Nearby(api_key,placeId,this);
+        renew_list_workmates();
     }
-
 }

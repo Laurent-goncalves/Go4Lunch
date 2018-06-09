@@ -34,6 +34,8 @@ public class Firebase_recover {
     private final static String CALLBACK_LISTRESTOFRAGMENT = "callback_listrestofragment";
     private final static String CALLBACK_LISTMATESFRAGMENT = "callback_listmatesfragment";
     private final static String CALLBACK_MAPSFRAGMENT = "callback_mapsfragment";
+    private final static String RENEW_LIST_WORKMATES = "renew_list_workmates";
+    private final static String INITIAL_LIST_WORKMATES = "initial_list_workmates";
     private final static String EXTRA_PLACE_ID = "placeId_resto";
     private String callback;
     private Context context;
@@ -111,7 +113,7 @@ public class Firebase_recover {
                     switch(callback){
                         case CALLBACK_RESTOFRAGMENT:
                             if(restoFragment!=null)
-                                restoFragment.set_list_of_workmates(list_workmates);
+                                restoFragment.set_list_of_workmates(list_workmates,INITIAL_LIST_WORKMATES);
                             break;
                         case CALLBACK_LISTRESTOFRAGMENT:
                             if(listRestoFragment!=null)
@@ -264,5 +266,33 @@ public class Firebase_recover {
 
     public String getResto_id_chosen() {
         return resto_id_chosen;
+    }
+
+    public void renew_list_workmates() {
+
+        databaseReferenceWorkmates.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot datas) {
+                if(datas!=null) {
+                    list_workmates = new ArrayList<>();
+
+                    for(DataSnapshot id : datas.getChildren()){
+
+                        Workmate workmate = create_workmate_with_firebase_datas(id);
+
+                        if(!is_workmate_in_list(workmate.getId(),list_workmates))
+                            list_workmates.add(workmate);
+                    }
+
+                    restoFragment.set_list_of_workmates(list_workmates,RENEW_LIST_WORKMATES);
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                System.out.println("eee Cancellation");
+            }
+        });
+
     }
 }

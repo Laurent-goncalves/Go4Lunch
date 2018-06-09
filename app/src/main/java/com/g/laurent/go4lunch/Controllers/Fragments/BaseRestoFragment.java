@@ -20,11 +20,16 @@ import static java.lang.Double.compare;
  */
 public abstract class BaseRestoFragment extends Fragment {
 
+    protected final static String EXTRA_LAT_CURRENT = "latitude_current_location";
+    protected final static String EXTRA_LONG_CURRENT = "longitude_current_location";
+    protected LatLng currentPlaceLatLng;
     protected List<Place_Nearby> list_places_nearby;
+    protected List<Place_Nearby> list_places_nearby_OLD;
     protected Firebase_update firebase_tool;
     protected Callback_resto_fb mCallback_resto_fb;
     protected Callback_DetailResto mCallback_detailResto;
     protected List<Workmate> list_workmates;
+    protected static final String EXTRA_LIST_RESTOS_JSON = "list_restos_json";
 
     public BaseRestoFragment() {
         // Required empty public constructor

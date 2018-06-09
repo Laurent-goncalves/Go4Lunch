@@ -24,5 +24,5 @@
     API : AIzaSyCAzX1ILkJlqSsTMkRJHSGEMAQWuqxSxKA
     API : AIzaSyBiRkG6clZcF-KhwQIPGq5t8h-KBk-8ldA
     -->
-    <string name="google_maps_key2" templateMergeStrategy="preserve" translatable="false">AIzaSyBiRkG6clZcF-KhwQIPGq5t8h-KBk-8ldA</string>
+    <string name="google_maps_key2" templateMergeStrategy="preserve" translatable="false">AIzaSyCAzX1ILkJlqSsTMkRJHSGEMAQWuqxSxKA</string>
 </resources>

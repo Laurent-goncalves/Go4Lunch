@@ -150,7 +150,7 @@ public class TimeCalculation {
             if(shortest_timing<30){
                 text = context.getResources().getString(R.string.opening_in) + shortest_timing + " min";
             } else {
-                text = context.getResources().getString(R.string.open_at) + get_time_hour(next_time_opening);
+                text = context.getResources().getString(R.string.open_at) + " " + get_time_hour(next_time_opening);
             }
         }
 
@@ -179,9 +179,9 @@ public class TimeCalculation {
         }
 
         if(shortest_timing < 30){
-            text = context.getResources().getString(R.string.closed_soon) + shortest_timing + " min)";
+            text = context.getResources().getString(R.string.closed_soon) + " " + shortest_timing + " min)";
         } else {
-            text = context.getResources().getString(R.string.open_until) + get_time_hour(next_time_closing);
+            text = context.getResources().getString(R.string.open_until) + " " + get_time_hour(next_time_closing);
         }
 
         return text;
