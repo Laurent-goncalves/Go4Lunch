@@ -75,7 +75,8 @@ import butterknife.ButterKnife;
 import static android.content.ContentValues.TAG;
 
 
-public class MultiActivity extends AppCompatActivity implements Callback_resto_fb, NavigationView.OnNavigationItemSelectedListener,CallbackMultiActivity {
+public class MultiActivity extends AppCompatActivity implements Callback_resto_fb,
+        NavigationView.OnNavigationItemSelectedListener, CallbackMultiActivity, SwipeRefreshLayout.OnRefreshListener {
 
     private LatLng lastKnownPlace;
     private final static String EXTRA_LAT_CURRENT = "latitude_current_location";
@@ -89,7 +90,9 @@ public class MultiActivity extends AppCompatActivity implements Callback_resto_f
     @BindView(R.id.activity_main_drawer_layout) DrawerLayout drawerLayout;
     @BindView(R.id.activity_main_nav_view) NavigationView navigationView;
     @BindView(R.id.activity_main_toolbar) Toolbar toolbar;
+    @BindView(R.id.swiperefresh) SwipeRefreshLayout swipeRefreshLayout;
     private TabLayout tabs;
+    private LatLng currentPlaceLatLng;
     private MultiFragAdapter pageAdapter;
     private int PLACE_AUTOCOMPLETE_REQUEST_CODE = 1;
     private int current_page;
@@ -102,6 +105,7 @@ public class MultiActivity extends AppCompatActivity implements Callback_resto_f
     private static final String EXTRA_PREFERENCES = "preferences";
     private static final String EXTRA_RESTO_JSON = "resto_to_json";
     private final static String EXTRA_RESTO_DETAILS = "resto_details";
+    private static final String EXTRA_PREF_TYPE_PLACE = "type_place_preferences";
     private static final String EXTRA_ENABLE_NOTIF = "enable_notif";
 
     @Override
@@ -115,7 +119,8 @@ public class MultiActivity extends AppCompatActivity implements Callback_resto_f
         FirebaseApp.initializeApp(context);
         mCurrentUser = FirebaseAuth.getInstance().getCurrentUser();
         Firebase_update firebase_update = new Firebase_update(context);
-        sharedPreferences = getSharedPreferences(EXTRA_PREFERENCES,MODE_PRIVATE);
+        sharedPreferences = getSharedPreferences(EXTRA_PREFERENCES, MODE_PRIVATE);
+        current_page = 0;
 
         if (mCurrentUser != null)
             firebase_update.create_new_user_firebase(mCurrentUser);
@@ -127,23 +132,16 @@ public class MultiActivity extends AppCompatActivity implements Callback_resto_f
         this.configureDrawerLayout();
         this.configureNavigationView();
         this.configureAlarmManager();
-        LatLng currentPlaceLatLng = new LatLng(48.866667, 2.333333);
-        String radius = "500";
-        String type = "bar";
+        currentPlaceLatLng = new LatLng(48.866667, 2.333333);
+
+
+
+        String radius = String.valueOf(sharedPreferences.getInt(EXTRA_PREF_RADIUS,500));
+        String type = sharedPreferences.getString(EXTRA_PREF_TYPE_PLACE,"restaurant");
 
         new List_Search_Nearby(api_key, currentPlaceLatLng, radius, type, this);
 
-     /*   SwipeRefreshLayout swipeRefreshLayout = this.findViewById(R.id.swiperefresh);
-        swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
-                @Override
-                public void onRefresh() {
-                    configureViewPagerAndTabs();
-
-                    (mSwipeRefreshLayout.isRefreshing()) {
-                        mSwipeRefreshLayout.setRefreshing(false);     } // à mettre dans classe interne
-                }
-            }
-        );*/
+        swipeRefreshLayout.setOnRefreshListener(this);
     }
 
     @Override
@@ -168,6 +166,10 @@ public class MultiActivity extends AppCompatActivity implements Callback_resto_f
 
                 // Design purpose. Tabs have the same width
                 tabs.setTabMode(TabLayout.MODE_FIXED);
+
+                // Select the last tab selected before eventual refresh and stop the refresh
+                Objects.requireNonNull(tabs.getTabAt(current_page)).select();
+                swipeRefreshLayout.setRefreshing(false);
             }
         });
 
@@ -202,28 +204,39 @@ public class MultiActivity extends AppCompatActivity implements Callback_resto_f
         Objects.requireNonNull(Objects.requireNonNull(tabs.getTabAt(2)).getIcon()).setColorFilter(getResources().getColor(R.color.colorIconNotSelected), PorterDuff.Mode.SRC_IN);
 
         // configure toolbar
-        configureToolBar("I'm hungry", true);
+        configureToolBar(getResources().getString(R.string.toolbar_mapview), true);
+        swipeRefreshLayout.setEnabled(false);
 
         // Set on Tab selected listener
         tabs.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
             @Override
             public void onTabSelected(TabLayout.Tab tab) {
+                // Change color of the tab -> orange
                 if (tab.getIcon() != null)
                     tab.getIcon().setColorFilter(getResources().getColor(R.color.colorIconSelected), PorterDuff.Mode.SRC_IN);
 
+                // Change tab title if required
                 if (Objects.requireNonNull(tab.getText()).equals(getResources().getString(R.string.workmates)))
-                    configureToolBar("Available workmates", true);
+                    configureToolBar(getResources().getString(R.string.available_workmates), true);
                 else
-                    configureToolBar("I'm hungry!", true);
+                    configureToolBar(getResources().getString(R.string.toolbar_mapview), true);
+
+                // Disable pull to refresh when mapView is displayed
+                if(tab.getPosition()==0)
+                    swipeRefreshLayout.setEnabled(false);
+                else
+                    swipeRefreshLayout.setEnabled(true);
 
 
-                if(searchItem!=null) {
+                if (searchItem != null) {
                     searchItem.collapseActionView();
                 }
             }
 
             @Override
             public void onTabUnselected(TabLayout.Tab tab) {
+
+                // Change color of the tab -> black
                 if (tab.getIcon() != null)
                     tab.getIcon().setColorFilter(getResources().getColor(R.color.colorIconNotSelected), PorterDuff.Mode.SRC_IN);
             }
@@ -242,7 +255,7 @@ public class MultiActivity extends AppCompatActivity implements Callback_resto_f
 
         alarmMgr = (AlarmManager) getApplicationContext().getSystemService(Context.ALARM_SERVICE);
         Intent intent = new Intent(getApplicationContext(), AlarmReceiver.class);
-        intent.putExtra(EXTRA_USER_ID,mCurrentUser.getUid());
+        intent.putExtra(EXTRA_USER_ID, mCurrentUser.getUid());
         alarmIntent = PendingIntent.getBroadcast(getApplicationContext(), 0, intent, 0);
 
         // Set the alarm to start at 12:00 p.m.
@@ -253,8 +266,8 @@ public class MultiActivity extends AppCompatActivity implements Callback_resto_f
 
         // setRepeating() lets you specify a precise custom interval
         if (alarmMgr != null)
-        alarmMgr.setRepeating(AlarmManager.RTC, calendar.getTimeInMillis(),
-                AlarmManager.INTERVAL_DAY, alarmIntent);
+            alarmMgr.setRepeating(AlarmManager.RTC, calendar.getTimeInMillis(),
+                    AlarmManager.INTERVAL_DAY, alarmIntent);
 
     }
 
@@ -265,15 +278,15 @@ public class MultiActivity extends AppCompatActivity implements Callback_resto_f
     public void configure_and_show_settings_activity() {
         configureToolBar("Settings", true);
         Intent intent = new Intent(this, SettingActivity.class);
-        int requestCode=0;
-        if(sharedPreferences!=null){
-            if(sharedPreferences.getBoolean(EXTRA_ENABLE_NOTIF,false)){
-                requestCode=1;
+        int requestCode = 0;
+        if (sharedPreferences != null) {
+            if (sharedPreferences.getBoolean(EXTRA_ENABLE_NOTIF, false)) {
+                requestCode = 1;
             } else {
-                requestCode=0;
+                requestCode = 0;
             }
         }
-        startActivityForResult(intent,requestCode);
+        startActivityForResult(intent, requestCode);
     }
 
     @Override
@@ -281,7 +294,7 @@ public class MultiActivity extends AppCompatActivity implements Callback_resto_f
         // request code 1 = enable notif ; request code 0 = disable notif
         if (requestCode == 1) {
             if (resultCode == RESULT_CANCELED) { // if the user decided to disable notification, whereas it was enabled when opening settings
-                if(alarmMgr!=null)
+                if (alarmMgr != null)
                     alarmMgr.cancel(alarmIntent);
             }
         } else {
@@ -317,7 +330,7 @@ public class MultiActivity extends AppCompatActivity implements Callback_resto_f
             case android.R.id.home:
                 drawerLayout.openDrawer(GravityCompat.START);  // OPEN DRAWER
 
-                if(searchItem!=null) {
+                if (searchItem != null) {
                     searchItem.collapseActionView();
                 }
                 return true;
@@ -349,12 +362,12 @@ public class MultiActivity extends AppCompatActivity implements Callback_resto_f
 
                 Google_Maps_Utils google_maps_utils = new Google_Maps_Utils(getApplicationContext());
 
-                switch(current_page){
+                switch (current_page) {
                     case 0:
-                        google_maps_utils.googleplacespredictions(api_key,query,bounds,null,pageAdapter.getMapsFragment());
+                        google_maps_utils.googleplacespredictions(api_key, query, bounds, null, pageAdapter.getMapsFragment());
                         break;
                     case 1:
-                        google_maps_utils.googleplacespredictions(api_key,query,bounds,pageAdapter.getListRestoFragment(),null);
+                        google_maps_utils.googleplacespredictions(api_key, query, bounds, pageAdapter.getListRestoFragment(), null);
                         break;
                 }
                 return false;
@@ -370,8 +383,8 @@ public class MultiActivity extends AppCompatActivity implements Callback_resto_f
         searchView.setOnCloseListener(new SearchView.OnCloseListener() {
             @Override
             public boolean onClose() {
-System.out.println("eee    onClose!!");
-                switch(current_page){
+                System.out.println("eee    onClose!!");
+                switch (current_page) {
                     case 0:
                         pageAdapter.getMapsFragment().recover_previous_state();
                         break;
@@ -426,8 +439,8 @@ System.out.println("eee    onClose!!");
             case R.id.activity_main_drawer_your_lunch:
 
                 Intent intent = new Intent(getApplicationContext(), RestoActivity.class);
-                String resto_json = sharedPreferences.getString(EXTRA_RESTO_JSON,null);
-                intent.putExtra(EXTRA_RESTO_DETAILS,resto_json);
+                String resto_json = sharedPreferences.getString(EXTRA_RESTO_JSON, null);
+                intent.putExtra(EXTRA_RESTO_DETAILS, resto_json);
                 startActivity(intent);
 
                 break;
@@ -485,70 +498,10 @@ System.out.println("eee    onClose!!");
         return pageAdapter;
     }
 
-
-
-
-    /*
-    private void configureOnClickRecyclerView(){
-        ItemClickSupport.addTo(recyclerView, R.layout.fragment_main_item)
-                .setOnItemClickListener(new ItemClickSupport.OnItemClickListener() {
-                    @Override
-                    public void onItemClicked(RecyclerView recyclerView, int position, View v) {
-                        updateUIWithUserInfo(position);
-                    }
-                });
-    }*/
-
+    @Override
+    public void onRefresh() {
+        String radius = String.valueOf(sharedPreferences.getInt(EXTRA_PREF_RADIUS,500));
+        String type = sharedPreferences.getString(EXTRA_PREF_TYPE_PLACE,"restaurant");
+        new List_Search_Nearby(api_key, currentPlaceLatLng, radius, type, this);
+    }
 }
-/*    @Override
-    public void onMapReady(GoogleMap googleMap) {
-        mMap = googleMap;
-
-        // Add a marker in Sydney and move the camera
-        LatLng corbeil = new LatLng(48.6102599, 2.474805);
-        mMap.addMarker(new MarkerOptions().position(corbeil).title("Marker in corbeil"));
-        mMap.moveCamera(CameraUpdateFactory.newLatLng(corbeil));
-
-
-      // Prompt the user for permission.
-        getLocationPermission();
-
-        // Turn on the My Location layer and the related control on the map.
-        updateLocationUI();
-
-        getNumberResults();
-
-    }*/
-
-
-  /*  public void configure_and_show_listmatesfragment(){
-        configureToolBar("available workmates",true);
-        ListMatesFragment listMatesFragment = new ListMatesFragment();
-        FragmentTransaction fragmentTransaction = getFragmentManager().beginTransaction();
-        fragmentTransaction.replace(R.id.fragment_map_view, listMatesFragment);
-        fragmentTransaction.commit();
-    }
-
-    public void configure_and_show_MapsFragment(){
-
-        // Create new bundle
-        bundle.putString(EXTRA_API_KEY,api_key);
-
-        configureToolBar("I'm hungry!",true);
-
-        MapsFragment mapsFragment = new MapsFragment();
-        mapsFragment.setArguments(bundle);
-        FragmentTransaction fragmentTransaction = getFragmentManager().beginTransaction();
-        fragmentTransaction.replace(R.id.fragment_map_view, mapsFragment);
-        fragmentTransaction.commit();
-    }
-
-    public void configure_and_show_ListRestoFragment(){
-
-        configureToolBar("I'm hungry!",true);
-        listRestoFragment = new ListRestoFragment();
-        listRestoFragment.setArguments(bundle);
-        FragmentTransaction fragmentTransaction = getFragmentManager().beginTransaction();
-        fragmentTransaction.replace(R.id.fragment_map_view, listRestoFragment);
-        fragmentTransaction.commit();
-    }*/
