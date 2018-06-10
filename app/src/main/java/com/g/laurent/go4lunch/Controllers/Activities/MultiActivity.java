@@ -133,17 +133,17 @@ public class MultiActivity extends AppCompatActivity implements Callback_resto_f
 
         new List_Search_Nearby(api_key, currentPlaceLatLng, radius, type, this);
 
-        SwipeRefreshLayout swipeRefreshLayout = this.findViewById(R.id.swiperefresh);
+     /*   SwipeRefreshLayout swipeRefreshLayout = this.findViewById(R.id.swiperefresh);
         swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
                 @Override
                 public void onRefresh() {
-                /*    configureViewPagerAndTabs();
+                    configureViewPagerAndTabs();
 
                     (mSwipeRefreshLayout.isRefreshing()) {
-                        mSwipeRefreshLayout.setRefreshing(false);     } // à mettre dans classe interne*/
+                        mSwipeRefreshLayout.setRefreshing(false);     } // à mettre dans classe interne
                 }
             }
-        );
+        );*/
     }
 
     @Override
@@ -427,8 +427,6 @@ System.out.println("eee    onClose!!");
 
                 Intent intent = new Intent(getApplicationContext(), RestoActivity.class);
                 String resto_json = sharedPreferences.getString(EXTRA_RESTO_JSON,null);
-
-
                 intent.putExtra(EXTRA_RESTO_DETAILS,resto_json);
                 startActivity(intent);
 
