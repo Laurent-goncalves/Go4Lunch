@@ -19,6 +19,9 @@ import android.widget.Spinner;
 import android.widget.Switch;
 import android.widget.TextView;
 
+import com.g.laurent.go4lunch.Controllers.Activities.SettingActivity;
+import com.g.laurent.go4lunch.Models.Callback_alarm;
+import com.g.laurent.go4lunch.Models.Workmate;
 import com.g.laurent.go4lunch.R;
 
 import java.util.ArrayList;
@@ -44,12 +47,14 @@ public class SettingsFragment extends Fragment implements AdapterView.OnItemSele
     @BindView(R.id.text_setting_radius) TextView radius_value;
     @BindView(R.id.done_button) Button button_done;
     @BindView(R.id.framelayout_setting_frag) FrameLayout global_view;
+    @BindView(R.id.switch_enable_notif) Switch enable_notif;
     private SharedPreferences sharedPreferences;
     private Context context;
     private static final String EXTRA_PREFERENCES = "preferences";
     private static final String EXTRA_PREF_LANG = "language_preferences";
     private static final String EXTRA_PREF_RADIUS = "radius_preferences";
     private static final String EXTRA_PREF_TYPE_PLACE = "type_place_preferences";
+    private static final String EXTRA_ENABLE_NOTIF = "enable_notif";
     private View view;
 
     public SettingsFragment() {
@@ -78,6 +83,9 @@ public class SettingsFragment extends Fragment implements AdapterView.OnItemSele
         // Configure switch button (language FR / ENG)
         configure_language_switch();
 
+        // Configure permission notification
+        configure_notification_switch();
+
         // Configure radius seekbar
         configure_radius_seekbar();
 
@@ -88,14 +96,35 @@ public class SettingsFragment extends Fragment implements AdapterView.OnItemSele
         configure_button_done();
     }
 
+    private void configure_notification_switch() {
+
+        Boolean enable = sharedPreferences.getBoolean(EXTRA_ENABLE_NOTIF,false);
+
+        if(enable)
+            enable_notif.setChecked(true);
+        else
+            enable_notif.setChecked(false);
+    }
+
     private void configure_button_done() {
 
         button_done.setOnClickListener(v -> {
+
+            int requestCode = 0;
             // Save language preferences
             if(switch_fr_eng.isChecked())
                 sharedPreferences.edit().putString(EXTRA_PREF_LANG,"en").apply();
             else
                 sharedPreferences.edit().putString(EXTRA_PREF_LANG,"fr").apply();
+
+            // Save the permission to send notifications
+            if(enable_notif.isChecked()) {
+                requestCode = 1;
+                sharedPreferences.edit().putBoolean(EXTRA_ENABLE_NOTIF, true).apply();
+            } else {
+                requestCode = 0;
+                sharedPreferences.edit().putBoolean(EXTRA_ENABLE_NOTIF, false).apply();
+            }
 
             // Save radius
             sharedPreferences.edit().putInt(EXTRA_PREF_RADIUS,radius.getProgress()).apply();
@@ -104,7 +133,7 @@ public class SettingsFragment extends Fragment implements AdapterView.OnItemSele
             sharedPreferences.edit().putString(EXTRA_PREF_TYPE_PLACE,list_type_places.getSelectedItem().toString()).apply();
 
             // Go back to previous fragment
-            getActivity().finish();
+            ((SettingActivity)getActivity()).send_result_enable_notification(requestCode);
         });
     }
 
@@ -260,4 +289,5 @@ public class SettingsFragment extends Fragment implements AdapterView.OnItemSele
 
         System.out.println("eee config2=" + config.locale);
     }
+
 }

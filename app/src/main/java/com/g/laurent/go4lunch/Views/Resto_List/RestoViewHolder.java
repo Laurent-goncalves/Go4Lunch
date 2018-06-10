@@ -10,6 +10,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.request.RequestOptions;
 import com.g.laurent.go4lunch.Controllers.Activities.MultiActivity;
 import com.g.laurent.go4lunch.Controllers.Activities.RestoActivity;
 import com.g.laurent.go4lunch.Models.Place_Nearby;
@@ -141,6 +142,8 @@ public class RestoViewHolder extends RecyclerView.ViewHolder implements View.OnC
         // Load the image using Glide
         Glide.with(view)
                     .load(link)
+                    .apply(new RequestOptions()
+                        .placeholder(R.drawable.placeholder_resto))
                     .into(picture_resto);
     }
 

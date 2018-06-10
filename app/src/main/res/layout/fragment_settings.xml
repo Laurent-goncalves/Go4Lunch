@@ -65,6 +65,30 @@
             android:gravity="center"
             android:orientation="horizontal">
 
+            <!-- TOGGLE ENABLE NOTIFICATIONS -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/enable_notif"
+                android:text="@string/enable_notif"
+                android:textAlignment="center"
+                android:textSize="20sp"
+                android:layout_marginEnd="@dimen/default_margin"/>
+
+            <Switch
+                android:id="@+id/switch_enable_notif"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="40dp"
+            android:gravity="center"
+            android:orientation="horizontal">
+
             <!-- SETTING RADIUS -->
             <TextView
                 android:layout_width="wrap_content"

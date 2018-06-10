@@ -33,13 +33,16 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.request.RequestOptions;
 import com.firebase.ui.auth.AuthUI;
 import com.g.laurent.go4lunch.Controllers.Fragments.ListRestoFragment;
 import com.g.laurent.go4lunch.Models.AlarmReceiver;
 import com.g.laurent.go4lunch.Models.CallbackMultiActivity;
+import com.g.laurent.go4lunch.Models.Callback_alarm;
 import com.g.laurent.go4lunch.Models.Callback_resto_fb;
 import com.g.laurent.go4lunch.Models.List_Search_Nearby;
 import com.g.laurent.go4lunch.Models.Place_Nearby;
+import com.g.laurent.go4lunch.Models.Workmate;
 import com.g.laurent.go4lunch.R;
 import com.g.laurent.go4lunch.Utils.DistanceCalculation;
 import com.g.laurent.go4lunch.Utils.Firebase_recover;
@@ -60,6 +63,7 @@ import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.gson.Gson;
 
 import java.util.Calendar;
 import java.util.List;
@@ -92,6 +96,13 @@ public class MultiActivity extends AppCompatActivity implements Callback_resto_f
     private ViewPager pager;
     private SearchView searchView;
     private MenuItem searchItem;
+    private AlarmManager alarmMgr;
+    private PendingIntent alarmIntent;
+    private SharedPreferences sharedPreferences;
+    private static final String EXTRA_PREFERENCES = "preferences";
+    private static final String EXTRA_RESTO_JSON = "resto_to_json";
+    private final static String EXTRA_RESTO_DETAILS = "resto_details";
+    private static final String EXTRA_ENABLE_NOTIF = "enable_notif";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -104,6 +115,7 @@ public class MultiActivity extends AppCompatActivity implements Callback_resto_f
         FirebaseApp.initializeApp(context);
         mCurrentUser = FirebaseAuth.getInstance().getCurrentUser();
         Firebase_update firebase_update = new Firebase_update(context);
+        sharedPreferences = getSharedPreferences(EXTRA_PREFERENCES,MODE_PRIVATE);
 
         if (mCurrentUser != null)
             firebase_update.create_new_user_firebase(mCurrentUser);
@@ -117,7 +129,7 @@ public class MultiActivity extends AppCompatActivity implements Callback_resto_f
         this.configureAlarmManager();
         LatLng currentPlaceLatLng = new LatLng(48.866667, 2.333333);
         String radius = "500";
-        String type = "restaurant";
+        String type = "bar";
 
         new List_Search_Nearby(api_key, currentPlaceLatLng, radius, type, this);
 
@@ -226,12 +238,12 @@ public class MultiActivity extends AppCompatActivity implements Callback_resto_f
     // ------------------------ CREATE NEW LIST OF RESTAURANTS -------------------------
     // ---------------------------------------------------------------------------------
 
-    private void configureAlarmManager() {
+    public void configureAlarmManager() {
 
-        AlarmManager alarmMgr = (AlarmManager) getApplicationContext().getSystemService(Context.ALARM_SERVICE);
+        alarmMgr = (AlarmManager) getApplicationContext().getSystemService(Context.ALARM_SERVICE);
         Intent intent = new Intent(getApplicationContext(), AlarmReceiver.class);
         intent.putExtra(EXTRA_USER_ID,mCurrentUser.getUid());
-        PendingIntent alarmIntent = PendingIntent.getBroadcast(getApplicationContext(), 0, intent, 0);
+        alarmIntent = PendingIntent.getBroadcast(getApplicationContext(), 0, intent, 0);
 
         // Set the alarm to start at 12:00 p.m.
         Calendar calendar = Calendar.getInstance();
@@ -247,13 +259,36 @@ public class MultiActivity extends AppCompatActivity implements Callback_resto_f
     }
 
     // ---------------------------------------------------------------------------------
-    // -------------------         CONFIGURATION OF FRAGMENTS         ------------------
+    // -------------------         CONFIGURATION OF SETTINGS         ------------------
     // ---------------------------------------------------------------------------------
 
-    public void configure_and_show_settings_fragment() {
+    public void configure_and_show_settings_activity() {
         configureToolBar("Settings", true);
         Intent intent = new Intent(this, SettingActivity.class);
-        startActivity(intent);
+        int requestCode=0;
+        if(sharedPreferences!=null){
+            if(sharedPreferences.getBoolean(EXTRA_ENABLE_NOTIF,false)){
+                requestCode=1;
+            } else {
+                requestCode=0;
+            }
+        }
+        startActivityForResult(intent,requestCode);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        // request code 1 = enable notif ; request code 0 = disable notif
+        if (requestCode == 1) {
+            if (resultCode == RESULT_CANCELED) { // if the user decided to disable notification, whereas it was enabled when opening settings
+                if(alarmMgr!=null)
+                    alarmMgr.cancel(alarmIntent);
+            }
+        } else {
+            if (resultCode == RESULT_FIRST_USER) { // if the user has enabled notif, whereas it was disabled when opening settings
+                configureAlarmManager();
+            }
+        }
     }
 
     // ---------------------------------------------------------------------------------
@@ -352,8 +387,6 @@ System.out.println("eee    onClose!!");
         return true;
     }
 
-
-
     // ---------------------------------------------------------------------------------
     // -----------------     CONFIGURATION OF DRAWER  ----------------------------------
     // ---------------------------------------------------------------------------------
@@ -379,6 +412,7 @@ System.out.println("eee    onClose!!");
             if (mCurrentUser.getPhotoUrl() != null)
                 Glide.with(this)
                         .load(mCurrentUser.getPhotoUrl().toString())
+                        .apply(RequestOptions.circleCropTransform())
                         .into(picture_user);
 
         }
@@ -390,11 +424,17 @@ System.out.println("eee    onClose!!");
         int id = item.getItemId();
         switch (id) {
             case R.id.activity_main_drawer_your_lunch:
-                Firebase_recover firebase_recover = new Firebase_recover(getApplicationContext(), this, mCurrentUser.getUid());
-                firebase_recover.show_lunch_current_user();
+
+                Intent intent = new Intent(getApplicationContext(), RestoActivity.class);
+                String resto_json = sharedPreferences.getString(EXTRA_RESTO_JSON,null);
+
+
+                intent.putExtra(EXTRA_RESTO_DETAILS,resto_json);
+                startActivity(intent);
+
                 break;
             case R.id.activity_main_drawer_settings:
-                configure_and_show_settings_fragment();
+                configure_and_show_settings_activity();
                 break;
             case R.id.activity_main_drawer_logout:
                 signOutUserFromFirebase();
@@ -446,6 +486,8 @@ System.out.println("eee    onClose!!");
     public MultiFragAdapter getPageAdapter() {
         return pageAdapter;
     }
+
+
 
 
     /*

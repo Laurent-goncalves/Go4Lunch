@@ -31,6 +31,7 @@
     <string name="available_workmates">Collègues disponibles</string>
 
     <!-- Settings -->
+    <string name="enable_notif">Autoriser les notifications</string>
     <string name="title_settings">Paramètres</string>
     <string name="setting_radius">Rayon</string>
     <string name="type_of_place">Type d\'établissement: </string>

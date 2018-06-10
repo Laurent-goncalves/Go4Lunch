@@ -214,26 +214,6 @@ public class Firebase_recover {
     }
 
 
-    public void show_lunch_current_user(){
-
-        databaseReferenceWorkmates.addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot data) {
-                if(data!=null) {
-
-                    Intent intent = new Intent(context,RestoActivity.class);
-                    intent.putExtra(EXTRA_PLACE_ID,(String) data.getValue());
-                    context.startActivity(intent);
-                }
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-                System.out.println("eee Cancellation");
-            }
-        });
-    }
-
     private Boolean is_workmate_in_list(String user_id, List<Workmate> list_workmates){
 
         for(Workmate workmate : list_workmates){

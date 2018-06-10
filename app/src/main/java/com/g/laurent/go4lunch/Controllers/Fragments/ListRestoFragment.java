@@ -142,10 +142,6 @@ public class ListRestoFragment extends BaseRestoFragment implements ListViewAdap
 
     @Override
     public void onClickShowRestoDetails(String placeId) {
-
-
-
-
         mCallback_detailResto.configure_and_show_restofragment(placeId);
     }
 

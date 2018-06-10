@@ -44,25 +44,6 @@ public class AlarmReceiver extends BroadcastReceiver implements Callback_alarm {
         firebase_recover.recover_list_workmates();
     }
 
-    @Override
-    public void send_notification(List<Workmate> workmateList){
-
-        if(workmateList!=null) {
-
-            // Recover the place_id, name and address of the resto selected by the user
-            find_data_on_resto_chosen(workmateList);
-
-            // Get the number and names of workmates coming with the user to the restaurant
-            find_users_joining_resto_chosen(workmateList);
-
-            // Create the text of the notification
-            String text_notif = define_text_notification();
-
-            // send notification
-            create_and_send_notification(text_notif);
-        }
-    }
-
     private void find_data_on_resto_chosen(List<Workmate> workmateList){
         for (Workmate user : workmateList){
             if(user!=null){
@@ -144,6 +125,25 @@ public class AlarmReceiver extends BroadcastReceiver implements Callback_alarm {
 
         if (notificationManager != null)
             notificationManager.notify(1, builder.build());
+    }
+
+    @Override
+    public void send_notification(List<Workmate> workmateList){
+
+        if(workmateList!=null) {
+
+            // Recover the place_id, name and address of the resto selected by the user
+            find_data_on_resto_chosen(workmateList);
+
+            // Get the number and names of workmates coming with the user to the restaurant
+            find_users_joining_resto_chosen(workmateList);
+
+            // Create the text of the notification
+            String text_notif = define_text_notification();
+
+            // send notification
+            create_and_send_notification(text_notif);
+        }
     }
 
 }

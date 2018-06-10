@@ -8,7 +8,6 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import com.g.laurent.go4lunch.Models.List_Search_Nearby;
 import com.g.laurent.go4lunch.Models.Place_Nearby;
 import com.g.laurent.go4lunch.Models.Workmate;
 import com.g.laurent.go4lunch.R;
@@ -175,12 +174,18 @@ public class MapsFragment extends BaseRestoFragment  {
                                     .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN)));
 
                         } else {
+
                             mMap.addMarker(new MarkerOptions()
                                     .position(city)
                                     .title(text)
-                             //     .icon(BitmapDescriptorFactory.fromPath(place_nearby.getIcon_url())));
-                                    .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_ORANGE)));
+                                   // .icon(BitmapDescriptorFactory.fromBitmap(getBitmapFromURL(place_nearby.getIcon_url()))));
 
+                             .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_ORANGE)));
+
+                            //      .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_ORANGE)));
+
+
+                            //     .icon(BitmapDescriptorFactory.fromPath(place_nearby.getIcon_url())));
 
                         }
                     }
@@ -189,11 +194,12 @@ public class MapsFragment extends BaseRestoFragment  {
         }
     }
 
-    public static Bitmap getBitmapFromURL(String url) {
+    public Bitmap getBitmapFromURL(String url) {
         Bitmap bitmap = null;
         InputStream in = null;
         BufferedOutputStream out = null;
         int IO_BUFFER_SIZE = 4 * 1024;
+
         try {
             URI uri = new URI(url);
             url = uri.toASCIIString();
@@ -220,13 +226,14 @@ public class MapsFragment extends BaseRestoFragment  {
                 if(in!=null)
                     in.close();
                 if(out!=null)
-                out.close();
+                    out.close();
             } catch (IOException e) {
                 e.printStackTrace();
             }
         }
         return bitmap;
     }
+
 
     public void set_list_of_workmates(List<Workmate> list_workmates){
         this.list_workmates=list_workmates;

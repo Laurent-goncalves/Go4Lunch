@@ -2,9 +2,10 @@
 <resources>
     <color name="colorPrimary">#ff5722</color>
     <color name="colorPrimaryDark">#c41b00</color>
-    <color name="colorAccent">#FF4081</color>
+    <color name="colorAccent">#ff5722</color>
     <color name="colorIconSelected">#ff5722</color>
     <color name="colorIconNotSelected">#000000</color>
+    <color name="colorNavigationDrawerMenu">#ff8a50</color>
 
     <color name="colorGoogleButton">#ff3939</color>
     <color name="colorFacebookButton">#45619d</color>

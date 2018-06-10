@@ -29,5 +29,6 @@
     <string name="english">English</string>
     <string name="go4lunch">Go4Lunch</string>
     <string name="imageview_drawer">ImageView drawer</string>
+    <string name="image_current_user">image_current_user</string>
 
 </resources>

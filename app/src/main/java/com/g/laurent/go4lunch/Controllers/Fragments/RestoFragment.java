@@ -3,6 +3,7 @@ package com.g.laurent.go4lunch.Controllers.Fragments;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.res.ColorStateList;
 import android.graphics.drawable.Drawable;
@@ -57,6 +58,8 @@ public class RestoFragment extends Fragment {
     private final static String EXTRA_RESTO_DETAILS = "resto_details";
     private final static String RENEW_LIST_WORKMATES = "renew_list_workmates";
     private final static String INITIAL_LIST_WORKMATES = "initial_list_workmates";
+    private static final String EXTRA_PREFERENCES = "preferences";
+    private static final String EXTRA_RESTO_JSON = "resto_to_json";
     private Place_Nearby resto;
     private String placeId;
     private Context context;
@@ -85,6 +88,7 @@ public class RestoFragment extends Fragment {
         Gson gson = new Gson();
         String resto_json = getArguments().getString(EXTRA_RESTO_DETAILS,null);
         resto = gson.fromJson(resto_json,Place_Nearby.class);
+
         placeId = resto.getPlaceId();
 
         firebase_update = new Firebase_update(context,this);
@@ -342,6 +346,12 @@ public class RestoFragment extends Fragment {
 
         // Button choose resto
         if(did_I_choose_resto(list_workmates_joining)) {
+
+            SharedPreferences sharedPreferences = context.getSharedPreferences(EXTRA_PREFERENCES,Context.MODE_PRIVATE);
+            Gson gson = new Gson();
+            String resto_json = gson.toJson(resto,Place_Nearby.class);
+            sharedPreferences.edit().putString(EXTRA_RESTO_JSON,resto_json).apply();
+
             setRestoChosen(true);
             button_valid.setEnabled(false);
         } else {

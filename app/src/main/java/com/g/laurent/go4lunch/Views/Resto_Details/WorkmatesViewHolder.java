@@ -85,11 +85,12 @@ public class WorkmatesViewHolder extends RecyclerView.ViewHolder {
 
         String photoUrl = workmates.getPhotoUrl();
 
-        if(photoUrl!=null) {
-            Glide.with(context)
+        Glide.with(context)
                     .load(photoUrl)
+                    .apply(new RequestOptions()
+                            .placeholder(R.drawable.round_person_black_24))
                     .apply(RequestOptions.circleCropTransform())
                     .into(picture_workmate);
-        }
+
     }
 }
