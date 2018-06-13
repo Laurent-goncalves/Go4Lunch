@@ -2,77 +2,60 @@ package com.g.laurent.go4lunch.Controllers.Activities;
 
 import android.app.AlarmManager;
 import android.app.PendingIntent;
-import android.app.SearchManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
+import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
 import android.os.Bundle;
 import android.support.design.widget.TabLayout;
 import android.support.v4.view.GravityCompat;
-import android.support.v4.view.MenuItemCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.text.Html;
-import android.text.TextUtils;
-import android.util.Log;
+import android.util.AttributeSet;
+import android.view.Gravity;
+import android.view.InflateException;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.support.v7.widget.SearchView;
 import android.widget.TextView;
-import android.widget.Toast;
-
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
 import com.firebase.ui.auth.AuthUI;
-import com.g.laurent.go4lunch.Controllers.Fragments.ListRestoFragment;
 import com.g.laurent.go4lunch.Models.AlarmReceiver;
 import com.g.laurent.go4lunch.Models.CallbackMultiActivity;
-import com.g.laurent.go4lunch.Models.Callback_alarm;
 import com.g.laurent.go4lunch.Models.Callback_resto_fb;
 import com.g.laurent.go4lunch.Models.List_Search_Nearby;
 import com.g.laurent.go4lunch.Models.Place_Nearby;
-import com.g.laurent.go4lunch.Models.Workmate;
 import com.g.laurent.go4lunch.R;
 import com.g.laurent.go4lunch.Utils.DistanceCalculation;
-import com.g.laurent.go4lunch.Utils.Firebase_recover;
 import com.g.laurent.go4lunch.Utils.Firebase_update;
 import com.g.laurent.go4lunch.Utils.Google_Maps_Utils;
 import com.g.laurent.go4lunch.Views.MultiFragAdapter;
-import com.google.android.gms.common.GooglePlayServicesNotAvailableException;
-import com.google.android.gms.common.GooglePlayServicesRepairableException;
-import com.google.android.gms.common.api.Status;
-import com.google.android.gms.location.places.AutocompleteFilter;
-import com.google.android.gms.location.places.Place;
-import com.google.android.gms.location.places.ui.PlaceAutocomplete;
-import com.google.android.gms.location.places.ui.PlaceAutocompleteFragment;
-import com.google.android.gms.location.places.ui.PlaceSelectionListener;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-import com.google.gson.Gson;
-
 import java.util.Calendar;
 import java.util.List;
 import java.util.Objects;
-
 import butterknife.BindView;
 import butterknife.ButterKnife;
-
-import static android.content.ContentValues.TAG;
 
 
 public class MultiActivity extends AppCompatActivity implements Callback_resto_fb,
@@ -89,7 +72,7 @@ public class MultiActivity extends AppCompatActivity implements Callback_resto_f
     private FirebaseUser mCurrentUser;
     @BindView(R.id.activity_main_drawer_layout) DrawerLayout drawerLayout;
     @BindView(R.id.activity_main_nav_view) NavigationView navigationView;
-    @BindView(R.id.activity_main_toolbar) Toolbar toolbar;
+    private Toolbar toolbar;
     @BindView(R.id.swiperefresh) SwipeRefreshLayout swipeRefreshLayout;
     private TabLayout tabs;
     private LatLng currentPlaceLatLng;
@@ -98,7 +81,8 @@ public class MultiActivity extends AppCompatActivity implements Callback_resto_f
     private int current_page;
     private ViewPager pager;
     private SearchView searchView;
-    private MenuItem searchItem;
+    private TextView title_toolbar;
+    private ImageButton hamburger;
     private AlarmManager alarmMgr;
     private PendingIntent alarmIntent;
     private SharedPreferences sharedPreferences;
@@ -107,6 +91,10 @@ public class MultiActivity extends AppCompatActivity implements Callback_resto_f
     private final static String EXTRA_RESTO_DETAILS = "resto_details";
     private static final String EXTRA_PREF_TYPE_PLACE = "type_place_preferences";
     private static final String EXTRA_ENABLE_NOTIF = "enable_notif";
+    private Google_Maps_Utils google_maps_utils;
+    private ActionBarDrawerToggle toggle;
+
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -122,6 +110,10 @@ public class MultiActivity extends AppCompatActivity implements Callback_resto_f
         sharedPreferences = getSharedPreferences(EXTRA_PREFERENCES, MODE_PRIVATE);
         current_page = 0;
 
+        google_maps_utils = new Google_Maps_Utils(getApplicationContext(),this);
+
+
+
         if (mCurrentUser != null)
             firebase_update.create_new_user_firebase(mCurrentUser);
 
@@ -129,13 +121,19 @@ public class MultiActivity extends AppCompatActivity implements Callback_resto_f
 
         //lastKnownPlace=findLastPlaceHighestLikelihood(savedInstanceState);
 
-        this.configureDrawerLayout();
+
         this.configureNavigationView();
-        this.configureAlarmManager();
+       // this.configureAlarmManager();
+
         currentPlaceLatLng = new LatLng(48.866667, 2.333333);
 
+        tabs = findViewById(R.id.activity_multi_tabs);
+        //tabs.setupWithViewPager(pager);
+        configure_toolbar();
+        configure_tabs();
 
 
+        //configureToolBar("I'm hungry!",true);
         String radius = String.valueOf(sharedPreferences.getInt(EXTRA_PREF_RADIUS,500));
         String type = sharedPreferences.getString(EXTRA_PREF_TYPE_PLACE,"restaurant");
 
@@ -152,32 +150,27 @@ public class MultiActivity extends AppCompatActivity implements Callback_resto_f
 
         pageAdapter = new MultiFragAdapter(getSupportFragmentManager(), api_key, getApplicationContext(), list_restos);
 
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                pager.setAdapter(pageAdapter);
+        runOnUiThread(() -> {
+            pager.setAdapter(pageAdapter);
 
-                // Get TabLayout from layout
-                tabs = findViewById(R.id.activity_multi_tabs);
-                tabs.setupWithViewPager(pager);
+            // Get TabLayout from layout
+            tabs = findViewById(R.id.activity_multi_tabs);
+            tabs.setupWithViewPager(pager);
 
-                // Glue TabLayout and ViewPager together
-                configure_tabs();
+            // Glue TabLayout and ViewPager together
+            configure_tabs();
 
-                // Design purpose. Tabs have the same width
-                tabs.setTabMode(TabLayout.MODE_FIXED);
+            // Design purpose. Tabs have the same width
+            tabs.setTabMode(TabLayout.MODE_FIXED);
 
-                // Select the last tab selected before eventual refresh and stop the refresh
-                Objects.requireNonNull(tabs.getTabAt(current_page)).select();
-                swipeRefreshLayout.setRefreshing(false);
-            }
+            // Select the last tab selected before eventual refresh and stop the refresh
+            Objects.requireNonNull(tabs.getTabAt(current_page)).select();
+            swipeRefreshLayout.setRefreshing(false);
         });
-
 
         pager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
             @Override
             public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
-
             }
 
             @Override
@@ -203,8 +196,6 @@ public class MultiActivity extends AppCompatActivity implements Callback_resto_f
         Objects.requireNonNull(tabs.getTabAt(2)).setIcon(R.drawable.baseline_people_white_24);
         Objects.requireNonNull(Objects.requireNonNull(tabs.getTabAt(2)).getIcon()).setColorFilter(getResources().getColor(R.color.colorIconNotSelected), PorterDuff.Mode.SRC_IN);
 
-        // configure toolbar
-        configureToolBar(getResources().getString(R.string.toolbar_mapview), true);
         swipeRefreshLayout.setEnabled(false);
 
         // Set on Tab selected listener
@@ -217,9 +208,9 @@ public class MultiActivity extends AppCompatActivity implements Callback_resto_f
 
                 // Change tab title if required
                 if (Objects.requireNonNull(tab.getText()).equals(getResources().getString(R.string.workmates)))
-                    configureToolBar(getResources().getString(R.string.available_workmates), true);
+                    toolbar.setTitle(getResources().getString(R.string.available_workmates));
                 else
-                    configureToolBar(getResources().getString(R.string.toolbar_mapview), true);
+                    toolbar.setTitle(getResources().getString(R.string.toolbar_mapview));
 
                 // Disable pull to refresh when mapView is displayed
                 if(tab.getPosition()==0)
@@ -227,14 +218,14 @@ public class MultiActivity extends AppCompatActivity implements Callback_resto_f
                 else
                     swipeRefreshLayout.setEnabled(true);
 
-
-                if (searchItem != null) {
-                    searchItem.collapseActionView();
-                }
             }
 
             @Override
             public void onTabUnselected(TabLayout.Tab tab) {
+
+                // if the searchView is opened, close it
+                if(!searchView.isIconified())
+                    searchView.setIconified(true);
 
                 // Change color of the tab -> black
                 if (tab.getIcon() != null)
@@ -253,30 +244,33 @@ public class MultiActivity extends AppCompatActivity implements Callback_resto_f
 
     public void configureAlarmManager() {
 
-        alarmMgr = (AlarmManager) getApplicationContext().getSystemService(Context.ALARM_SERVICE);
-        Intent intent = new Intent(getApplicationContext(), AlarmReceiver.class);
-        intent.putExtra(EXTRA_USER_ID, mCurrentUser.getUid());
-        alarmIntent = PendingIntent.getBroadcast(getApplicationContext(), 0, intent, 0);
+        Boolean enable = sharedPreferences.getBoolean(EXTRA_ENABLE_NOTIF,false);
 
-        // Set the alarm to start at 12:00 p.m.
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTimeInMillis(System.currentTimeMillis());
-        calendar.set(Calendar.HOUR_OF_DAY, 12);
-        calendar.set(Calendar.MINUTE, 0);
+        if(enable){
+            alarmMgr = (AlarmManager) getApplicationContext().getSystemService(Context.ALARM_SERVICE);
+            Intent intent = new Intent(getApplicationContext(), AlarmReceiver.class);
+            intent.putExtra(EXTRA_USER_ID, mCurrentUser.getUid());
+            alarmIntent = PendingIntent.getBroadcast(getApplicationContext(), 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
 
-        // setRepeating() lets you specify a precise custom interval
-        if (alarmMgr != null)
-            alarmMgr.setRepeating(AlarmManager.RTC, calendar.getTimeInMillis(),
-                    AlarmManager.INTERVAL_DAY, alarmIntent);
+            // Set the alarm to start at 12:00 p.m.
+            Calendar calendar = Calendar.getInstance();
+            calendar.setTimeInMillis(System.currentTimeMillis());
+            calendar.set(Calendar.HOUR_OF_DAY, 12);
+            calendar.set(Calendar.MINUTE, 0);
 
+            // setRepeating() lets you specify a precise custom interval
+            if (alarmMgr != null)
+                alarmMgr.setRepeating(AlarmManager.RTC, calendar.getTimeInMillis(),
+                        AlarmManager.INTERVAL_DAY, alarmIntent);
+        }
     }
 
     // ---------------------------------------------------------------------------------
-    // -------------------         CONFIGURATION OF SETTINGS         ------------------
+    // -------------------         CONFIGURATION OF SETTINGS         -------------------
     // ---------------------------------------------------------------------------------
 
     public void configure_and_show_settings_activity() {
-        configureToolBar("Settings", true);
+   //     configureToolBar("Settings", true);
         Intent intent = new Intent(this, SettingActivity.class);
         int requestCode = 0;
         if (sharedPreferences != null) {
@@ -294,8 +288,9 @@ public class MultiActivity extends AppCompatActivity implements Callback_resto_f
         // request code 1 = enable notif ; request code 0 = disable notif
         if (requestCode == 1) {
             if (resultCode == RESULT_CANCELED) { // if the user decided to disable notification, whereas it was enabled when opening settings
-                if (alarmMgr != null)
+                if (alarmMgr != null) {
                     alarmMgr.cancel(alarmIntent);
+                }
             }
         } else {
             if (resultCode == RESULT_FIRST_USER) { // if the user has enabled notif, whereas it was disabled when opening settings
@@ -308,44 +303,25 @@ public class MultiActivity extends AppCompatActivity implements Callback_resto_f
     // -----------------     CONFIGURATION OF TOOLBAR  ---------------------------------
     // ---------------------------------------------------------------------------------
 
-    private void configureToolBar(String title, Boolean bar_display) {
+    public void configure_toolbar(){
 
-        runOnUiThread(() -> {
-            if (bar_display) {
-                toolbar.setVisibility(View.VISIBLE);
-                setSupportActionBar(toolbar);
-                android.support.v7.app.ActionBar actionBar = getSupportActionBar();
-                if (actionBar != null) {
-                    actionBar.setTitle(title);
-                    actionBar.setDisplayHomeAsUpEnabled(true);
-                }
-            } else
-                toolbar.setVisibility(View.GONE);
-        });
+        toolbar = (Toolbar) findViewById(R.id.activity_main_toolbar);
+        setSupportActionBar(toolbar);
+
+        //Assign icons
+        title_toolbar = toolbar.findViewById(R.id.title_toolbar);
+        title_toolbar.setText(getResources().getString(R.string.toolbar_mapview));
+        hamburger = toolbar.findViewById(R.id.button_hamburger);
+        searchView = toolbar.findViewById(R.id.searchView);
+
+        // configure hamburger menu to open the navigation drawer
+        hamburger.setOnClickListener(v -> drawerLayout.openDrawer(Gravity.START));
+        configure_searchView();
     }
 
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case android.R.id.home:
-                drawerLayout.openDrawer(GravityCompat.START);  // OPEN DRAWER
+    private void configure_searchView(){
 
-                if (searchItem != null) {
-                    searchItem.collapseActionView();
-                }
-                return true;
-        }
-        return true;
-    }
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-
-        MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.options_menu, menu);
-
-        searchItem = menu.findItem(R.id.search);
-        searchView = (SearchView) searchItem.getActionView();
+        searchView.setQueryHint(getResources().getString(R.string.Search_restaurants));
 
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
@@ -360,7 +336,7 @@ public class MultiActivity extends AppCompatActivity implements Callback_resto_f
                 DistanceCalculation tool_calcul_distance = new DistanceCalculation();
                 LatLngBounds bounds = tool_calcul_distance.create_LatLngBounds(radius, current_location);
 
-                Google_Maps_Utils google_maps_utils = new Google_Maps_Utils(getApplicationContext());
+                //  google_maps_utils = new Google_Maps_Utils(getApplicationContext(),);
 
                 switch (current_page) {
                     case 0:
@@ -375,40 +351,46 @@ public class MultiActivity extends AppCompatActivity implements Callback_resto_f
 
             @Override
             public boolean onQueryTextChange(String s) {
-                searchView.setBackgroundColor(Color.WHITE);
+
                 return false;
             }
         });
 
-        searchView.setOnCloseListener(new SearchView.OnCloseListener() {
-            @Override
-            public boolean onClose() {
-                System.out.println("eee    onClose!!");
-                switch (current_page) {
-                    case 0:
-                        pageAdapter.getMapsFragment().recover_previous_state();
-                        break;
-                    case 1:
-                        pageAdapter.getListRestoFragment().recover_previous_state();
-                        break;
-                }
-                return false;
-            }
-        });
-        searchView.setIconifiedByDefault(true);
+        // change color of the text in the edittext
+        EditText searchEditText = (EditText) searchView.findViewById(android.support.v7.appcompat.R.id.search_src_text);
+        searchEditText.setTextColor(getResources().getColor(R.color.colorIconNotSelected));
 
-        return true;
+        // change color of close icon in searchview
+        ImageView icon_close_search = searchView.findViewById(android.support.v7.appcompat.R.id.search_close_btn);
+        icon_close_search.setColorFilter(getResources().getColor(R.color.colorGrey));
+
+        searchView.setOnSearchClickListener(v -> {
+            title_toolbar.setVisibility(View.GONE);
+            hamburger.setVisibility(View.GONE);
+            searchView.setMaxWidth(Integer.MAX_VALUE);
+        });
+
+        searchView.setOnCloseListener(() -> {
+            title_toolbar.setVisibility(View.VISIBLE);
+            hamburger.setVisibility(View.VISIBLE);
+
+            // Recover the previous list of places nearby generated
+            switch (current_page) {
+                case 0:
+                    pageAdapter.getMapsFragment().recover_previous_state();
+                    break;
+                case 1:
+                    pageAdapter.getListRestoFragment().recover_previous_state();
+                    break;
+            }
+
+            return false;
+        });
     }
 
     // ---------------------------------------------------------------------------------
     // -----------------     CONFIGURATION OF DRAWER  ----------------------------------
     // ---------------------------------------------------------------------------------
-
-    private void configureDrawerLayout() {
-        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(this, drawerLayout, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
-        drawerLayout.addDrawerListener(toggle);
-        toggle.syncState();
-    }
 
     private void configureNavigationView() {
         navigationView.setNavigationItemSelectedListener(this);
@@ -505,3 +487,21 @@ public class MultiActivity extends AppCompatActivity implements Callback_resto_f
         new List_Search_Nearby(api_key, currentPlaceLatLng, radius, type, this);
     }
 }
+
+
+
+
+
+
+    /*@Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.options_menu, menu);
+
+        searchItem = menu.findItem(R.id.search);
+
+
+        return true;
+    }*/
+

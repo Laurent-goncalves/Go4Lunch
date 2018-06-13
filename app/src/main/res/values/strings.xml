@@ -30,5 +30,7 @@
     <string name="go4lunch">Go4Lunch</string>
     <string name="imageview_drawer">ImageView drawer</string>
     <string name="image_current_user">image_current_user</string>
+    <string name="icon_button_search">icon_button_search</string>
+    <string name="icon_button_hamburger">icon_button_hamburger</string>
 
 </resources>

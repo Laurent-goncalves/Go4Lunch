@@ -7,6 +7,7 @@
 
     <!-- MAPVIEW & LISTVIEW -->
     <string name="toolbar_mapview">J\'ai faim</string>
+    <string name="Search_restaurants">Rechercher restaurants</string>
 
     <!-- RESTOVIEW -->
     <string name="call">APPEL</string>

@@ -13,5 +13,6 @@
     <color name="colorGreen">#68efad</color>
     <color name="colorWhite">#fffffe</color>
     <color name="colorTrackSwitch">#ffc2ae</color>
+    <color name="colorGrey">#c9c9c8</color>
 
 </resources>

@@ -7,6 +7,7 @@
 
     <!-- MAPVIEW & LISTVIEW -->
     <string name="toolbar_mapview">I\'m hungry</string>
+    <string name="Search_restaurants">Search restaurants</string>
 
     <!-- RESTOVIEW -->
     <string name="call">CALL</string>

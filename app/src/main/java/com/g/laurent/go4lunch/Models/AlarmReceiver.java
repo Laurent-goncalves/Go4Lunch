@@ -34,7 +34,6 @@ public class AlarmReceiver extends BroadcastReceiver implements Callback_alarm {
     public void onReceive(Context context, Intent intent) {
         mContext=context;
         callback = this;
-
         if(intent!=null){
             if(intent.getExtras()!=null)
                 user_id=intent.getExtras().getString(EXTRA_USER_ID,null);

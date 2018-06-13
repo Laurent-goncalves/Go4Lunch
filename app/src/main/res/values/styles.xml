@@ -15,7 +15,20 @@
     </style>
 
 
+    <style name="SearchViewStyle" parent="Widget.AppCompat.SearchView">
+        <!-- Gets rid of the search icon
+        <item name="searchIcon">@drawable/ic_search_white_24dp</item>
 
+        <item name="closeIcon">@drawable/baseline_close_black_24</item> -->
+
+        <item name="searchHintIcon">@drawable/baseline_search_black_24</item>
+            <!-- Gets rid of the "underline" in the text -->
+        <item name="queryBackground">@color/colorWhite</item>
+        <!-- Gets rid of the search icon when the SearchView is expanded -->
+
+        <!-- The hint text that appears when the user has not typed anything -->
+        <item name="queryHint">@string/search_hint</item>
+    </style>
 
     <!-- STYLE SIGN-IN ACTIVITY -->
     <style name="LoginTheme" parent="AppTheme">

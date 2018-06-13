@@ -108,14 +108,14 @@ public class List_Search_Nearby {
         // CONSTRUCTOR FOR AUTOCOMPLETE METHOD
         this.mapsFragment=mapsFragment;
         list_places_nearby = new ArrayList<>();
-      //  launch_request_search_nearby_places_autocomplete(api_key, list_placeId, CALLBACK_MAPS_FRAGMENT);
+        launch_request_search_nearby_places_autocomplete(api_key, list_placeId, CALLBACK_MAPS_FRAGMENT);
     }
 
     public List_Search_Nearby(String api_key, List<String> list_placeId, ListRestoFragment listRestoFragment) {
         // CONSTRUCTOR FOR AUTOCOMPLETE METHOD
         this.listRestoFragment=listRestoFragment;
         list_places_nearby = new ArrayList<>();
-      //  launch_request_search_nearby_places_autocomplete(api_key, list_placeId, CALLBACK_LIST_RESTO_FRAGMENT);
+        launch_request_search_nearby_places_autocomplete(api_key, list_placeId, CALLBACK_LIST_RESTO_FRAGMENT);
     }
 
     private void launch_request_search_nearby_places_autocomplete(String api_key, List<String> list_places_Id, String callback){

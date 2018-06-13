@@ -19,6 +19,7 @@ import com.g.laurent.go4lunch.Utils.DetailsPlace.Open;
 import com.g.laurent.go4lunch.Utils.DetailsPlace.OpeningHours;
 import com.g.laurent.go4lunch.Utils.DetailsPlace.Period;
 import com.g.laurent.go4lunch.Utils.Firebase_update;
+import com.g.laurent.go4lunch.Utils.Google_Maps_Utils;
 import com.g.laurent.go4lunch.Utils.TimeCalculation;
 import com.google.android.gms.common.data.DataBufferUtils;
 import com.google.android.gms.location.places.AutocompletePrediction;
@@ -127,6 +128,16 @@ public class MainActivityTest {
         //                                                                       current_time
 
         Assert.assertEquals("Closed now",timeCalculation.getInformationAboutOpeningAndClosure(openingHours.getPeriods(),current_time,current_day-1));
+
+
+    }
+
+    @Test
+    public void TEST_get_current_location(){
+
+
+        Google_Maps_Utils google_maps_utils = new Google_Maps_Utils(mActivityTestRule.getActivity().getApplicationContext());
+
 
 
     }

@@ -1,5 +1,6 @@
 package com.g.laurent.go4lunch.Controllers.Fragments;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -10,6 +11,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.g.laurent.go4lunch.Controllers.Activities.MultiActivity;
 import com.g.laurent.go4lunch.Controllers.Activities.RestoActivity;
 import com.g.laurent.go4lunch.Models.Place_Nearby;
 import com.g.laurent.go4lunch.Models.Workmate;
@@ -54,7 +56,7 @@ public class MapsFragment extends BaseRestoFragment  {
     private static final String EXTRA_PREF_RADIUS = "radius_preferences";
     private static final String EXTRA_PREF_TYPE_PLACE = "type_place_preferences";
     private final static String EXTRA_RESTO_DETAILS = "resto_details";
-
+private MultiActivity mMultiActivity;
     private Firebase_recover firebase_recover;
     private Context context;
     private List<Workmate> list_workmates;
@@ -91,7 +93,7 @@ public class MapsFragment extends BaseRestoFragment  {
         mMapView.onCreate(savedInstanceState);
         context = getActivity().getApplicationContext();
         list_places_nearby_OLD = new ArrayList<>();
-        Google_Maps_Utils google_maps_utils = new Google_Maps_Utils(context);
+        Google_Maps_Utils google_maps_utils = new Google_Maps_Utils(context,mMultiActivity);
 
         currentPlaceLatLng = new LatLng(48.866667, 2.333333);
 
@@ -230,5 +232,11 @@ public class MapsFragment extends BaseRestoFragment  {
         super.onResume();
         if(firebase_recover!=null)
             firebase_recover.recover_list_workmates();
+    }
+
+    @Override
+    public void onAttach(Activity activity) {
+        super.onAttach(activity);
+        mMultiActivity=(MultiActivity) activity;
     }
 }
