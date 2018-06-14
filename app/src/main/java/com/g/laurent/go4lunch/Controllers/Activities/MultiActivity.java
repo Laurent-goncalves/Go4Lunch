@@ -13,6 +13,7 @@ import android.support.design.widget.NavigationView;
 import android.os.Bundle;
 import android.support.design.widget.TabLayout;
 import android.support.v4.view.GravityCompat;
+import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v4.widget.SwipeRefreshLayout;
@@ -27,6 +28,8 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
@@ -44,13 +47,17 @@ import com.g.laurent.go4lunch.R;
 import com.g.laurent.go4lunch.Utils.DistanceCalculation;
 import com.g.laurent.go4lunch.Utils.Firebase_update;
 import com.g.laurent.go4lunch.Utils.Google_Maps_Utils;
+import com.g.laurent.go4lunch.Utils.Toolbar_navig_Utils;
 import com.g.laurent.go4lunch.Views.MultiFragAdapter;
+import com.google.android.gms.location.places.AutocompletePrediction;
+import com.google.android.gms.location.places.ui.PlaceAutocompleteFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 import java.util.Objects;
@@ -59,14 +66,14 @@ import butterknife.ButterKnife;
 
 
 public class MultiActivity extends AppCompatActivity implements Callback_resto_fb,
-        NavigationView.OnNavigationItemSelectedListener, CallbackMultiActivity, SwipeRefreshLayout.OnRefreshListener {
+         CallbackMultiActivity, SwipeRefreshLayout.OnRefreshListener {
 
     private LatLng lastKnownPlace;
     private final static String EXTRA_LAT_CURRENT = "latitude_current_location";
     private final static String EXTRA_LONG_CURRENT = "longitude_current_location";
     private static final String EXTRA_PREF_RADIUS = "radius_preferences";
     private static final String EXTRA_USER_ID = "user_id_alarm";
-    private static final int SIGN_OUT_TASK = 10;
+
     private final String EXTRA_API_KEY = "api_key";
     private String api_key;
     private FirebaseUser mCurrentUser;
@@ -80,20 +87,16 @@ public class MultiActivity extends AppCompatActivity implements Callback_resto_f
     private int PLACE_AUTOCOMPLETE_REQUEST_CODE = 1;
     private int current_page;
     private ViewPager pager;
-    private SearchView searchView;
-    private TextView title_toolbar;
-    private ImageButton hamburger;
+
     private AlarmManager alarmMgr;
     private PendingIntent alarmIntent;
     private SharedPreferences sharedPreferences;
     private static final String EXTRA_PREFERENCES = "preferences";
-    private static final String EXTRA_RESTO_JSON = "resto_to_json";
+    private Toolbar_navig_Utils toolbar_navig_utils;
     private final static String EXTRA_RESTO_DETAILS = "resto_details";
     private static final String EXTRA_PREF_TYPE_PLACE = "type_place_preferences";
     private static final String EXTRA_ENABLE_NOTIF = "enable_notif";
     private Google_Maps_Utils google_maps_utils;
-    private ActionBarDrawerToggle toggle;
-
 
 
     @Override
@@ -110,27 +113,32 @@ public class MultiActivity extends AppCompatActivity implements Callback_resto_f
         sharedPreferences = getSharedPreferences(EXTRA_PREFERENCES, MODE_PRIVATE);
         current_page = 0;
 
-        google_maps_utils = new Google_Maps_Utils(getApplicationContext(),this);
+        google_maps_utils = new Google_Maps_Utils(getApplicationContext(),this,null);
+        currentPlaceLatLng = new LatLng(48.866667, 2.333333);
+        api_key = getResources().getString(R.string.google_maps_key2);
 
+        // Configure toolbar and navigation drawer
+        toolbar_navig_utils = new Toolbar_navig_Utils(this);
+        toolbar_navig_utils.configure_toolbar();
+        toolbar_navig_utils.configureNavigationView();
 
 
         if (mCurrentUser != null)
             firebase_update.create_new_user_firebase(mCurrentUser);
 
-        api_key = getResources().getString(R.string.google_maps_key2);
+
 
         //lastKnownPlace=findLastPlaceHighestLikelihood(savedInstanceState);
 
 
-        this.configureNavigationView();
        // this.configureAlarmManager();
 
-        currentPlaceLatLng = new LatLng(48.866667, 2.333333);
+
 
         tabs = findViewById(R.id.activity_multi_tabs);
         //tabs.setupWithViewPager(pager);
-        configure_toolbar();
-        configure_tabs();
+
+       // configure_tabs();
 
 
         //configureToolBar("I'm hungry!",true);
@@ -208,24 +216,23 @@ public class MultiActivity extends AppCompatActivity implements Callback_resto_f
 
                 // Change tab title if required
                 if (Objects.requireNonNull(tab.getText()).equals(getResources().getString(R.string.workmates)))
-                    toolbar.setTitle(getResources().getString(R.string.available_workmates));
+                    toolbar_navig_utils.getToolbar().setTitle(getResources().getString(R.string.available_workmates));
                 else
-                    toolbar.setTitle(getResources().getString(R.string.toolbar_mapview));
+                    toolbar_navig_utils.getToolbar().setTitle(getResources().getString(R.string.toolbar_mapview));
 
                 // Disable pull to refresh when mapView is displayed
                 if(tab.getPosition()==0)
                     swipeRefreshLayout.setEnabled(false);
                 else
                     swipeRefreshLayout.setEnabled(true);
-
             }
 
             @Override
             public void onTabUnselected(TabLayout.Tab tab) {
 
                 // if the searchView is opened, close it
-                if(!searchView.isIconified())
-                    searchView.setIconified(true);
+                if(!toolbar_navig_utils.getSearchView().isIconified())
+                    toolbar_navig_utils.getSearchView().setIconified(true);
 
                 // Change color of the tab -> black
                 if (tab.getIcon() != null)
@@ -270,7 +277,7 @@ public class MultiActivity extends AppCompatActivity implements Callback_resto_f
     // ---------------------------------------------------------------------------------
 
     public void configure_and_show_settings_activity() {
-   //     configureToolBar("Settings", true);
+
         Intent intent = new Intent(this, SettingActivity.class);
         int requestCode = 0;
         if (sharedPreferences != null) {
@@ -299,164 +306,6 @@ public class MultiActivity extends AppCompatActivity implements Callback_resto_f
         }
     }
 
-    // ---------------------------------------------------------------------------------
-    // -----------------     CONFIGURATION OF TOOLBAR  ---------------------------------
-    // ---------------------------------------------------------------------------------
-
-    public void configure_toolbar(){
-
-        toolbar = (Toolbar) findViewById(R.id.activity_main_toolbar);
-        setSupportActionBar(toolbar);
-
-        //Assign icons
-        title_toolbar = toolbar.findViewById(R.id.title_toolbar);
-        title_toolbar.setText(getResources().getString(R.string.toolbar_mapview));
-        hamburger = toolbar.findViewById(R.id.button_hamburger);
-        searchView = toolbar.findViewById(R.id.searchView);
-
-        // configure hamburger menu to open the navigation drawer
-        hamburger.setOnClickListener(v -> drawerLayout.openDrawer(Gravity.START));
-        configure_searchView();
-    }
-
-    private void configure_searchView(){
-
-        searchView.setQueryHint(getResources().getString(R.string.Search_restaurants));
-
-        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
-            @Override
-            public boolean onQueryTextSubmit(String query) {
-
-                String EXTRA_PREFERENCES = "preferences";
-                SharedPreferences sharedPreferences = getSharedPreferences(EXTRA_PREFERENCES, MODE_PRIVATE);
-                LatLng current_location = new LatLng(48.866667, 2.333333);
-                int radius = sharedPreferences.getInt(EXTRA_PREF_RADIUS, 500);
-
-                // Define bounds for search
-                DistanceCalculation tool_calcul_distance = new DistanceCalculation();
-                LatLngBounds bounds = tool_calcul_distance.create_LatLngBounds(radius, current_location);
-
-                //  google_maps_utils = new Google_Maps_Utils(getApplicationContext(),);
-
-                switch (current_page) {
-                    case 0:
-                        google_maps_utils.googleplacespredictions(api_key, query, bounds, null, pageAdapter.getMapsFragment());
-                        break;
-                    case 1:
-                        google_maps_utils.googleplacespredictions(api_key, query, bounds, pageAdapter.getListRestoFragment(), null);
-                        break;
-                }
-                return false;
-            }
-
-            @Override
-            public boolean onQueryTextChange(String s) {
-
-                return false;
-            }
-        });
-
-        // change color of the text in the edittext
-        EditText searchEditText = (EditText) searchView.findViewById(android.support.v7.appcompat.R.id.search_src_text);
-        searchEditText.setTextColor(getResources().getColor(R.color.colorIconNotSelected));
-
-        // change color of close icon in searchview
-        ImageView icon_close_search = searchView.findViewById(android.support.v7.appcompat.R.id.search_close_btn);
-        icon_close_search.setColorFilter(getResources().getColor(R.color.colorGrey));
-
-        searchView.setOnSearchClickListener(v -> {
-            title_toolbar.setVisibility(View.GONE);
-            hamburger.setVisibility(View.GONE);
-            searchView.setMaxWidth(Integer.MAX_VALUE);
-        });
-
-        searchView.setOnCloseListener(() -> {
-            title_toolbar.setVisibility(View.VISIBLE);
-            hamburger.setVisibility(View.VISIBLE);
-
-            // Recover the previous list of places nearby generated
-            switch (current_page) {
-                case 0:
-                    pageAdapter.getMapsFragment().recover_previous_state();
-                    break;
-                case 1:
-                    pageAdapter.getListRestoFragment().recover_previous_state();
-                    break;
-            }
-
-            return false;
-        });
-    }
-
-    // ---------------------------------------------------------------------------------
-    // -----------------     CONFIGURATION OF DRAWER  ----------------------------------
-    // ---------------------------------------------------------------------------------
-
-    private void configureNavigationView() {
-        navigationView.setNavigationItemSelectedListener(this);
-
-        if (mCurrentUser != null) {
-
-            ImageView picture_user = navigationView.getHeaderView(0).findViewById(R.id.current_user_image_drawer);
-            TextView name_user = navigationView.getHeaderView(0).findViewById(R.id.current_user_name_drawer);
-            TextView email_user = navigationView.getHeaderView(0).findViewById(R.id.current_user_email_drawer);
-
-            name_user.setText(mCurrentUser.getDisplayName());
-            email_user.setText(mCurrentUser.getEmail());
-
-            if (mCurrentUser.getPhotoUrl() != null)
-                Glide.with(this)
-                        .load(mCurrentUser.getPhotoUrl().toString())
-                        .apply(RequestOptions.circleCropTransform())
-                        .into(picture_user);
-
-        }
-    }
-
-    @Override
-    public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-
-        int id = item.getItemId();
-        switch (id) {
-            case R.id.activity_main_drawer_your_lunch:
-
-                Intent intent = new Intent(getApplicationContext(), RestoActivity.class);
-                String resto_json = sharedPreferences.getString(EXTRA_RESTO_JSON, null);
-                intent.putExtra(EXTRA_RESTO_DETAILS, resto_json);
-                startActivity(intent);
-
-                break;
-            case R.id.activity_main_drawer_settings:
-                configure_and_show_settings_activity();
-                break;
-            case R.id.activity_main_drawer_logout:
-                signOutUserFromFirebase();
-                break;
-            default:
-                break;
-        }
-        this.drawerLayout.closeDrawer(GravityCompat.START);
-        return true;
-    }
-
-    private void signOutUserFromFirebase() {
-        AuthUI.getInstance()
-                .signOut(this)
-                .addOnSuccessListener(this, this.updateUIAfterRESTRequestsCompleted(SIGN_OUT_TASK));
-    }
-
-    private OnSuccessListener<Void> updateUIAfterRESTRequestsCompleted(final int origin) {
-        return aVoid -> {
-            switch (origin) {
-                case SIGN_OUT_TASK:
-                    finish();
-                    break;
-                default:
-                    break;
-            }
-        };
-    }
-
     // ----------------------------------------------------------------------------------------------------
     // -------------------------------------- CONFIGURE TABS ----------------------------------------------
     // ----------------------------------------------------------------------------------------------------
@@ -480,12 +329,50 @@ public class MultiActivity extends AppCompatActivity implements Callback_resto_f
         return pageAdapter;
     }
 
+    public int getCurrentPage(){
+        return current_page;
+    }
+
+    public String get_API_KEY(){
+        return api_key;
+    }
+
+    public MultiFragAdapter get_Page_Adapter(){
+        return pageAdapter;
+    }
+
+    public LatLng get_current_position(){
+        return currentPlaceLatLng;
+    }
+
+    public DrawerLayout getDrawerLayout() {
+        return drawerLayout;
+    }
+
+    public NavigationView getNavigationView() {
+        return navigationView;
+    }
+
+    public SharedPreferences getSharedPreferences() {
+        return sharedPreferences;
+    }
+
+    public FirebaseUser getCurrentUser() {
+        return mCurrentUser;
+    }
+
+    public LatLng getCurrentPlaceLatLng() {
+        return currentPlaceLatLng;
+    }
+
     @Override
     public void onRefresh() {
         String radius = String.valueOf(sharedPreferences.getInt(EXTRA_PREF_RADIUS,500));
         String type = sharedPreferences.getString(EXTRA_PREF_TYPE_PLACE,"restaurant");
         new List_Search_Nearby(api_key, currentPlaceLatLng, radius, type, this);
     }
+
+
 }
 
 

@@ -1,0 +1,281 @@
+package com.g.laurent.go4lunch.Utils;
+
+import android.content.Context;
+import android.content.Intent;
+import android.support.annotation.NonNull;
+import android.support.design.widget.NavigationView;
+import android.support.v4.view.GravityCompat;
+import android.support.v7.app.ActionBarDrawerToggle;
+import android.support.v7.widget.SearchView;
+import android.support.v7.widget.Toolbar;
+import android.text.TextPaint;
+import android.text.style.CharacterStyle;
+import android.view.Gravity;
+import android.view.MenuItem;
+import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.ImageButton;
+import android.widget.ImageView;
+import android.widget.TextView;
+
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.request.RequestOptions;
+import com.firebase.ui.auth.AuthUI;
+import com.g.laurent.go4lunch.Controllers.Activities.MultiActivity;
+import com.g.laurent.go4lunch.Controllers.Activities.RestoActivity;
+import com.g.laurent.go4lunch.Controllers.Fragments.ListRestoFragment;
+import com.g.laurent.go4lunch.Controllers.Fragments.MapsFragment;
+import com.g.laurent.go4lunch.Models.List_Search_Nearby;
+import com.g.laurent.go4lunch.Models.Place_Nearby;
+import com.g.laurent.go4lunch.R;
+import com.g.laurent.go4lunch.Utils.DetailsPlace.Geometry;
+import com.g.laurent.go4lunch.Utils.DetailsPlace.OpeningHours;
+import com.google.android.gms.location.places.AutocompletePrediction;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.LatLngBounds;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.auth.FirebaseUser;
+
+import java.util.ArrayList;
+import java.util.List;
+
+public class Toolbar_navig_Utils implements NavigationView.OnNavigationItemSelectedListener{
+
+    private static final String EXTRA_PREF_RADIUS = "radius_preferences";
+    private static final String EXTRA_RESTO_JSON = "resto_to_json";
+    private final static String EXTRA_RESTO_DETAILS = "resto_details";
+    private static final int SIGN_OUT_TASK = 10;
+    private SearchView searchView;
+    private TextView title_toolbar;
+    private ImageButton hamburger;
+    private Context context;
+    private MultiActivity activity;
+    private LatLngBounds bounds;
+    private LatLng currentPlaceLatLng;
+    private FirebaseUser mCurrentUser;
+    private SearchView.SearchAutoComplete searchAutoComplete;
+    private int radius;
+    private String api_key;
+    private List<Place_Nearby> list_place_nearby_autocomplete;
+    private MapsFragment mapsFragment;
+    private ListRestoFragment listRestoFragment;
+    private Toolbar toolbar;
+
+    public Toolbar_navig_Utils(MultiActivity activity) {
+        this.activity = activity;
+        this.context = activity.getApplicationContext();
+        this.mCurrentUser = activity.getCurrentUser();
+        this.currentPlaceLatLng=activity.getCurrentPlaceLatLng();
+        this.api_key = activity.get_API_KEY();
+    }
+
+    // ---------------------------------------------------------------------------------
+    // -----------------     CONFIGURATION OF TOOLBAR  ---------------------------------
+    // ---------------------------------------------------------------------------------
+
+    public void configure_toolbar(){
+
+        toolbar = (Toolbar) activity.findViewById(R.id.activity_main_toolbar);
+        activity.setSupportActionBar(toolbar);
+
+        //Assign icons
+        title_toolbar = toolbar.findViewById(R.id.title_toolbar);
+        title_toolbar.setText(activity.getResources().getString(R.string.toolbar_mapview));
+        hamburger = toolbar.findViewById(R.id.button_hamburger);
+        searchView = toolbar.findViewById(R.id.searchView);
+
+        // configure hamburger menu to open the navigation drawer
+        hamburger.setOnClickListener(v -> activity.getDrawerLayout().openDrawer(Gravity.START));
+        configure_searchView();
+    }
+
+    private void configure_searchView(){
+
+        Google_Maps_Utils google_maps_utils = new Google_Maps_Utils(context,activity,this);
+
+        searchView.setQueryHint(activity.getResources().getString(R.string.Search_restaurants));
+
+        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+
+                radius = activity.getSharedPreferences().getInt(EXTRA_PREF_RADIUS,500);
+                DistanceCalculation distanceCalculation = new DistanceCalculation();
+                bounds = distanceCalculation.create_LatLngBounds(radius,currentPlaceLatLng);
+
+                switch (activity.getCurrentPage()) {
+                    case 0:
+                        google_maps_utils.googleplacespredictions(activity.get_API_KEY(), query, bounds, null, activity.get_Page_Adapter().getMapsFragment());
+                        break;
+                    case 1:
+                        google_maps_utils.googleplacespredictions(activity.get_API_KEY(), query, bounds, activity.get_Page_Adapter().getListRestoFragment(), null);
+                        break;
+                }
+                return false;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String s) {
+
+                google_maps_utils.get_list_places_prediction(s,bounds);
+                return false;
+            }
+        });
+
+        searchAutoComplete = (SearchView.SearchAutoComplete)searchView.findViewById(android.support.v7.appcompat.R.id.search_src_text);
+
+        // change color of the text query area
+        searchAutoComplete.setTextColor(activity.getResources().getColor(R.color.colorIconNotSelected));
+
+        // when clicking on an item from the list autocomplete
+        searchAutoComplete.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+
+                List<String> list_placesId = new ArrayList<>();
+                list_placesId.add(list_place_nearby_autocomplete.get(position).getPlaceId());
+
+                if(activity.getCurrentPage()==0) {
+                    new List_Search_Nearby(api_key, list_placesId, activity.get_Page_Adapter().getMapsFragment());
+                } else if(activity.getCurrentPage()==1) {
+                    new List_Search_Nearby(api_key, list_placesId, activity.get_Page_Adapter().getListRestoFragment());
+                }
+            }
+        });
+
+        // change color of close icon in searchview
+        ImageView icon_close_search = searchView.findViewById(android.support.v7.appcompat.R.id.search_close_btn);
+        icon_close_search.setColorFilter(activity.getResources().getColor(R.color.colorGrey));
+
+        searchView.setOnSearchClickListener(v -> {
+            title_toolbar.setVisibility(View.GONE);
+            hamburger.setVisibility(View.GONE);
+            searchView.setMaxWidth(Integer.MAX_VALUE);
+
+            LatLng current_location = new LatLng(48.866667, 2.333333);
+            int radius = activity.getSharedPreferences().getInt(EXTRA_PREF_RADIUS, 500);
+
+            // Define bounds for search
+            DistanceCalculation tool_calcul_distance = new DistanceCalculation();
+            bounds = tool_calcul_distance.create_LatLngBounds(radius, current_location);
+
+        });
+
+        searchView.setOnCloseListener(() -> {
+            title_toolbar.setVisibility(View.VISIBLE);
+            hamburger.setVisibility(View.VISIBLE);
+
+            // Recover the previous list of places nearby generated
+            switch (activity.getCurrentPage()) {
+                case 0:
+                    activity.getPageAdapter().getMapsFragment().recover_previous_state();
+                    break;
+                case 1:
+                    activity.getPageAdapter().getListRestoFragment().recover_previous_state();
+                    break;
+            }
+
+            return false;
+        });
+    }
+
+    public void display_list_predictions(ArrayList<AutocompletePrediction> al) {
+
+        list_place_nearby_autocomplete = new ArrayList<>();
+
+        for(AutocompletePrediction place_predic : al){
+            list_place_nearby_autocomplete.add(new Place_Nearby(place_predic.getFullText(null).toString(),place_predic.getPlaceId(),null,null,null,null,null,null,null,null,null));
+        }
+
+        String dataArr[] = new String[list_place_nearby_autocomplete.size()];
+        for(int i = 0; i<list_place_nearby_autocomplete.size();i++)
+            dataArr[i] = list_place_nearby_autocomplete.get(i).getName_restaurant();
+
+        ArrayAdapter<String> autocomplete_adapter = new ArrayAdapter<>(activity, android.R.layout.simple_dropdown_item_1line, dataArr);
+        searchAutoComplete.setAdapter(autocomplete_adapter);
+
+    }
+
+    // ---------------------------------------------------------------------------------
+    // -----------------     CONFIGURATION OF DRAWER  ----------------------------------
+    // ---------------------------------------------------------------------------------
+
+    public void configureNavigationView() {
+
+        activity.getNavigationView().setNavigationItemSelectedListener(this);
+
+        if (mCurrentUser != null) {
+
+            ImageView picture_user = activity.getNavigationView().getHeaderView(0).findViewById(R.id.current_user_image_drawer);
+            TextView name_user = activity.getNavigationView().getHeaderView(0).findViewById(R.id.current_user_name_drawer);
+            TextView email_user = activity.getNavigationView().getHeaderView(0).findViewById(R.id.current_user_email_drawer);
+
+            name_user.setText(mCurrentUser.getDisplayName());
+            email_user.setText(mCurrentUser.getEmail());
+
+            if (mCurrentUser.getPhotoUrl() != null)
+                Glide.with(activity)
+                        .load(mCurrentUser.getPhotoUrl().toString())
+                        .apply(RequestOptions.circleCropTransform())
+                        .into(picture_user);
+
+        }
+    }
+
+    @Override
+    public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+
+        int id = item.getItemId();
+        switch (id) {
+            case R.id.activity_main_drawer_your_lunch:
+
+                Intent intent = new Intent(context, RestoActivity.class);
+                String resto_json = activity.getSharedPreferences().getString(EXTRA_RESTO_JSON, null);
+                intent.putExtra(EXTRA_RESTO_DETAILS, resto_json);
+                activity.startActivity(intent);
+
+                break;
+            case R.id.activity_main_drawer_settings:
+                activity.configure_and_show_settings_activity();
+                break;
+            case R.id.activity_main_drawer_logout:
+                signOutUserFromFirebase();
+                break;
+            default:
+                break;
+        }
+        activity.getDrawerLayout().closeDrawer(GravityCompat.START);
+        return true;
+    }
+
+    private void signOutUserFromFirebase() {
+        AuthUI.getInstance()
+                .signOut(context)
+                .addOnSuccessListener(activity, updateUIAfterRESTRequestsCompleted(SIGN_OUT_TASK));
+    }
+
+    private OnSuccessListener<Void> updateUIAfterRESTRequestsCompleted(final int origin) {
+        return aVoid -> {
+            switch (origin) {
+                case SIGN_OUT_TASK:
+                    activity.finish();
+                    break;
+                default:
+                    break;
+            }
+        };
+    }
+
+    public SearchView getSearchView() {
+        return searchView;
+    }
+
+    public SearchView.SearchAutoComplete getSearchAutoComplete() {
+        return searchAutoComplete;
+    }
+
+    public Toolbar getToolbar() {
+        return toolbar;
+    }
+}

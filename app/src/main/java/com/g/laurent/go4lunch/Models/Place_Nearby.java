@@ -4,8 +4,6 @@ import com.g.laurent.go4lunch.Utils.DetailsPlace.Geometry;
 import com.g.laurent.go4lunch.Utils.DetailsPlace.OpeningHours;
 import java.util.List;
 
-
-
 public class Place_Nearby {
 
     private String name_restaurant;

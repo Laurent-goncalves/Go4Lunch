@@ -1,6 +1,7 @@
 package com.g.laurent.go4lunch;
 
 import android.content.Context;
+import android.support.test.espresso.ViewInteraction;
 import android.support.test.rule.ActivityTestRule;
 import android.support.test.runner.AndroidJUnit4;
 import android.test.mock.MockContext;
@@ -21,6 +22,7 @@ import com.g.laurent.go4lunch.Utils.DetailsPlace.Period;
 import com.g.laurent.go4lunch.Utils.Firebase_update;
 import com.g.laurent.go4lunch.Utils.Google_Maps_Utils;
 import com.g.laurent.go4lunch.Utils.TimeCalculation;
+import com.g.laurent.go4lunch.Utils.Toolbar_navig_Utils;
 import com.google.android.gms.common.data.DataBufferUtils;
 import com.google.android.gms.location.places.AutocompletePrediction;
 import com.google.android.gms.location.places.AutocompletePredictionBufferResponse;
@@ -46,6 +48,12 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import static android.content.ContentValues.TAG;
+import static android.support.test.espresso.Espresso.onView;
+import static android.support.test.espresso.action.ViewActions.closeSoftKeyboard;
+import static android.support.test.espresso.action.ViewActions.replaceText;
+import static android.support.test.espresso.matcher.ViewMatchers.isDisplayed;
+import static android.support.test.espresso.matcher.ViewMatchers.withId;
+import static org.hamcrest.Matchers.allOf;
 
 
 @LargeTest
@@ -136,7 +144,40 @@ public class MainActivityTest {
     public void TEST_get_current_location(){
 
 
-        Google_Maps_Utils google_maps_utils = new Google_Maps_Utils(mActivityTestRule.getActivity().getApplicationContext());
+     //   Google_Maps_Utils google_maps_utils = new Google_Maps_Utils(mActivityTestRule.getActivity().getApplicationContext());
+
+
+
+    }
+
+    @Test
+    public void TEST_SearchView_AutoComplete(){
+
+        /*Toolbar_navig_Utils toolbar_navig_utils = new Toolbar_navig_Utils(mActivityTestRule.getActivity());
+
+        mActivityTestRule.getActivity().runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                toolbar_navig_utils.configure_toolbar();
+
+                waiting_time(5000);
+
+                ViewInteraction searchAutoComplete = onView(
+                        allOf(withId(R.id.search_src_text),
+                                childAtPosition(
+                                        allOf(withId(R.id.search_plate),
+                                                childAtPosition(
+                                                        withId(R.id.search_edit_frame),
+                                                        1)),
+                                        0),
+                                isDisplayed()));
+                searchAutoComplete.perform(replaceText("japonais"), closeSoftKeyboard());
+            }
+        });*/
+
+
+
+       // toolbar_navig_utils.getSearchAutoComplete().setText("japonais");
 
 
 

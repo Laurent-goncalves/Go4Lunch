@@ -10,6 +10,7 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 import com.g.laurent.go4lunch.Controllers.Activities.MultiActivity;
 import com.g.laurent.go4lunch.Controllers.Activities.RestoActivity;
@@ -93,10 +94,9 @@ private MultiActivity mMultiActivity;
         mMapView.onCreate(savedInstanceState);
         context = getActivity().getApplicationContext();
         list_places_nearby_OLD = new ArrayList<>();
-        Google_Maps_Utils google_maps_utils = new Google_Maps_Utils(context,mMultiActivity);
+        Google_Maps_Utils google_maps_utils = new Google_Maps_Utils(context,mMultiActivity,null);
 
         currentPlaceLatLng = new LatLng(48.866667, 2.333333);
-
 
         if(getArguments()!=null) {
 
@@ -167,10 +167,25 @@ private MultiActivity mMultiActivity;
                 }
             });
 
+            // zoom on current location if number of resto > 1
+            if(list_places_nearby.size()>1){
+                CameraUpdate yourLocation = CameraUpdateFactory.newLatLngZoom(currentPlaceLatLng, 16);
+                mMap.animateCamera(yourLocation);
+            } else { // else zoom on the resto from the list
 
-            // zoom on current location
-            CameraUpdate yourLocation = CameraUpdateFactory.newLatLngZoom(currentPlaceLatLng, 16);
-            mMap.animateCamera(yourLocation);
+                LatLng location_zoom = currentPlaceLatLng;
+                try{
+                    location_zoom = new LatLng(list_places_nearby.get(0).getGeometry().getLocation().getLat(),
+                            list_places_nearby.get(0).getGeometry().getLocation().getLng());
+                } catch(Throwable e){
+                    Toast toast = Toast.makeText(context,"Localization of the restaurant not found.",Toast.LENGTH_LONG);
+                    toast.show();
+                }
+
+                CameraUpdate yourLocation = CameraUpdateFactory.newLatLngZoom(location_zoom, 16);
+                mMap.animateCamera(yourLocation);
+            }
+
         });
 
     }

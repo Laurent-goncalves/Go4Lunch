@@ -11,6 +11,7 @@ import android.util.Log;
 import android.widget.Toast;
 
 import com.g.laurent.go4lunch.Controllers.Activities.MultiActivity;
+import com.g.laurent.go4lunch.Models.Place_Nearby;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.g.laurent.go4lunch.Controllers.Fragments.ListRestoFragment;
 import com.g.laurent.go4lunch.Controllers.Fragments.MapsFragment;
@@ -55,11 +56,13 @@ public class Google_Maps_Utils extends FragmentActivity implements GoogleApiClie
     private int PLACE_AUTOCOMPLETE_REQUEST_CODE = 1;
     private Location mLastKnownLocation;
     private MultiActivity activity;
+    private Toolbar_navig_Utils toolbar_navig_utils;
 
-    public Google_Maps_Utils(Context context, MultiActivity activity) {
+    public Google_Maps_Utils(Context context, MultiActivity activity, Toolbar_navig_Utils toolbar_navig_utils) {
 
         this.context = context;
         this.activity = activity;
+        this.toolbar_navig_utils=toolbar_navig_utils;
         // Construct a GeoDataClient.
         //mGeoDataClient = Places.getGeoDataClient(context, null);
 
@@ -75,6 +78,8 @@ public class Google_Maps_Utils extends FragmentActivity implements GoogleApiClie
         //getDeviceLocation();
 
     }
+
+
 
     private void getLocationPermission() {
 
@@ -172,44 +177,6 @@ public class Google_Maps_Utils extends FragmentActivity implements GoogleApiClie
         }
     }
 
-  /*  @Override
-    public void onRequestPermissionsResult(int requestCode,
-                                           @NonNull String permissions[],
-                                           @NonNull int[] grantResults) {
-        mLocationPermissionGranted = false;
-        switch (requestCode) {
-            case PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION: {
-                // If request is cancelled, the result arrays are empty.
-                if (grantResults.length > 0
-                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    mLocationPermissionGranted = true;
-                }
-            }
-        }
-
-    }*/
-
-
-
-
-   /* private void updateLocationUI() {
-       if (mMap == null) {
-            return;
-        }
-        try {
-            if (mLocationPermissionGranted) {
-                mMap.setMyLocationEnabled(true);
-                mMap.getUiSettings().setMyLocationButtonEnabled(true);
-            } else {
-                mMap.setMyLocationEnabled(false);
-                mMap.getUiSettings().setMyLocationButtonEnabled(false);
-                lastKnownPlace = null;
-                //getLocationPermission();
-            }
-        } catch (SecurityException e)  {
-            Log.e("Exception: %s", e.getMessage());
-        }
-    }*/
 
 
 
@@ -263,9 +230,80 @@ public class Google_Maps_Utils extends FragmentActivity implements GoogleApiClie
         });
     }
 
+    public void get_list_places_prediction(String query, LatLngBounds bounds){
+
+        List<String> list_places_nearby = new ArrayList<>();
+        GeoDataClient mGeoDataClient = Places.getGeoDataClient(context);
+
+        // Filter to select only professionnals addresses
+        AutocompleteFilter typeFilter = new AutocompleteFilter.Builder()
+                .setTypeFilter(AutocompleteFilter.TYPE_FILTER_ESTABLISHMENT)
+                .build();
+
+        Task<AutocompletePredictionBufferResponse> results =
+                mGeoDataClient.getAutocompletePredictions(query, bounds, GeoDataClient.BoundsMode.STRICT, typeFilter);
+
+        results.addOnSuccessListener(new OnSuccessListener<AutocompletePredictionBufferResponse>() {
+            @Override
+            public void onSuccess(AutocompletePredictionBufferResponse autocompletePredictions) {
+
+                try {
+                    // Freeze the results immutable representation that can be stored safely.
+                    ArrayList<AutocompletePrediction> al = DataBufferUtils.freezeAndClose(autocompletePredictions);
+                    toolbar_navig_utils.display_list_predictions(al);
+
+                } catch (RuntimeExecutionException e) {
+                    // If the query did not complete successfully return null
+                    Log.e(TAG, "Error getting autocomplete prediction API call", e);
+                }
+
+            }
+        });
+    }
 
 
 }
+
+
+/*  @Override
+    public void onRequestPermissionsResult(int requestCode,
+                                           @NonNull String permissions[],
+                                           @NonNull int[] grantResults) {
+        mLocationPermissionGranted = false;
+        switch (requestCode) {
+            case PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION: {
+                // If request is cancelled, the result arrays are empty.
+                if (grantResults.length > 0
+                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    mLocationPermissionGranted = true;
+                }
+            }
+        }
+
+    }*/
+
+
+
+
+   /* private void updateLocationUI() {
+       if (mMap == null) {
+            return;
+        }
+        try {
+            if (mLocationPermissionGranted) {
+                mMap.setMyLocationEnabled(true);
+                mMap.getUiSettings().setMyLocationButtonEnabled(true);
+            } else {
+                mMap.setMyLocationEnabled(false);
+                mMap.getUiSettings().setMyLocationButtonEnabled(false);
+                lastKnownPlace = null;
+                //getLocationPermission();
+            }
+        } catch (SecurityException e)  {
+            Log.e("Exception: %s", e.getMessage());
+        }
+    }*/
+
 
 
 

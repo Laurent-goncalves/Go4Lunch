@@ -84,6 +84,7 @@ public class ListRestoFragment extends BaseRestoFragment implements ListViewAdap
         currentPlaceLatLng =new LatLng(48.866667,2.333333);
 
         String api_key = getResources().getString(R.string.google_maps_key2);
+        list_places_nearby_OLD = new ArrayList<>();
 
         if(getArguments()!=null) {
 
@@ -93,10 +94,7 @@ public class ListRestoFragment extends BaseRestoFragment implements ListViewAdap
             list_places_nearby = gson.fromJson(json,list_places);
         }
 
-
         recover_list_workmates(list_places_nearby);
-
-        //new List_Search_Nearby(api_key, current_location,radius,type,this);
 
         create_onclicklistener_for_sorting_buttons();
         return view;
@@ -125,7 +123,6 @@ public class ListRestoFragment extends BaseRestoFragment implements ListViewAdap
 
         if(list_places_nearby_OLD!=null){
             if(list_places_nearby_OLD.size()>0){
-
                 this.list_places_nearby = new ArrayList<>();
                 this.list_places_nearby.addAll(list_places_nearby_OLD);
                 list_places_nearby_OLD.clear();
@@ -185,16 +182,14 @@ public class ListRestoFragment extends BaseRestoFragment implements ListViewAdap
 
     public void sort_list_places_nearby(String type_sorting) {
 
-        List<Place_Nearby> new_list_place_nearby= new ArrayList<>();
-        List<Double> list_to_sort_dbl = new ArrayList<>();
-        List<Integer> list_to_sort_int = new ArrayList<>();
-        List<Integer> list_index = new ArrayList<>();
+        List<Place_Nearby> new_list_place_nearby;
+        List<Double> list_to_sort_dbl;
 
         if(list_places_nearby!=null){
 
             if(!type_sorting.equals("workmates")) {
                 list_to_sort_dbl=create_list_to_sort(list_places_nearby, type_sorting,currentPlaceLatLng);
-                list_index.addAll(set_list_sorted_dbl(list_to_sort_dbl,type_sorting));
+                List<Integer> list_index = new ArrayList<>(set_list_sorted_dbl(list_to_sort_dbl, type_sorting));
                 new_list_place_nearby=create_list_place_nearby_sorted(list_index);
                 list_places_nearby.clear();
                 list_places_nearby.addAll(new_list_place_nearby);
