@@ -96,7 +96,7 @@ public class Google_Maps_Utils extends FragmentActivity implements GoogleApiClie
         }
     }
 
-    public void getNumberResults() {
+    public void getNumberResults(MultiActivity activity) {
 
         mPlaceDetectionClient = Places.getPlaceDetectionClient(activity);
 
@@ -117,7 +117,17 @@ public class Google_Maps_Utils extends FragmentActivity implements GoogleApiClie
                             else
                                 currentPlaceLatLng = lastKnownPlace;
 
-                            System.out.println("eee current location=" + currentPlaceLatLng.latitude +"   " + currentPlaceLatLng.longitude);
+                            Toast toast;
+
+                            if(currentPlaceLatLng!=null)
+                                toast = Toast.makeText(context,"current location=" + currentPlaceLatLng.latitude +"   " + currentPlaceLatLng.longitude,Toast.LENGTH_LONG);
+                            else
+                                toast = Toast.makeText(context,"current location=null" ,Toast.LENGTH_LONG);
+
+                            toast.show();
+
+                            activity.getSwipeRefreshLayout().setEnabled(false);
+                            //System.out.println("eee current location=" + currentPlaceLatLng.latitude +"   " + currentPlaceLatLng.longitude);
 
                         } else {
                             Log.d(TAG, "Current location is null. Using defaults.");

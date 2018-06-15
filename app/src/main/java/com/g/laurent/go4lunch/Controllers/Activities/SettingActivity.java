@@ -23,7 +23,7 @@ public class SettingActivity extends AppCompatActivity {
         setContentView(R.layout.activity_setting);
         ButterKnife.bind(this);
         configure_and_show_settings_fragment();
-        configureToolBar("Settings",true);
+        configureToolBar();
     }
 
     public void configure_and_show_settings_fragment(){
@@ -34,19 +34,16 @@ public class SettingActivity extends AppCompatActivity {
         fragmentTransaction.commit();
     }
 
-    private void configureToolBar(String title, Boolean bar_display){
+    private void configureToolBar(){
 
         runOnUiThread(() -> {
-            if(bar_display){
-                toolbar.setVisibility(View.VISIBLE);
-                setSupportActionBar(toolbar);
-                android.support.v7.app.ActionBar actionBar = getSupportActionBar();
-                if(actionBar!=null) {
-                    actionBar.setTitle(title);
-                    actionBar.setDisplayHomeAsUpEnabled(false);
-                }
-            } else
-                toolbar.setVisibility(View.GONE);
+            toolbar.setVisibility(View.VISIBLE);
+            setSupportActionBar(toolbar);
+            android.support.v7.app.ActionBar actionBar = getSupportActionBar();
+            if(actionBar!=null) {
+                actionBar.setTitle("Settings");
+                actionBar.setDisplayHomeAsUpEnabled(false);
+            }
         });
     }
 

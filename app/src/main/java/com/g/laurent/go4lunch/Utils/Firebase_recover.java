@@ -141,8 +141,6 @@ public class Firebase_recover {
                                 mapsFragment.set_list_of_workmates(list_workmates);
                             break;
                         case CALLBACK_ALARM:
-                            System.out.println("eee   CALLBACK_ALARM  ");
-
                             if(callback_alarm!=null)
                                 callback_alarm.send_notification(list_workmates);
                             break;

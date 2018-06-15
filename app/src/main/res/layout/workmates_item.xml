@@ -17,7 +17,8 @@
             android:id="@+id/workmates_image"
             android:layout_width="50dip"
             android:layout_height="50dip"
-            android:layout_margin="5dip"/>
+            android:layout_margin="5dip"
+            android:layout_marginStart="@dimen/default_margin"/>
 
         <TextView
             android:id="@+id/workmates_text"

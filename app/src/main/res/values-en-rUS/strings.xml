@@ -36,6 +36,14 @@
     <string name="title_settings">Settings</string>
     <string name="setting_radius">Radius</string>
     <string name="type_of_place">Type of place: </string>
+    <string name="reset_liked">Reset liked restaurants</string>
+    <string name="reset_chosen">Reset chosen restaurant</string>
+    <string name="confirmation_reset_chosen_resto">Do you confirm your choice to reset chosen restaurant?</string>
+    <string name="confirmation_reset_liked_resto">Do you confirm your choice to reset list of liked restaurants?</string>
+    <string name="confirm_message_reset">Reset done!</string>
+    <string name="alert_message_not_reset">Reset failed</string>
+    <string name="confirm">Yes</string>
+    <string name="cancel">Cancel</string>
     <string name="done">Done</string>
 
     <!-- NOTIFICATIONS MESSAGE -->

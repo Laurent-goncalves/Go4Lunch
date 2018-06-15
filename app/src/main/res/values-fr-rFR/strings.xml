@@ -36,6 +36,14 @@
     <string name="title_settings">Paramètres</string>
     <string name="setting_radius">Rayon</string>
     <string name="type_of_place">Type d\'établissement: </string>
+    <string name="reset_liked">Reset restaurants liked</string>
+    <string name="reset_chosen">Reset restaurant choisi</string>
+    <string name="confirmation_reset_chosen_resto">Etes-vous sûr de vouloir ré-initialiser le choix de restaurant ?</string>
+    <string name="confirmation_reset_liked_resto">Etes-vous sûr de vouloir ré-initialiser la liste des restaurants liked ?</string>
+    <string name="confirm_message_reset">Reset effectué!</string>
+    <string name="alert_message_not_reset">Echec reset</string>
+    <string name="confirm">Oui</string>
+    <string name="cancel">Annuler</string>
     <string name="done">Terminé</string>
 
     <!-- NOTIFICATIONS MESSAGE -->

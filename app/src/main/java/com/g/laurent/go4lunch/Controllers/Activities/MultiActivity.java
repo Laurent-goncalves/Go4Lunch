@@ -65,15 +65,13 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 
 
-public class MultiActivity extends AppCompatActivity implements Callback_resto_fb,
-         CallbackMultiActivity, SwipeRefreshLayout.OnRefreshListener {
+public class MultiActivity extends AppCompatActivity implements Callback_resto_fb, CallbackMultiActivity, SwipeRefreshLayout.OnRefreshListener {
 
     private LatLng lastKnownPlace;
     private final static String EXTRA_LAT_CURRENT = "latitude_current_location";
     private final static String EXTRA_LONG_CURRENT = "longitude_current_location";
     private static final String EXTRA_PREF_RADIUS = "radius_preferences";
     private static final String EXTRA_USER_ID = "user_id_alarm";
-
     private final String EXTRA_API_KEY = "api_key";
     private String api_key;
     private FirebaseUser mCurrentUser;
@@ -87,7 +85,6 @@ public class MultiActivity extends AppCompatActivity implements Callback_resto_f
     private int PLACE_AUTOCOMPLETE_REQUEST_CODE = 1;
     private int current_page;
     private ViewPager pager;
-
     private AlarmManager alarmMgr;
     private PendingIntent alarmIntent;
     private SharedPreferences sharedPreferences;
@@ -114,6 +111,10 @@ public class MultiActivity extends AppCompatActivity implements Callback_resto_f
         current_page = 0;
 
         google_maps_utils = new Google_Maps_Utils(getApplicationContext(),this,null);
+
+        google_maps_utils.getNumberResults(this);
+
+
         currentPlaceLatLng = new LatLng(48.866667, 2.333333);
         api_key = getResources().getString(R.string.google_maps_key2);
 
@@ -126,22 +127,13 @@ public class MultiActivity extends AppCompatActivity implements Callback_resto_f
         if (mCurrentUser != null)
             firebase_update.create_new_user_firebase(mCurrentUser);
 
-
-
-        //lastKnownPlace=findLastPlaceHighestLikelihood(savedInstanceState);
-
-
-       // this.configureAlarmManager();
-
-
+        // this.configureAlarmManager();
 
         tabs = findViewById(R.id.activity_multi_tabs);
-        //tabs.setupWithViewPager(pager);
 
-       // configure_tabs();
+        // configure_tabs();
 
 
-        //configureToolBar("I'm hungry!",true);
         String radius = String.valueOf(sharedPreferences.getInt(EXTRA_PREF_RADIUS,500));
         String type = sharedPreferences.getString(EXTRA_PREF_TYPE_PLACE,"restaurant");
 
@@ -215,7 +207,7 @@ public class MultiActivity extends AppCompatActivity implements Callback_resto_f
                     tab.getIcon().setColorFilter(getResources().getColor(R.color.colorIconSelected), PorterDuff.Mode.SRC_IN);
 
                 // Change tab title if required
-                if (Objects.requireNonNull(tab.getText()).equals(getResources().getString(R.string.workmates)))
+                if (current_page==2)
                     toolbar_navig_utils.getToolbar().setTitle(getResources().getString(R.string.available_workmates));
                 else
                     toolbar_navig_utils.getToolbar().setTitle(getResources().getString(R.string.toolbar_mapview));
@@ -319,12 +311,6 @@ public class MultiActivity extends AppCompatActivity implements Callback_resto_f
         super.onSaveInstanceState(outState);
     }
 
-    @Override
-    public void update_chosen_list_restos(List<Place_Nearby> list_restos) {
-
-    }
-
-
     public MultiFragAdapter getPageAdapter() {
         return pageAdapter;
     }
@@ -365,14 +351,24 @@ public class MultiActivity extends AppCompatActivity implements Callback_resto_f
         return currentPlaceLatLng;
     }
 
+    public SwipeRefreshLayout getSwipeRefreshLayout() {
+        return swipeRefreshLayout;
+    }
+
     @Override
     public void onRefresh() {
-        String radius = String.valueOf(sharedPreferences.getInt(EXTRA_PREF_RADIUS,500));
+        google_maps_utils.getNumberResults(this);
+
+     /*   String radius = String.valueOf(sharedPreferences.getInt(EXTRA_PREF_RADIUS,500));
         String type = sharedPreferences.getString(EXTRA_PREF_TYPE_PLACE,"restaurant");
-        new List_Search_Nearby(api_key, currentPlaceLatLng, radius, type, this);
+        new List_Search_Nearby(api_key, currentPlaceLatLng, radius, type, this);*/
     }
 
 
+    @Override
+    public void update_chosen_list_restos(List<Place_Nearby> list_restos) {
+
+    }
 }
 
 

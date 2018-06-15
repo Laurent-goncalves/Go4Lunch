@@ -1,6 +1,7 @@
 package com.g.laurent.go4lunch.Controllers.Fragments;
 
 
+import android.app.AlertDialog;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
@@ -12,31 +13,25 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
-import android.widget.ExpandableListView;
 import android.widget.FrameLayout;
 import android.widget.SeekBar;
 import android.widget.Spinner;
 import android.widget.Switch;
 import android.widget.TextView;
-
+import android.widget.Toast;
 import com.g.laurent.go4lunch.Controllers.Activities.SettingActivity;
-import com.g.laurent.go4lunch.Models.Callback_alarm;
-import com.g.laurent.go4lunch.Models.Workmate;
 import com.g.laurent.go4lunch.R;
-
+import com.g.laurent.go4lunch.Utils.Firebase_update;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
-
 import butterknife.BindView;
 import butterknife.ButterKnife;
-
 import static android.content.Context.MODE_PRIVATE;
 
 
-/**
- * A simple {@link Fragment} subclass.
- */
 public class SettingsFragment extends Fragment implements AdapterView.OnItemSelectedListener {
 
     @BindView(R.id.switch_french_english) Switch switch_fr_eng;
@@ -46,16 +41,19 @@ public class SettingsFragment extends Fragment implements AdapterView.OnItemSele
     @BindView(R.id.list_type_place) Spinner list_type_places;
     @BindView(R.id.text_setting_radius) TextView radius_value;
     @BindView(R.id.done_button) Button button_done;
+    @BindView(R.id.initialize_liked_resto) Button button_reset_liked;
+    @BindView(R.id.initialize_chosen_resto) Button button_reset_chosen;
     @BindView(R.id.framelayout_setting_frag) FrameLayout global_view;
     @BindView(R.id.switch_enable_notif) Switch enable_notif;
     private SharedPreferences sharedPreferences;
     private Context context;
+    private Firebase_update firebase_update;
+    private FirebaseUser mCurrentUser;
     private static final String EXTRA_PREFERENCES = "preferences";
     private static final String EXTRA_PREF_LANG = "language_preferences";
     private static final String EXTRA_PREF_RADIUS = "radius_preferences";
     private static final String EXTRA_PREF_TYPE_PLACE = "type_place_preferences";
     private static final String EXTRA_ENABLE_NOTIF = "enable_notif";
-    private View view;
 
     public SettingsFragment() {
         // Required empty public constructor
@@ -65,11 +63,13 @@ public class SettingsFragment extends Fragment implements AdapterView.OnItemSele
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        view = inflater.inflate(R.layout.fragment_settings, container, false);
-        ButterKnife.bind(this,view);
+        View view = inflater.inflate(R.layout.fragment_settings, container, false);
+        ButterKnife.bind(this, view);
         sharedPreferences = getActivity().getSharedPreferences(EXTRA_PREFERENCES,MODE_PRIVATE);
+        firebase_update = new Firebase_update(context);
         configure_settings_areas();
         configureOnClickListener();
+        mCurrentUser = FirebaseAuth.getInstance().getCurrentUser();
         context = getActivity().getApplicationContext();
         return view;
     }
@@ -92,8 +92,70 @@ public class SettingsFragment extends Fragment implements AdapterView.OnItemSele
         // Configure list of type of place
         configure_type_of_place_list();
 
+        // Configure button reset liked restaurants
+        configure_button_reset_liked();
+
+        // Configure button reset chosen restaurants
+        configure_button_resto_chosen();
+
         // Configure button "DONE"
         configure_button_done();
+    }
+
+    private void configure_button_resto_chosen() {
+        button_reset_chosen.setOnClickListener(v -> {
+            AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+            builder.setCancelable(true);
+            builder.setTitle(getResources().getString(R.string.reset_chosen));
+            builder.setMessage(getResources().getString(R.string.confirmation_reset_chosen_resto));
+            builder.setPositiveButton(getResources().getString(R.string.confirm),
+                    (dialog, which) -> {
+                        if(mCurrentUser!=null) {
+                            firebase_update.initialize_chosen_restaurant(mCurrentUser.getUid());
+                            message_to_display(true);
+                        } else
+                            message_to_display(false);
+                    });
+            builder.setNegativeButton(android.R.string.cancel, (dialog, which) -> {
+            });
+
+            AlertDialog dialog = builder.create();
+            dialog.show();
+        });
+    }
+
+    private void configure_button_reset_liked() {
+        button_reset_liked.setOnClickListener(v -> {
+
+            AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+            builder.setCancelable(true);
+            builder.setTitle(getResources().getString(R.string.reset_liked));
+            builder.setMessage(getResources().getString(R.string.confirmation_reset_liked_resto));
+            builder.setPositiveButton(getResources().getString(R.string.confirm),
+                    (dialog, which) -> {
+                        if(mCurrentUser!=null) {
+                            firebase_update.initialize_like_list_restaurant(mCurrentUser.getUid());
+                            message_to_display(true);
+                        } else
+                            message_to_display(false);
+                    });
+            builder.setNegativeButton(android.R.string.cancel, (dialog, which) -> {
+            });
+
+            AlertDialog dialog = builder.create();
+            dialog.show();
+        });
+    }
+
+    private void message_to_display(Boolean success){
+        Toast toast;
+
+        if(success)
+            toast = Toast.makeText(context,getResources().getString(R.string.confirm_message_reset),Toast.LENGTH_SHORT);
+        else
+            toast = Toast.makeText(context,getResources().getString(R.string.alert_message_not_reset),Toast.LENGTH_SHORT);
+
+        toast.show();
     }
 
     private void configure_notification_switch() {
@@ -110,7 +172,7 @@ public class SettingsFragment extends Fragment implements AdapterView.OnItemSele
 
         button_done.setOnClickListener(v -> {
 
-            int requestCode = 0;
+            int requestCode;
             // Save language preferences
             if(switch_fr_eng.isChecked())
                 sharedPreferences.edit().putString(EXTRA_PREF_LANG,"en").apply();
@@ -174,12 +236,12 @@ public class SettingsFragment extends Fragment implements AdapterView.OnItemSele
         list_type_places.setOnItemSelectedListener(this);
 
         // Spinner Drop down elements
-        List<String> categories = new ArrayList<String>();
+        List<String> categories = new ArrayList<>();
         categories.add("restaurant");
         categories.add("bar");
 
         // Creating adapter for spinner
-        ArrayAdapter<String> dataAdapter = new ArrayAdapter<String>(this.getActivity(), android.R.layout.simple_spinner_item, categories);
+        ArrayAdapter<String> dataAdapter = new ArrayAdapter<>(this.getActivity(), android.R.layout.simple_spinner_item, categories);
 
         // Drop down layout style - list view with radio button
         dataAdapter.setDropDownViewResource(android.R.layout.simple_spinner_item);
@@ -252,13 +314,6 @@ public class SettingsFragment extends Fragment implements AdapterView.OnItemSele
 
     @Override
     public void onNothingSelected(AdapterView<?> parent) {
-    }
-
-    private void update_text_views(){
-
-
-
-
     }
 
     /*@Override

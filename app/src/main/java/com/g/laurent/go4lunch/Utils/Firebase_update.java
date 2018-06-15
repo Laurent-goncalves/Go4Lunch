@@ -68,8 +68,14 @@ public class Firebase_update implements GoogleApiClient.OnConnectionFailedListen
         databaseReferenceWorkmates.child(mCurrentUser.getUid()).child("photo_url").setValue(mCurrentUser.getPhotoUrl().toString());
     }
 
-    public void initialize_like_status_and_chosen_restaurant(String userId){
+    public void initialize_chosen_restaurant(String userId){
         databaseReferenceWorkmates.child(userId).child("resto_id").removeValue();
+        databaseReferenceWorkmates.child(userId).child("resto_address").removeValue();
+        databaseReferenceWorkmates.child(userId).child("resto_name").removeValue();
+        databaseReferenceWorkmates.child(userId).child("resto_type").removeValue();
+    }
+
+    public void initialize_like_list_restaurant(String userId){
         databaseReferenceWorkmates.child(userId).child("list_resto_liked").removeValue();
     }
 
