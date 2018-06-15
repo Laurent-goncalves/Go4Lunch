@@ -73,6 +73,7 @@ public class Firebase_update implements GoogleApiClient.OnConnectionFailedListen
         databaseReferenceWorkmates.child(userId).child("resto_address").removeValue();
         databaseReferenceWorkmates.child(userId).child("resto_name").removeValue();
         databaseReferenceWorkmates.child(userId).child("resto_type").removeValue();
+        databaseReferenceWorkmates.child(userId).child("chosen").setValue(false);
     }
 
     public void initialize_like_list_restaurant(String userId){

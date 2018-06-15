@@ -234,11 +234,16 @@ public class Toolbar_navig_Utils implements NavigationView.OnNavigationItemSelec
         switch (id) {
             case R.id.activity_main_drawer_your_lunch:
 
-                Intent intent = new Intent(context, RestoActivity.class);
                 String resto_json = activity.getSharedPreferences().getString(EXTRA_RESTO_JSON, null);
-                intent.putExtra(EXTRA_RESTO_DETAILS, resto_json);
-                activity.startActivity(intent);
 
+                if(resto_json!=null){
+                    Intent intent = new Intent(context, RestoActivity.class);
+                    intent.putExtra(EXTRA_RESTO_DETAILS, resto_json);
+                    activity.startActivity(intent);
+                } else {
+                    Toast toast = Toast.makeText(context,"No restaurant chosen",Toast.LENGTH_LONG);
+                    toast.show();
+                }
                 break;
             case R.id.activity_main_drawer_settings:
                 activity.configure_and_show_settings_activity();

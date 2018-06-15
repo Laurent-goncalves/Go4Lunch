@@ -5,59 +5,28 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.graphics.Color;
 import android.graphics.PorterDuff;
-import android.os.Handler;
-import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
 import android.os.Bundle;
 import android.support.design.widget.TabLayout;
-import android.support.v4.view.GravityCompat;
-import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v4.widget.SwipeRefreshLayout;
-import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
-import android.util.AttributeSet;
-import android.view.Gravity;
-import android.view.InflateException;
-import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
-import android.view.View;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
-import android.widget.EditText;
-import android.widget.ImageButton;
-import android.widget.ImageView;
-import android.support.v7.widget.SearchView;
-import android.widget.TextView;
-import com.bumptech.glide.Glide;
-import com.bumptech.glide.request.RequestOptions;
-import com.firebase.ui.auth.AuthUI;
 import com.g.laurent.go4lunch.Models.AlarmReceiver;
 import com.g.laurent.go4lunch.Models.CallbackMultiActivity;
 import com.g.laurent.go4lunch.Models.Callback_resto_fb;
 import com.g.laurent.go4lunch.Models.List_Search_Nearby;
 import com.g.laurent.go4lunch.Models.Place_Nearby;
 import com.g.laurent.go4lunch.R;
-import com.g.laurent.go4lunch.Utils.DistanceCalculation;
 import com.g.laurent.go4lunch.Utils.Firebase_update;
 import com.g.laurent.go4lunch.Utils.Google_Maps_Utils;
 import com.g.laurent.go4lunch.Utils.Toolbar_navig_Utils;
 import com.g.laurent.go4lunch.Views.MultiFragAdapter;
-import com.google.android.gms.location.places.AutocompletePrediction;
-import com.google.android.gms.location.places.ui.PlaceAutocompleteFragment;
 import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.LatLngBounds;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 import java.util.Objects;
@@ -67,33 +36,25 @@ import butterknife.ButterKnife;
 
 public class MultiActivity extends AppCompatActivity implements Callback_resto_fb, CallbackMultiActivity, SwipeRefreshLayout.OnRefreshListener {
 
-    private LatLng lastKnownPlace;
-    private final static String EXTRA_LAT_CURRENT = "latitude_current_location";
-    private final static String EXTRA_LONG_CURRENT = "longitude_current_location";
     private static final String EXTRA_PREF_RADIUS = "radius_preferences";
     private static final String EXTRA_USER_ID = "user_id_alarm";
-    private final String EXTRA_API_KEY = "api_key";
-    private String api_key;
-    private FirebaseUser mCurrentUser;
-    @BindView(R.id.activity_main_drawer_layout) DrawerLayout drawerLayout;
-    @BindView(R.id.activity_main_nav_view) NavigationView navigationView;
-    private Toolbar toolbar;
-    @BindView(R.id.swiperefresh) SwipeRefreshLayout swipeRefreshLayout;
-    private TabLayout tabs;
-    private LatLng currentPlaceLatLng;
-    private MultiFragAdapter pageAdapter;
-    private int PLACE_AUTOCOMPLETE_REQUEST_CODE = 1;
-    private int current_page;
-    private ViewPager pager;
-    private AlarmManager alarmMgr;
-    private PendingIntent alarmIntent;
-    private SharedPreferences sharedPreferences;
     private static final String EXTRA_PREFERENCES = "preferences";
-    private Toolbar_navig_Utils toolbar_navig_utils;
-    private final static String EXTRA_RESTO_DETAILS = "resto_details";
     private static final String EXTRA_PREF_TYPE_PLACE = "type_place_preferences";
     private static final String EXTRA_ENABLE_NOTIF = "enable_notif";
-    private Google_Maps_Utils google_maps_utils;
+    @BindView(R.id.activity_main_drawer_layout) DrawerLayout drawerLayout;
+    @BindView(R.id.activity_main_nav_view) NavigationView navigationView;
+    @BindView(R.id.swiperefresh) SwipeRefreshLayout swipeRefreshLayout;
+    private AlarmManager alarmMgr;
+    private PendingIntent alarmIntent;
+    private TabLayout tabs;
+    private MultiFragAdapter pageAdapter;
+    private ViewPager pager;
+    private int current_page;
+    private SharedPreferences sharedPreferences;
+    private String api_key;
+    private LatLng currentPlaceLatLng;
+    private FirebaseUser mCurrentUser;
+    private Toolbar_navig_Utils toolbar_navig_utils;
 
 
     @Override
@@ -103,43 +64,15 @@ public class MultiActivity extends AppCompatActivity implements Callback_resto_f
         Context context = getApplicationContext();
         ButterKnife.bind(this);
 
-        // Save current user to Firebase storage
+        // Assign and initialize variables
         FirebaseApp.initializeApp(context);
         mCurrentUser = FirebaseAuth.getInstance().getCurrentUser();
-        Firebase_update firebase_update = new Firebase_update(context);
         sharedPreferences = getSharedPreferences(EXTRA_PREFERENCES, MODE_PRIVATE);
         current_page = 0;
 
-        google_maps_utils = new Google_Maps_Utils(getApplicationContext(),this,null);
-
-        google_maps_utils.getNumberResults(this);
-
-
-        currentPlaceLatLng = new LatLng(48.866667, 2.333333);
-        api_key = getResources().getString(R.string.google_maps_key2);
-
-        // Configure toolbar and navigation drawer
-        toolbar_navig_utils = new Toolbar_navig_Utils(this);
-        toolbar_navig_utils.configure_toolbar();
-        toolbar_navig_utils.configureNavigationView();
-
-
-        if (mCurrentUser != null)
-            firebase_update.create_new_user_firebase(mCurrentUser);
-
-        // this.configureAlarmManager();
-
-        tabs = findViewById(R.id.activity_multi_tabs);
-
-        // configure_tabs();
-
-
-        String radius = String.valueOf(sharedPreferences.getInt(EXTRA_PREF_RADIUS,500));
-        String type = sharedPreferences.getString(EXTRA_PREF_TYPE_PLACE,"restaurant");
-
-        new List_Search_Nearby(api_key, currentPlaceLatLng, radius, type, this);
-
-        swipeRefreshLayout.setOnRefreshListener(this);
+        // Recover current location
+        Google_Maps_Utils google_maps_utils = new Google_Maps_Utils(getApplicationContext(), this, null);
+        google_maps_utils.getLocationPermission();
     }
 
     @Override
@@ -183,7 +116,6 @@ public class MultiActivity extends AppCompatActivity implements Callback_resto_f
 
             }
         });
-
     }
 
     private void configure_tabs() {
@@ -296,18 +228,42 @@ public class MultiActivity extends AppCompatActivity implements Callback_resto_f
                 configureAlarmManager();
             }
         }
+        setContentView(R.layout.activity_maps);
     }
 
     // ----------------------------------------------------------------------------------------------------
-    // -------------------------------------- CONFIGURE TABS ----------------------------------------------
+    // -------------------------------------- GETTER and SETTER -------------------------------------------
     // ----------------------------------------------------------------------------------------------------
+
+    public void setCurrentPlaceLatLng(LatLng currentPlaceLatLng) {
+        this.currentPlaceLatLng = currentPlaceLatLng;
+
+        api_key = getResources().getString(R.string.google_maps_key2);
+
+        // Configure toolbar and navigation drawer
+        toolbar_navig_utils = new Toolbar_navig_Utils(this);
+        toolbar_navig_utils.configure_toolbar();
+        toolbar_navig_utils.configureNavigationView();
+
+        Firebase_update firebase_update = new Firebase_update(getApplicationContext());
+
+        if (mCurrentUser != null)
+            firebase_update.create_new_user_firebase(mCurrentUser);
+
+        // this.configureAlarmManager();
+
+        tabs = findViewById(R.id.activity_multi_tabs);
+
+        String radius = String.valueOf(sharedPreferences.getInt(EXTRA_PREF_RADIUS,500));
+        String type = sharedPreferences.getString(EXTRA_PREF_TYPE_PLACE,"restaurant");
+
+        new List_Search_Nearby(api_key, currentPlaceLatLng, radius, type, this);
+
+        swipeRefreshLayout.setOnRefreshListener(this);
+    }
 
     @Override
     public void onSaveInstanceState(Bundle outState) {
-        if (lastKnownPlace != null) {
-            outState.putFloat(EXTRA_LAT_CURRENT, (float) lastKnownPlace.latitude);
-            outState.putFloat(EXTRA_LONG_CURRENT, (float) lastKnownPlace.longitude);
-        }
         super.onSaveInstanceState(outState);
     }
 
@@ -325,10 +281,6 @@ public class MultiActivity extends AppCompatActivity implements Callback_resto_f
 
     public MultiFragAdapter get_Page_Adapter(){
         return pageAdapter;
-    }
-
-    public LatLng get_current_position(){
-        return currentPlaceLatLng;
     }
 
     public DrawerLayout getDrawerLayout() {
@@ -357,13 +309,10 @@ public class MultiActivity extends AppCompatActivity implements Callback_resto_f
 
     @Override
     public void onRefresh() {
-        google_maps_utils.getNumberResults(this);
-
-     /*   String radius = String.valueOf(sharedPreferences.getInt(EXTRA_PREF_RADIUS,500));
+        String radius = String.valueOf(sharedPreferences.getInt(EXTRA_PREF_RADIUS,500));
         String type = sharedPreferences.getString(EXTRA_PREF_TYPE_PLACE,"restaurant");
-        new List_Search_Nearby(api_key, currentPlaceLatLng, radius, type, this);*/
+        new List_Search_Nearby(api_key, currentPlaceLatLng, radius, type, this);
     }
-
 
     @Override
     public void update_chosen_list_restos(List<Place_Nearby> list_restos) {
