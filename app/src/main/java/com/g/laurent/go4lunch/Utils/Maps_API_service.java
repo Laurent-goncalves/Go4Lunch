@@ -1,10 +1,7 @@
 package com.g.laurent.go4lunch.Utils;
 
-import android.graphics.Bitmap;
-
 import com.g.laurent.go4lunch.Utils.DetailsPlace.DetailsPlace;
 import com.g.laurent.go4lunch.Utils.Search_Nearby.SearchNearby;
-
 import io.reactivex.Observable;
 import okhttp3.OkHttpClient;
 import okhttp3.logging.HttpLoggingInterceptor;
@@ -14,8 +11,8 @@ import retrofit2.converter.gson.GsonConverterFactory;
 import retrofit2.http.GET;
 import retrofit2.http.Query;
 
-public interface Maps_API_service {
 
+public interface Maps_API_service {
 
 //https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=48.6102599,2.474805&radius=500&type=restaurant&key=AIzaSyCAzX1ILkJlqSsTMkRJHSGEMAQWuqxSxKA
 

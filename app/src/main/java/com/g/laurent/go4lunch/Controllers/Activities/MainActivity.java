@@ -3,32 +3,24 @@ package com.g.laurent.go4lunch.Controllers.Activities;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
-import android.content.res.Resources;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.support.v7.widget.Toolbar;
 import android.widget.Button;
-
 import com.firebase.ui.auth.AuthUI;
 import com.firebase.ui.auth.ErrorCodes;
 import com.firebase.ui.auth.IdpResponse;
 import com.g.laurent.go4lunch.R;
-
 import java.util.Collections;
 import java.util.Locale;
-
+import java.util.Objects;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 
 public class MainActivity extends AppCompatActivity {
 
-    private Toolbar toolbar;
-    private Intent intent;
-    private Configuration conf;
-    private Resources res;
     private static final int RC_SIGN_IN = 123;
     private static final String GOOGLE_SIGN_IN = "google";
     private static final String FACEBOOK_SIGN_IN = "facebook";
@@ -46,9 +38,8 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
 
-        /*Intent intent = new Intent(this,MultiActivity.class);
-        startActivity(intent);*/
-
+        Intent intent = new Intent(this,MultiActivity.class);
+        startActivity(intent);
     }
 
     @OnClick(R.id.main_activity_button_login_google)
@@ -120,9 +111,9 @@ public class MainActivity extends AppCompatActivity {
             } else { // ERRORS
                 if (response == null) {
                     showSnackBar(this.window_sign_in, getString(R.string.error_authentication_canceled));
-                } else if (response.getErrorCode() == ErrorCodes.NO_NETWORK) {
+                } else if (Objects.requireNonNull(response.getError()).getErrorCode() == ErrorCodes.NO_NETWORK) {
                     showSnackBar(this.window_sign_in, getString(R.string.error_no_internet));
-                } else if (response.getErrorCode() == ErrorCodes.UNKNOWN_ERROR) {
+                } else if (response.getError().getErrorCode() == ErrorCodes.UNKNOWN_ERROR) {
                     showSnackBar(this.window_sign_in, getString(R.string.error_unknown_error));
                 }
             }
@@ -150,59 +141,3 @@ public class MainActivity extends AppCompatActivity {
     }
 
 }
-
-
-
-/* protected void configureToolbar(String title){
-        // Assign toolbar_old
-        toolbar_old = findViewById(R.id.activity_main_toolbar);
-        // Sets the Toolbar
-        setSupportActionBar(toolbar_old);
-
-        this.title_tb = title;
-
-        try {
-            runOnUiThread(new Runnable() {
-
-                @Override
-                public void run() {
-
-                    if (toolbar_old != null && title_toolbar != null) {
-                        title_toolbar.setText(title_tb);
-
-                        if (getSupportActionBar() != null) {
-                            switch (title_tb) {
-
-                                case "MyNews":
-                                    icon_search.setVisibility(View.VISIBLE);
-                                    icon_menu.setVisibility(View.VISIBLE);
-                                    icon_notif.setVisibility(View.VISIBLE);
-                                    setIconOnClickListener();
-                                    // Disable the Up button
-                                    getSupportActionBar().setDisplayHomeAsUpEnabled(false);
-                                    break;
-                                case "Search Articles":
-                                    icon_search.setVisibility(View.GONE);
-                                    icon_menu.setVisibility(View.GONE);
-                                    icon_notif.setVisibility(View.GONE);
-                                    // Enable the Up button
-                                    getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-                                    break;
-                                case "Notifications":
-                                    icon_search.setVisibility(View.GONE);
-                                    icon_menu.setVisibility(View.GONE);
-                                    icon_notif.setVisibility(View.GONE);
-                                    // Enable the Up button
-                                    getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-                                    break;
-                            }
-                        }
-                    }
-
-                }
-            });
-        } catch (Throwable throwable) {
-            throwable.printStackTrace();
-        }
-
-    }*/

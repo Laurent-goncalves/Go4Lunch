@@ -57,13 +57,10 @@
         <uses-library android:name="com.google.android.maps" />
         <activity
             android:name=".Controllers.Activities.MultiActivity"
-            android:label="@string/title_activity_maps"
-            android:configChanges="layoutDirection|locale"/>
-        <activity android:name=".Controllers.Activities.SettingActivity"
-            android:configChanges="layoutDirection|locale">
+            android:label="@string/title_activity_maps" />
+        <activity android:name=".Controllers.Activities.SettingActivity">
         </activity>
-        <activity android:name=".Controllers.Activities.RestoActivity"
-            android:configChanges="layoutDirection|locale"/>
+        <activity android:name=".Controllers.Activities.RestoActivity" />
     </application>
 
 </manifest>

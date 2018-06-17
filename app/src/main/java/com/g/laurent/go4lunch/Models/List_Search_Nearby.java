@@ -7,7 +7,6 @@ import com.g.laurent.go4lunch.Utils.DetailsPlace.DetailsPlace;
 import com.g.laurent.go4lunch.Utils.DetailsPlace.Photo;
 import com.g.laurent.go4lunch.Utils.DetailsPlace.Result;
 import com.g.laurent.go4lunch.Utils.Maps_API_stream;
-import com.g.laurent.go4lunch.Views.MultiFragAdapter;
 import com.google.android.gms.maps.model.LatLng;
 import java.util.ArrayList;
 import java.util.List;
@@ -15,8 +14,7 @@ import io.reactivex.Observable;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.observers.DisposableObserver;
 
-
-public class List_Search_Nearby {
+public class List_Search_Nearby implements Disposable {
 
     private List<Place_Nearby> list_places_nearby;
     private Disposable disposable;
@@ -93,11 +91,23 @@ public class List_Search_Nearby {
             @Override
             public void onComplete() {
 
-                callbackMultiActivity.configureViewPagerAndTabs(list_places_nearby);
+                if(callbackMultiActivity!=null)
+                    callbackMultiActivity.configureViewPagerAndTabs(list_places_nearby);
 
                 Log.e("TAG","On Complete !!");
             }
         };
+    }
+
+
+    @Override
+    public void dispose() {
+        if (this.disposable != null && !this.disposable.isDisposed()) this.disposable.dispose();
+    }
+
+    @Override
+    public boolean isDisposed() {
+        return false;
     }
 
     // ------------------------------------------------------------------------------------------------
@@ -168,7 +178,4 @@ public class List_Search_Nearby {
         return list_places_nearby;
     }
 
-    public void setList_places_nearby(List<Place_Nearby> list_places_nearby) {
-        this.list_places_nearby = list_places_nearby;
-    }
 }

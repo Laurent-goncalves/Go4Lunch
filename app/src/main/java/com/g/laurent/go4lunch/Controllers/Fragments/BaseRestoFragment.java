@@ -1,18 +1,11 @@
 package com.g.laurent.go4lunch.Controllers.Fragments;
 
-import android.app.Activity;
 import android.support.v4.app.Fragment;
-
-import com.g.laurent.go4lunch.Models.Callback_DetailResto;
-import com.g.laurent.go4lunch.Models.Callback_resto_fb;
 import com.g.laurent.go4lunch.Models.Place_Nearby;
 import com.g.laurent.go4lunch.Models.Workmate;
-import com.g.laurent.go4lunch.Utils.Firebase_update;
 import com.google.android.gms.maps.model.LatLng;
-
 import java.util.ArrayList;
 import java.util.List;
-
 import static java.lang.Double.compare;
 
 /**
@@ -20,14 +13,10 @@ import static java.lang.Double.compare;
  */
 public abstract class BaseRestoFragment extends Fragment {
 
-    protected final static String EXTRA_LAT_CURRENT = "latitude_current_location";
-    protected final static String EXTRA_LONG_CURRENT = "longitude_current_location";
     protected LatLng currentPlaceLatLng;
     protected List<Place_Nearby> list_places_nearby;
     protected List<Place_Nearby> list_places_nearby_OLD;
-    protected Firebase_update firebase_tool;
-    protected Callback_resto_fb mCallback_resto_fb;
-    protected Callback_DetailResto mCallback_detailResto;
+
     protected List<Workmate> list_workmates;
     protected static final String EXTRA_LIST_RESTOS_JSON = "list_restos_json";
 
@@ -35,23 +24,7 @@ public abstract class BaseRestoFragment extends Fragment {
         // Required empty public constructor
     }
 
-    protected Boolean is_id_resto_in_list(String id_to_check){
 
-        Boolean answer = false;
-
-        for(Place_Nearby place_nearby : list_places_nearby){
-            if(place_nearby!=null){
-                if(place_nearby.getPlaceId()!=null){
-                    if(place_nearby.getPlaceId().equals(id_to_check)){
-                        answer=true;
-                        break;
-                    }
-                }
-            }
-        }
-
-        return answer;
-    }
 
     protected Boolean is_resto_chosen_by_workmates(Place_Nearby resto, List<Workmate> workmateList){
 
@@ -140,7 +113,7 @@ public abstract class BaseRestoFragment extends Fragment {
 
             int index = 0 ;
             // Search the first index not in the table
-            for(Double item : list_to_sort){
+            for(Double ignored : list_to_sort){
                 if(!is_index_in_the_list(index,list_index_sorted))
                     break;
                 else
@@ -178,26 +151,13 @@ public abstract class BaseRestoFragment extends Fragment {
         return list_index_sorted;
     }
 
-    protected List<Integer> create_list_to_sort(List<Place_Nearby> new_list_places_nearby){
 
-        List<Integer> list_to_sort = new ArrayList<>();
-
-        for(Place_Nearby place : new_list_places_nearby){
-            if(place!=null) {
-                if(list_workmates!=null)
-                    list_to_sort.add(list_workmates.size());
-            }
-        }
-
-        return list_to_sort;
-    }
 
     // -------------------------------- SORT BY WORKMATE ----------------------------------------------
 
     public void sort_list_places_nearby_by_workmates(){
 
-        List<String> list_to_sort = create_list_workmates_to_sort();
-        String[][] tab_number_workmates = create_tab_restoId_by_workmate_number(list_to_sort);
+        String[][] tab_number_workmates = create_tab_restoId_by_workmate_number();
         List<String> list_sorted = sort_by_workmates_number(tab_number_workmates);
         List<Place_Nearby> new_list_places_nearby = new ArrayList<>();
 
@@ -216,21 +176,7 @@ public abstract class BaseRestoFragment extends Fragment {
         list_places_nearby = new_list_places_nearby;
     }
 
-    protected List<String> create_list_workmates_to_sort(){
-
-        List<String> list_to_sort = new ArrayList<>();
-
-        for(Workmate workmate : list_workmates){
-            if(workmate!=null) {
-                if(workmate.getResto_id()!=null)
-                    list_to_sort.add(workmate.getResto_id());
-            }
-        }
-
-        return list_to_sort;
-    }
-
-    private String[][] create_tab_restoId_by_workmate_number(List<String> list_to_sort){
+    private String[][] create_tab_restoId_by_workmate_number(){
 
         List<String> list_to_single_restoID = new ArrayList<>();
 
@@ -292,7 +238,7 @@ public abstract class BaseRestoFragment extends Fragment {
 
             int index = 0 ;
             // Search the first index not in the table
-            for(Integer item : list_to_sort){
+            for(Integer ignored : list_to_sort){
                 if(!is_index_in_the_list(index,list_to_sort))
                     break;
                 else
@@ -320,7 +266,72 @@ public abstract class BaseRestoFragment extends Fragment {
         return list_restoId_sorted;
     }
 
-    protected List<Integer> set_list_sorted_int(List<Integer> list_to_sort){
+    protected Boolean is_index_in_the_list(int index, List<Integer> list_index) {
+
+        Boolean answer = false;
+
+        for(int item : list_index){
+            if(item == index) {
+                answer=true;
+                break;
+            }
+        }
+        return answer;
+    }
+
+    // -------------------------- GETTER and SETTER ----------------------------------------------------
+
+    public void setList_places_nearby(List<Place_Nearby> list_places_nearby) {
+        this.list_places_nearby = list_places_nearby;
+    }
+
+    public List<Place_Nearby> getList_places_nearby() {
+        return list_places_nearby;
+    }
+
+    public List<Workmate> getList_workmates() {
+        return list_workmates;
+    }
+
+    public void setList_workmates(List<Workmate> list_workmates) {
+        this.list_workmates = list_workmates;
+    }
+
+}
+
+
+/*
+
+    protected List<String> create_list_workmates_to_sort(){
+
+        List<String> list_to_sort = new ArrayList<>();
+
+        for(Workmate workmate : list_workmates){
+            if(workmate!=null) {
+                if(workmate.getResto_id()!=null)
+                    list_to_sort.add(workmate.getResto_id());
+            }
+        }
+
+        return list_to_sort;
+    }
+
+
+    protected List<Integer> create_list_to_sort(List<Place_Nearby> new_list_places_nearby){
+
+        List<Integer> list_to_sort = new ArrayList<>();
+
+        for(Place_Nearby place : new_list_places_nearby){
+            if(place!=null) {
+                if(list_workmates!=null)
+                    list_to_sort.add(list_workmates.size());
+            }
+        }
+
+        return list_to_sort;
+    }
+
+protected List<Integer> set_list_sorted_int(List<Integer> list_to_sort){
 
         List<Integer> list_index_sorted = new ArrayList<>();
 
@@ -355,46 +366,21 @@ public abstract class BaseRestoFragment extends Fragment {
         return list_index_sorted;
     }
 
-    protected Boolean is_index_in_the_list(int index, List<Integer> list_index) {
+    protected Boolean is_id_resto_in_list(String id_to_check){
 
         Boolean answer = false;
 
-        for(int item : list_index){
-            if(item == index) {
-                answer=true;
-                break;
+        for(Place_Nearby place_nearby : list_places_nearby){
+            if(place_nearby!=null){
+                if(place_nearby.getPlaceId()!=null){
+                    if(place_nearby.getPlaceId().equals(id_to_check)){
+                        answer=true;
+                        break;
+                    }
+                }
             }
         }
+
         return answer;
     }
-
-    // -------------------------- GETTER and SETTER ----------------------------------------------------
-
-    public void setList_places_nearby(List<Place_Nearby> list_places_nearby) {
-        this.list_places_nearby = list_places_nearby;
-    }
-
-    public List<Place_Nearby> getList_places_nearby() {
-        return list_places_nearby;
-    }
-
-    public List<Workmate> getList_workmates() {
-        return list_workmates;
-    }
-
-    public void setList_workmates(List<Workmate> list_workmates) {
-        this.list_workmates = list_workmates;
-    }
-
-    @Override
-    public void onAttach(Activity activity) {
-        super.onAttach(activity);
-
-        try {
-            mCallback_resto_fb = (Callback_resto_fb) activity;
-        } catch (ClassCastException e) {
-            throw new ClassCastException(activity.toString()
-                    + " must implement Callback_resto_fb");
-        }
-    }
-}
+ */

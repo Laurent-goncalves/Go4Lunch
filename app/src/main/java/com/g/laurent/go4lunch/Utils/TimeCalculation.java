@@ -1,37 +1,30 @@
 package com.g.laurent.go4lunch.Utils;
 
 import android.content.Context;
-
 import com.g.laurent.go4lunch.Models.Place_Nearby;
 import com.g.laurent.go4lunch.R;
 import com.g.laurent.go4lunch.Utils.DetailsPlace.Period;
-import com.g.laurent.go4lunch.Utils.DetailsPlace.OpeningHours;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 
 public class TimeCalculation {
 
-    private Place_Nearby place_nearby;
     private int current_day;
-    private Calendar calendar;
-    private String current_hour;
-    private String current_minute;
     private int current_time;
     private Context context;
     public TimeCalculation(Context context) {
 
         this.context=context;
-        calendar = Calendar.getInstance();
+        Calendar calendar = Calendar.getInstance();
         current_day = calendar.get(Calendar.DAY_OF_WEEK);
-        current_hour= String.valueOf(calendar.get(Calendar.HOUR_OF_DAY));
-        current_minute= String.valueOf(calendar.get(Calendar.MINUTE));
+        String current_hour = String.valueOf(calendar.get(Calendar.HOUR_OF_DAY));
+        String current_minute = String.valueOf(calendar.get(Calendar.MINUTE));
         current_time = Integer.parseInt(current_hour + current_minute);
     }
 
     public String getTextOpeningHours(Place_Nearby place_nearby) {
 
-        this.place_nearby=place_nearby;
         String text = null;
 
         if(place_nearby!=null){
@@ -208,13 +201,5 @@ public class TimeCalculation {
         }
 
         return text;
-    }
-
-    public void setCurrent_day(int current_day) {
-        this.current_day = current_day;
-    }
-
-    public void setCurrent_time(int current_time) {
-        this.current_time = current_time;
     }
 }

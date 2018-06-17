@@ -1,12 +1,14 @@
 package com.g.laurent.go4lunch.Controllers.Fragments;
 
-
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
+import android.content.res.Resources;
+import android.os.Build;
 import android.os.Bundle;
 import android.app.Fragment;
+import android.util.DisplayMetrics;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -45,6 +47,13 @@ public class SettingsFragment extends Fragment implements AdapterView.OnItemSele
     @BindView(R.id.initialize_chosen_resto) Button button_reset_chosen;
     @BindView(R.id.framelayout_setting_frag) FrameLayout global_view;
     @BindView(R.id.switch_enable_notif) Switch enable_notif;
+    @BindView(R.id.title_settings) TextView title_settings_textview;
+    @BindView(R.id.enable_notif) TextView enable_notification_textview;
+    @BindView(R.id.setting_radius) TextView radius_textview;
+    @BindView(R.id.setting_type_place) TextView type_place__textview;
+
+
+
     private SharedPreferences sharedPreferences;
     private Context context;
     private Firebase_update firebase_update;
@@ -54,6 +63,7 @@ public class SettingsFragment extends Fragment implements AdapterView.OnItemSele
     private static final String EXTRA_PREF_RADIUS = "radius_preferences";
     private static final String EXTRA_PREF_TYPE_PLACE = "type_place_preferences";
     private static final String EXTRA_ENABLE_NOTIF = "enable_notif";
+    private static final String EXTRA_RESTO_JSON = "resto_to_json";
 
     public SettingsFragment() {
         // Required empty public constructor
@@ -96,27 +106,28 @@ public class SettingsFragment extends Fragment implements AdapterView.OnItemSele
         configure_button_reset_liked();
 
         // Configure button reset chosen restaurants
-        configure_button_resto_chosen();
+        configure_button_reset_chosen();
 
         // Configure button "DONE"
         configure_button_done();
     }
 
-    private void configure_button_resto_chosen() {
+    private void configure_button_reset_chosen() {
         button_reset_chosen.setOnClickListener(v -> {
             AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
             builder.setCancelable(true);
-            builder.setTitle(getResources().getString(R.string.reset_chosen));
-            builder.setMessage(getResources().getString(R.string.confirmation_reset_chosen_resto));
-            builder.setPositiveButton(getResources().getString(R.string.confirm),
+            builder.setTitle(context.getResources().getString(R.string.title_reset_chosen));
+            builder.setMessage(context.getResources().getString(R.string.confirmation_reset_chosen_resto));
+            builder.setPositiveButton(context.getResources().getString(R.string.confirm),
                     (dialog, which) -> {
                         if(mCurrentUser!=null) {
                             firebase_update.initialize_chosen_restaurant(mCurrentUser.getUid());
+                            sharedPreferences.edit().putString(EXTRA_RESTO_JSON, null).apply();
                             message_to_display(true);
                         } else
                             message_to_display(false);
                     });
-            builder.setNegativeButton(android.R.string.cancel, (dialog, which) -> {
+            builder.setNegativeButton(context.getResources().getString(R.string.cancel), (dialog, which) -> {
             });
 
             AlertDialog dialog = builder.create();
@@ -129,9 +140,9 @@ public class SettingsFragment extends Fragment implements AdapterView.OnItemSele
 
             AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
             builder.setCancelable(true);
-            builder.setTitle(getResources().getString(R.string.reset_liked));
-            builder.setMessage(getResources().getString(R.string.confirmation_reset_liked_resto));
-            builder.setPositiveButton(getResources().getString(R.string.confirm),
+            builder.setTitle(context.getResources().getString(R.string.title_reset_liked));
+            builder.setMessage(context.getResources().getString(R.string.confirmation_reset_liked_resto));
+            builder.setPositiveButton(context.getResources().getString(R.string.confirm),
                     (dialog, which) -> {
                         if(mCurrentUser!=null) {
                             firebase_update.initialize_like_list_restaurant(mCurrentUser.getUid());
@@ -139,7 +150,7 @@ public class SettingsFragment extends Fragment implements AdapterView.OnItemSele
                         } else
                             message_to_display(false);
                     });
-            builder.setNegativeButton(android.R.string.cancel, (dialog, which) -> {
+            builder.setNegativeButton(context.getResources().getString(R.string.cancel), (dialog, which) -> {
             });
 
             AlertDialog dialog = builder.create();
@@ -151,9 +162,9 @@ public class SettingsFragment extends Fragment implements AdapterView.OnItemSele
         Toast toast;
 
         if(success)
-            toast = Toast.makeText(context,getResources().getString(R.string.confirm_message_reset),Toast.LENGTH_SHORT);
+            toast = Toast.makeText(context,context.getResources().getString(R.string.confirm_message_reset),Toast.LENGTH_SHORT);
         else
-            toast = Toast.makeText(context,getResources().getString(R.string.alert_message_not_reset),Toast.LENGTH_SHORT);
+            toast = Toast.makeText(context,context.getResources().getString(R.string.alert_message_not_reset),Toast.LENGTH_SHORT);
 
         toast.show();
     }
@@ -262,7 +273,6 @@ public class SettingsFragment extends Fragment implements AdapterView.OnItemSele
                     break;
             }
         }
-
     }
 
     // ----------------------------------------------------------------------------------------------
@@ -314,35 +324,39 @@ public class SettingsFragment extends Fragment implements AdapterView.OnItemSele
 
     @Override
     public void onNothingSelected(AdapterView<?> parent) {
+
     }
-
-    /*@Override
-    public void onConfigurationChanged(Configuration newConfig) {
-        System.out.println("eee onConfigurationChanged");
-        super.onConfigurationChanged(newConfig);
-
-    }*/
 
     private void setLanguageForApp(){
 
-        SharedPreferences sharedPreferences = context.getSharedPreferences(EXTRA_PREFERENCES,MODE_PRIVATE);
         String lang = sharedPreferences.getString(EXTRA_PREF_LANG,"en");
 
-        Locale locale;
-        if(lang.equals("not-set")){ //use any value for default
-            locale = Locale.getDefault();
+        Locale locale = new Locale(lang);
+
+        Resources resources = getResources();
+        Configuration configuration = resources.getConfiguration();
+        DisplayMetrics displayMetrics = resources.getDisplayMetrics();
+        configuration.setLocale(locale);
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N){
+            context.createConfigurationContext(configuration);
         } else {
-            locale = new Locale(lang);
+            resources.updateConfiguration(configuration,displayMetrics);
         }
+        context.getResources().updateConfiguration(configuration, context.getResources().getDisplayMetrics());
 
-        Locale.setDefault(locale);
+        refresh_text_areas();
+    }
 
-        Configuration config = new Configuration();
-        config.locale = locale;
-        context.getResources().updateConfiguration(config,
-                context.getResources().getDisplayMetrics());
+    private void refresh_text_areas(){
 
-        System.out.println("eee config2=" + config.locale);
+        title_settings_textview.setText(context.getResources().getString(R.string.title_settings));
+        enable_notification_textview.setText(context.getResources().getString(R.string.enable_notif));
+        radius_textview.setText(context.getResources().getString(R.string.setting_radius));
+        type_place__textview.setText(context.getResources().getString(R.string.type_of_place));
+        button_done.setText(context.getResources().getString(R.string.done));
+        button_reset_chosen.setText(context.getResources().getString(R.string.button_reset_chosen));
+        button_reset_liked.setText(context.getResources().getString(R.string.button_reset_liked));
     }
 
 }

@@ -4,10 +4,20 @@
     <!-- MAIN PAGE -->
     <string name="connect_with_google">Se connecter avec Google</string>
     <string name="connect_with_facebook">Se connecter avec Facebook</string>
+    <string name="error_not_connected">Vous devez vous connecter !</string>
+    <string name="error_authentication_canceled">Authentification annulée&#8230;</string>
+    <string name="error_no_internet">Aucune connexion internet !</string>
+    <string name="error_unknown_error">Une erreur inconnue s\'est produite&#8230;</string>
+    <string name="connection_succeed">Authentification réussie !</string>
+    <string name="button_login_text_logged">Afficher le profil</string>
+    <string name="button_login_text_not_logged">Connexion</string>
 
     <!-- MAPVIEW & LISTVIEW -->
     <string name="toolbar_mapview">J\'ai faim</string>
     <string name="Search_restaurants">Rechercher restaurants</string>
+    <string name="map_view_tab">Carte</string>
+    <string name="list_view_tab">Restos</string>
+    <string name="localization_unkown">Restaurant non localisé</string>
 
     <!-- RESTOVIEW -->
     <string name="call">APPEL</string>
@@ -27,6 +37,7 @@
     <string name="colleague">collègues</string>
 
     <!-- LISTMATESVIEW -->
+    <string name="workmates_tab">Collègues</string>
     <string name="is_eating_at"> mange à </string>
     <string name="has_not_decided"> n\'a pas encore décidé!</string>
     <string name="available_workmates">Collègues disponibles</string>
@@ -36,12 +47,14 @@
     <string name="title_settings">Paramètres</string>
     <string name="setting_radius">Rayon</string>
     <string name="type_of_place">Type d\'établissement: </string>
-    <string name="reset_liked">Reset restaurants liked</string>
-    <string name="reset_chosen">Reset restaurant choisi</string>
+    <string name="button_reset_liked">RAZ like</string>
+    <string name="button_reset_chosen">RAZ choix</string>
+    <string name="title_reset_liked">RAZ restaurants liked</string>
+    <string name="title_reset_chosen">RAZ restaurant choisi</string>
     <string name="confirmation_reset_chosen_resto">Etes-vous sûr de vouloir ré-initialiser le choix de restaurant ?</string>
     <string name="confirmation_reset_liked_resto">Etes-vous sûr de vouloir ré-initialiser la liste des restaurants liked ?</string>
-    <string name="confirm_message_reset">Reset effectué!</string>
-    <string name="alert_message_not_reset">Echec reset</string>
+    <string name="confirm_message_reset">RAZ effectué!</string>
+    <string name="alert_message_not_reset">Echec RAZ</string>
     <string name="confirm">Oui</string>
     <string name="cancel">Annuler</string>
     <string name="done">Terminé</string>
@@ -53,7 +66,28 @@
 
     <!-- MENU -->
     <string name="your_lunch">VOTRE REPAS</string>
+    <string name="no_resto_chosen">Aucun restaurant choisi</string>
     <string name="settings">PARAMETRES</string>
     <string name="logout">DECONNEXION</string>
+
+    <!-- COMMON TEXTS FOR BOTH LANGUAGES -->
+    <string name="app_name">Go4Lunch</string>
+    <string name="title_activity_maps">Map</string>
+    <string name="radius">500</string>
+    <string name="app_label">app_label</string>
+    <string name="search_hint">Search_hint</string>
+    <string name="search">search</string>
+    <string name="image_restaurant">Image_restaurant</string>
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+    <string name="number_of_workmates">number of workmates</string>
+    <string name="number_of_stars">number of stars</string>
+    <string name="français">Français</string>
+    <string name="english">English</string>
+    <string name="go4lunch">Go4Lunch</string>
+    <string name="imageview_drawer">ImageView drawer</string>
+    <string name="image_current_user">image_current_user</string>
+    <string name="icon_button_search">icon_button_search</string>
+    <string name="icon_button_hamburger">icon_button_hamburger</string>
 
 </resources>

@@ -69,10 +69,13 @@ public class Google_Maps_Utils extends FragmentActivity implements GoogleApiClie
             ActivityCompat.requestPermissions(activity,
                     new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION},
                     PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION);
+
+            currentPlaceLatLng = find_last_current_location();
+            activity.setCurrentPlaceLatLng(currentPlaceLatLng);
         }
     }
 
-    public void getNumberResults(MultiActivity activity) {
+    private void getNumberResults(MultiActivity activity) {
 
         mPlaceDetectionClient = Places.getPlaceDetectionClient(activity);
 
@@ -80,7 +83,7 @@ public class Google_Maps_Utils extends FragmentActivity implements GoogleApiClie
 
             try {
 
-                @SuppressWarnings("MissingPermission") final Task<PlaceLikelihoodBufferResponse> placeResult = mPlaceDetectionClient.getCurrentPlace(null);
+                final Task<PlaceLikelihoodBufferResponse> placeResult = mPlaceDetectionClient.getCurrentPlace(null);
                 placeResult.addOnCompleteListener(task -> {
 
                     if (task.isSuccessful() && task.getResult() != null) {
@@ -122,6 +125,9 @@ public class Google_Maps_Utils extends FragmentActivity implements GoogleApiClie
     }
 
     private LatLng find_last_current_location(){
+
+        activity.getSharedPreferences().edit().putFloat(EXTRA_LAT_CURRENT,(float) 48.866667).apply();
+        activity.getSharedPreferences().edit().putFloat(EXTRA_LONG_CURRENT,(float) 2.333333).apply();
 
         Float latitude = activity.getSharedPreferences().getFloat(EXTRA_LAT_CURRENT,0);
         Float longitude = activity.getSharedPreferences().getFloat(EXTRA_LONG_CURRENT,0);

@@ -1,4 +1,4 @@
-package com.g.laurent.go4lunch.Views.Resto_Details;
+package com.g.laurent.go4lunch.Views.WorkmatesViews;
 
 import android.content.Context;
 import android.graphics.Color;
@@ -23,7 +23,7 @@ public class WorkmatesViewHolder extends RecyclerView.ViewHolder {
     private final static String TYPE_DISPLAY_WORKMATES_BY_RESTO = "list_of_workmates_by_resto";
     private Context context;
 
-    public WorkmatesViewHolder(View itemView, Context context) {
+    WorkmatesViewHolder(View itemView, Context context) {
         super(itemView);
         ButterKnife.bind(this, itemView);
         this.context=context;

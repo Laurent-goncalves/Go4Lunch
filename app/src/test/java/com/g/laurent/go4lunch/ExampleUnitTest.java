@@ -1,27 +1,16 @@
 package com.g.laurent.go4lunch;
 
-import android.content.Context;
-import android.test.mock.MockContext;
-
 import com.g.laurent.go4lunch.Controllers.Fragments.ListRestoFragment;
 import com.g.laurent.go4lunch.Models.List_Search_Nearby;
 import com.g.laurent.go4lunch.Models.Place_Nearby;
 import com.g.laurent.go4lunch.Models.Workmate;
-import com.g.laurent.go4lunch.Utils.DetailsPlace.Close;
-import com.g.laurent.go4lunch.Utils.DetailsPlace.Open;
-import com.g.laurent.go4lunch.Utils.DetailsPlace.OpeningHours;
-import com.g.laurent.go4lunch.Utils.DetailsPlace.Period;
 import com.g.laurent.go4lunch.Utils.DetailsPlace.Geometry;
 import com.g.laurent.go4lunch.Utils.DetailsPlace.Location;
 import com.g.laurent.go4lunch.Utils.DistanceCalculation;
-import com.g.laurent.go4lunch.Utils.Google_Maps_Utils;
-import com.g.laurent.go4lunch.Utils.TimeCalculation;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
-
 import junit.framework.Assert;
 import org.junit.Test;
-import org.mockito.Mockito;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -95,6 +84,20 @@ public class ExampleUnitTest {
         Assert.assertTrue(list_search_nearby.getList_places_nearby().size()>0);
     }
 
+    @Test
+    public void TEST_define_bounds(){
+
+        LatLng center =new LatLng(48.866667, 2.333333);
+        DistanceCalculation distanceCalculation = new DistanceCalculation();
+
+        LatLngBounds bounds = distanceCalculation.toBounds(center, 500d);
+
+        String distance = distanceCalculation.calulate_distance(
+                bounds.southwest.latitude,bounds.southwest.longitude,
+                bounds.northeast.latitude,bounds.northeast.longitude);
+
+        Assert.assertEquals("1000 m",distance);
+    }
 
 
     private List<Place_Nearby> build_fake_list_place_nearby(){
@@ -176,7 +179,6 @@ public class ExampleUnitTest {
         return new_list_workmates;
     }
 
-
     private void waiting_time(int time){
         try {
             Thread.sleep(time);
@@ -184,5 +186,4 @@ public class ExampleUnitTest {
             e.printStackTrace();
         }
     }
-
 }

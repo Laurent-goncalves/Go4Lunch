@@ -7,21 +7,13 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
 import android.support.v4.app.NotificationCompat;
-import android.widget.Toast;
-
 import com.g.laurent.go4lunch.R;
 import com.g.laurent.go4lunch.Utils.Firebase_recover;
-
-import org.mockito.internal.matchers.Not;
-
 import java.util.List;
-
-import javax.security.auth.callback.Callback;
 
 public class AlarmReceiver extends BroadcastReceiver implements Callback_alarm {
 
     private Context mContext;
-    private Callback_alarm callback;
     private String user_id;
     private String place_id;
     private String name_resto;
@@ -33,7 +25,7 @@ public class AlarmReceiver extends BroadcastReceiver implements Callback_alarm {
     @Override
     public void onReceive(Context context, Intent intent) {
         mContext=context;
-        callback = this;
+        Callback_alarm callback = this;
         if(intent!=null){
             if(intent.getExtras()!=null)
                 user_id=intent.getExtras().getString(EXTRA_USER_ID,null);

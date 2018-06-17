@@ -1,4 +1,4 @@
-package com.g.laurent.go4lunch.Views.Resto_Details;
+package com.g.laurent.go4lunch.Views.WorkmatesViews;
 
 import android.content.Context;
 import android.support.annotation.NonNull;

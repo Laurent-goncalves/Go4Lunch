@@ -1,4 +1,4 @@
-package com.g.laurent.go4lunch.Views.Resto_List;
+package com.g.laurent.go4lunch.Views.RestoListViews;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
@@ -11,7 +11,6 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
-import com.g.laurent.go4lunch.Controllers.Activities.MultiActivity;
 import com.g.laurent.go4lunch.Controllers.Activities.RestoActivity;
 import com.g.laurent.go4lunch.Models.Place_Nearby;
 import com.g.laurent.go4lunch.Models.Workmate;
@@ -20,8 +19,6 @@ import com.g.laurent.go4lunch.Utils.DistanceCalculation;
 import com.g.laurent.go4lunch.Utils.TimeCalculation;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.gson.Gson;
-
-import java.lang.ref.WeakReference;
 import java.util.List;
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -40,21 +37,19 @@ public class RestoViewHolder extends RecyclerView.ViewHolder implements View.OnC
     private Place_Nearby place_nearby;
     private List<Workmate> list_workmates;
     private LatLng current_loc;
-    private WeakReference<ListViewAdapter.Listener> callbackWeakRef;
     private Context context;
     private final static String EXTRA_RESTO_DETAILS = "resto_details";
 
-    public RestoViewHolder(View itemView) {
+    RestoViewHolder(View itemView) {
         super(itemView);
         this.view=itemView;
         ButterKnife.bind(this, itemView);
     }
 
-    public void configure_restaurant(LatLng current_loc, Place_Nearby place_nearby, ListViewAdapter.Listener callback, List<Workmate> list_workmates, Context context){
+    public void configure_restaurant(LatLng current_loc, Place_Nearby place_nearby, List<Workmate> list_workmates, Context context){
 
         this.place_nearby=place_nearby;
         this.current_loc=current_loc;
-        this.callbackWeakRef = new WeakReference<>(callback);
         this.view.setOnClickListener(this);
         this.context=context;
         this.list_workmates=list_workmates;

@@ -1,11 +1,9 @@
 package com.g.laurent.go4lunch.Controllers.Fragments;
 
-import android.app.Activity;
 import android.app.Fragment;
 import android.content.Context;
-import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.support.annotation.Nullable;
+import android.support.annotation.NonNull;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -13,37 +11,32 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
-import com.g.laurent.go4lunch.Models.List_Search_Nearby;
 import com.g.laurent.go4lunch.Models.Place_Nearby;
 import com.g.laurent.go4lunch.Models.Workmate;
 import com.g.laurent.go4lunch.R;
 import com.g.laurent.go4lunch.Utils.Firebase_recover;
-import com.g.laurent.go4lunch.Views.Resto_List.ListViewAdapter;
+import com.g.laurent.go4lunch.Views.RestoListViews.ListViewAdapter;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
-
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+
 import butterknife.BindView;
 import butterknife.ButterKnife;
-
-import static android.content.Context.MODE_PRIVATE;
 
 /**
  * A simple {@link Fragment} subclass.
  */
-public class ListRestoFragment extends BaseRestoFragment implements ListViewAdapter.Listener {
+public class ListRestoFragment extends BaseRestoFragment {
 
     @BindView(R.id.list_view_resto) RecyclerView recyclerView;
     @BindView(R.id.sort_by_criteria) TextView title_sort;
     @BindView(R.id.sort_by_number_workmates) Button button_workmates;
     @BindView(R.id.sort_by_number_stars) Button button_stars;
     @BindView(R.id.sort_by_distance) Button button_distance;
-    private static final String EXTRA_PREFERENCES = "preferences";
-    private static final String EXTRA_PREF_RADIUS = "radius_preferences";
-    private static final String EXTRA_PREF_TYPE_PLACE = "type_place_preferences";
     private String placeId;
     private Firebase_recover firebase_recover;
     private Context context;
@@ -52,7 +45,7 @@ public class ListRestoFragment extends BaseRestoFragment implements ListViewAdap
         // Required empty public constructor
     }
 
-    public static ListRestoFragment newInstance(String api_key, List<Place_Nearby> list_restos) {
+    public static ListRestoFragment newInstance(List<Place_Nearby> list_restos) {
 
         // Create new fragment
         ListRestoFragment frag = new ListRestoFragment();
@@ -69,13 +62,12 @@ public class ListRestoFragment extends BaseRestoFragment implements ListViewAdap
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View view =inflater.inflate(R.layout.fragment_list_resto, container, false);
         ButterKnife.bind(this,view);
-        SharedPreferences sharedPreferences = getActivity().getSharedPreferences(EXTRA_PREFERENCES, MODE_PRIVATE);
-        context = getActivity().getApplicationContext();
+        context = Objects.requireNonNull(getActivity()).getApplicationContext();
 
         // Recover list of restaurants on firebase
         firebase_recover = new Firebase_recover(context,this);
@@ -83,7 +75,6 @@ public class ListRestoFragment extends BaseRestoFragment implements ListViewAdap
         // Recover list of restos nearby
         currentPlaceLatLng =new LatLng(48.866667,2.333333);
 
-        String api_key = getResources().getString(R.string.google_maps_key2);
         list_places_nearby_OLD = new ArrayList<>();
 
         if(getArguments()!=null) {
@@ -96,7 +87,7 @@ public class ListRestoFragment extends BaseRestoFragment implements ListViewAdap
 
         recover_list_workmates(list_places_nearby);
 
-        create_onclicklistener_for_sorting_buttons();
+        configure_sorting_buttons();
         return view;
     }
 
@@ -111,7 +102,7 @@ public class ListRestoFragment extends BaseRestoFragment implements ListViewAdap
 
         if(context!=null) {
             // Create adapter passing in the sample user data
-            ListViewAdapter adapter = new ListViewAdapter(context, list_places_nearby, list_workmates, currentPlaceLatLng, this);
+            ListViewAdapter adapter = new ListViewAdapter(context, list_places_nearby, list_workmates, currentPlaceLatLng);
             // Attach the adapter to the recyclerview to populate items
             recyclerView.setAdapter(adapter);
             // Set layout manager to position the items
@@ -131,18 +122,11 @@ public class ListRestoFragment extends BaseRestoFragment implements ListViewAdap
         }
     }
 
-    private void getLatLng_current_location(){
-        // recover the latitude and longitude inside the bundle
-        currentPlaceLatLng = new LatLng(getArguments().getDouble(EXTRA_LAT_CURRENT,0),
-                                          getArguments().getDouble(EXTRA_LONG_CURRENT,0));
-    }
+    private void configure_sorting_buttons(){
 
-    @Override
-    public void onClickShowRestoDetails(String placeId) {
-        mCallback_detailResto.configure_and_show_restofragment(placeId);
-    }
+        title_sort.setText(context.getResources().getString(R.string.sort_by));
 
-    private void create_onclicklistener_for_sorting_buttons(){
+        button_workmates.setText(context.getResources().getString(R.string.colleague));
 
         button_workmates.setOnClickListener(v -> {
             sort_list_places_nearby("workmates");
@@ -150,11 +134,15 @@ public class ListRestoFragment extends BaseRestoFragment implements ListViewAdap
             configure_recycler_view();
         });
 
+        button_stars.setText(context.getResources().getString(R.string.stars));
+
         button_stars.setOnClickListener(v -> {
             sort_list_places_nearby("stars");
             change_color_button_if_selected(button_stars);
             configure_recycler_view();
         });
+
+        button_distance.setText(context.getResources().getString(R.string.distance));
 
         button_distance.setOnClickListener(v -> {
             sort_list_places_nearby("distance");

@@ -15,7 +15,6 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
-
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
 import com.firebase.ui.auth.AuthUI;
@@ -31,6 +30,7 @@ import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseUser;
 import java.util.ArrayList;
 import java.util.List;
+
 
 public class Toolbar_navig_Utils implements NavigationView.OnNavigationItemSelectedListener{
 
@@ -50,7 +50,6 @@ public class Toolbar_navig_Utils implements NavigationView.OnNavigationItemSelec
     private int radius;
     private String api_key;
     private List<Place_Nearby> list_place_nearby_autocomplete;
-    private Toolbar toolbar;
 
     public Toolbar_navig_Utils(MultiActivity activity) {
         this.activity = activity;
@@ -66,12 +65,17 @@ public class Toolbar_navig_Utils implements NavigationView.OnNavigationItemSelec
 
     public void configure_toolbar(){
 
-        toolbar = activity.findViewById(R.id.activity_main_toolbar);
+        Toolbar toolbar = activity.findViewById(R.id.activity_main_toolbar);
         activity.setSupportActionBar(toolbar);
 
         //Assign icons
         title_toolbar = toolbar.findViewById(R.id.title_toolbar);
-        title_toolbar.setText(activity.getResources().getString(R.string.toolbar_mapview));
+
+        if(activity.getCurrentPage()==2)
+            title_toolbar.setText(context.getResources().getString(R.string.available_workmates));
+        else
+            title_toolbar.setText(context.getResources().getString(R.string.toolbar_mapview));
+
         hamburger = toolbar.findViewById(R.id.button_hamburger);
         searchView = toolbar.findViewById(R.id.searchView);
 
@@ -90,7 +94,7 @@ public class Toolbar_navig_Utils implements NavigationView.OnNavigationItemSelec
 
             // Define bounds for search
             DistanceCalculation tool_calcul_distance = new DistanceCalculation();
-            bounds = tool_calcul_distance.create_LatLngBounds(radius, currentPlaceLatLng);
+            bounds = tool_calcul_distance.toBounds(currentPlaceLatLng, radius);
         });
     }
 
@@ -138,7 +142,7 @@ public class Toolbar_navig_Utils implements NavigationView.OnNavigationItemSelec
 
                 radius = activity.getSharedPreferences().getInt(EXTRA_PREF_RADIUS,500);
                 DistanceCalculation distanceCalculation = new DistanceCalculation();
-                bounds = distanceCalculation.create_LatLngBounds(radius,currentPlaceLatLng);
+                bounds = distanceCalculation.toBounds(currentPlaceLatLng,radius);
 
                 switch (activity.getCurrentPage()) {
                     case 0:
@@ -166,17 +170,17 @@ public class Toolbar_navig_Utils implements NavigationView.OnNavigationItemSelec
     private void configure_searchView(){
 
         // Add query hint in the search area
-        searchView.setQueryHint(activity.getResources().getString(R.string.Search_restaurants));
+        searchView.setQueryHint(context.getResources().getString(R.string.Search_restaurants));
 
         // Assign searchAutoComplete
         searchAutoComplete = searchView.findViewById(android.support.v7.appcompat.R.id.search_src_text);
 
         // change color of the text query area
-        searchAutoComplete.setTextColor(activity.getResources().getColor(R.color.colorIconNotSelected));
+        searchAutoComplete.setTextColor(context.getResources().getColor(R.color.colorIconNotSelected));
 
         // change color of close icon in searchview
         ImageView icon_close_search = searchView.findViewById(android.support.v7.appcompat.R.id.search_close_btn);
-        icon_close_search.setColorFilter(activity.getResources().getColor(R.color.colorGrey));
+        icon_close_search.setColorFilter(context.getResources().getColor(R.color.colorGrey));
 
         create_onClickListener_Opening_searchView();
         create_onClickListener_Closing_searchView();
@@ -209,6 +213,8 @@ public class Toolbar_navig_Utils implements NavigationView.OnNavigationItemSelec
 
         activity.getNavigationView().setNavigationItemSelectedListener(this);
 
+        configure_title_menu_navigDrawer();
+
         if (mCurrentUser != null) {
 
             ImageView picture_user = activity.getNavigationView().getHeaderView(0).findViewById(R.id.current_user_image_drawer);
@@ -219,13 +225,26 @@ public class Toolbar_navig_Utils implements NavigationView.OnNavigationItemSelec
             email_user.setText(mCurrentUser.getEmail());
 
             if (mCurrentUser.getPhotoUrl() != null)
-                Glide.with(activity)
+                Glide.with(context)
                         .load(mCurrentUser.getPhotoUrl().toString())
                         .apply(RequestOptions.circleCropTransform())
                         .into(picture_user);
 
         }
     }
+
+    private void configure_title_menu_navigDrawer(){
+
+        MenuItem menuYourLunch = activity.getNavigationView().getMenu().findItem(R.id.activity_main_drawer_your_lunch);
+        menuYourLunch.setTitle(context.getResources().getString(R.string.your_lunch));
+
+        MenuItem menuSettings = activity.getNavigationView().getMenu().findItem(R.id.activity_main_drawer_settings);
+        menuSettings.setTitle(context.getResources().getString(R.string.settings));
+
+        MenuItem menuLogOut = activity.getNavigationView().getMenu().findItem(R.id.activity_main_drawer_logout);
+        menuLogOut.setTitle(context.getResources().getString(R.string.logout));
+    }
+
 
     @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
@@ -241,7 +260,7 @@ public class Toolbar_navig_Utils implements NavigationView.OnNavigationItemSelec
                     intent.putExtra(EXTRA_RESTO_DETAILS, resto_json);
                     activity.startActivity(intent);
                 } else {
-                    Toast toast = Toast.makeText(context,"No restaurant chosen",Toast.LENGTH_LONG);
+                    Toast toast = Toast.makeText(context,context.getResources().getString(R.string.no_resto_chosen),Toast.LENGTH_LONG);
                     toast.show();
                 }
                 break;
@@ -280,7 +299,25 @@ public class Toolbar_navig_Utils implements NavigationView.OnNavigationItemSelec
         return searchView;
     }
 
-    public Toolbar getToolbar() {
-        return toolbar;
+    public void refresh_text_toolbar() {
+
+        if(activity.getCurrentPage()==2)
+            title_toolbar.setText(context.getResources().getString(R.string.available_workmates));
+        else
+            title_toolbar.setText(context.getResources().getString(R.string.toolbar_mapview));
+
+        searchView.setQueryHint(context.getResources().getString(R.string.Search_restaurants));
     }
 }
+
+
+/*
+
+                System.out.println("eee  listRestoFragment ");
+
+                if(activity.get_Page_Adapter().getListRestoFragment()!=null)
+                    System.out.println("eee  getListRestoFragment non null ");
+                else
+                    System.out.println("eee  getListRestoFragment NULL ");
+
+ */

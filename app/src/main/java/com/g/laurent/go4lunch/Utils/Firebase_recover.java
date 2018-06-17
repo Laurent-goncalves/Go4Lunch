@@ -1,11 +1,7 @@
 package com.g.laurent.go4lunch.Utils;
 
 import android.content.Context;
-import android.content.Intent;
-import android.provider.ContactsContract;
-
 import com.g.laurent.go4lunch.Controllers.Activities.MultiActivity;
-import com.g.laurent.go4lunch.Controllers.Activities.RestoActivity;
 import com.g.laurent.go4lunch.Controllers.Fragments.ListMatesFragment;
 import com.g.laurent.go4lunch.Controllers.Fragments.ListRestoFragment;
 import com.g.laurent.go4lunch.Controllers.Fragments.MapsFragment;
@@ -20,8 +16,6 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import java.util.ArrayList;
 import java.util.List;
-
-import javax.security.auth.callback.Callback;
 
 
 public class Firebase_recover {

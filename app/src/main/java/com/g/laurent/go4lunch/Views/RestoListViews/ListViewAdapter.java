@@ -1,4 +1,4 @@
-package com.g.laurent.go4lunch.Views.Resto_List;
+package com.g.laurent.go4lunch.Views.RestoListViews;
 
 import android.content.Context;
 import android.support.annotation.NonNull;
@@ -18,14 +18,12 @@ public class ListViewAdapter extends RecyclerView.Adapter<RestoViewHolder> {
     private List<Place_Nearby> list_search_nearby;
     private List<Workmate> list_workmates;
     private LatLng current_loc;
-    private final Listener callback;
 
-    public ListViewAdapter(Context context, List<Place_Nearby> list_search_nearby, List<Workmate> list_workmates, LatLng current_loc, Listener callback){
+    public ListViewAdapter(Context context, List<Place_Nearby> list_search_nearby, List<Workmate> list_workmates, LatLng current_loc){
         this.context=context;
         this.list_search_nearby=list_search_nearby;
         this.list_workmates=list_workmates;
         this.current_loc=current_loc;
-        this.callback=callback;
     }
 
     @NonNull
@@ -40,7 +38,7 @@ public class ListViewAdapter extends RecyclerView.Adapter<RestoViewHolder> {
     @Override
     public void onBindViewHolder(@NonNull RestoViewHolder holder, int position) {
         if(list_search_nearby!=null){
-            holder.configure_restaurant(current_loc,list_search_nearby.get(position),callback,list_workmates,context);
+            holder.configure_restaurant(current_loc,list_search_nearby.get(position),list_workmates,context);
         }
     }
 
@@ -50,9 +48,5 @@ public class ListViewAdapter extends RecyclerView.Adapter<RestoViewHolder> {
             return list_search_nearby.size();
         else
             return 0;
-    }
-
-    public interface Listener {
-        void onClickShowRestoDetails(String placeId);
     }
 }

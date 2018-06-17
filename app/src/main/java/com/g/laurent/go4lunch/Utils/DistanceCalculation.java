@@ -2,23 +2,17 @@ package com.g.laurent.go4lunch.Utils;
 
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
+import com.google.maps.android.SphericalUtil;
 
 public class DistanceCalculation {
 
-
-    public LatLngBounds create_LatLngBounds(int radius, LatLng center){
-
-        LatLngBounds bounds;
-
-        double radiusDegrees = (2*radius*180)/(Math.PI * 1000 * 6371);
-        LatLng northEast = new LatLng(center.latitude + radiusDegrees, center.longitude + radiusDegrees);
-        LatLng southWest = new LatLng(center.latitude - radiusDegrees, center.longitude - radiusDegrees);
-
-        bounds = LatLngBounds.builder().include(northEast).include(southWest).build();
-
-        return bounds;
+    public LatLngBounds toBounds(LatLng center, double radiusInMeters) {
+        LatLng southwestCorner =
+                SphericalUtil.computeOffset(center, radiusInMeters, 225.0);
+        LatLng northeastCorner =
+                SphericalUtil.computeOffset(center, radiusInMeters, 45.0);
+        return new LatLngBounds(southwestCorner, northeastCorner);
     }
-
 
     public String calulate_distance(double lat1, double lon1, double lat2, double lon2) {
 

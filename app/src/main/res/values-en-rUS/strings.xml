@@ -4,10 +4,20 @@
     <!-- MAIN PAGE -->
     <string name="connect_with_google">Sign in with Google</string>
     <string name="connect_with_facebook">Sign in with Facebook</string>
+    <string name="error_not_connected">You must connect !</string>
+    <string name="error_authentication_canceled">Authentication cancelled&#8230;</string>
+    <string name="error_no_internet">No internet connection !</string>
+    <string name="error_unknown_error">An unknown error occurred&#8230;</string>
+    <string name="connection_succeed">Authentication succeed !</string>
+    <string name="button_login_text_logged">Display profile</string>
+    <string name="button_login_text_not_logged">Connection</string>
 
     <!-- MAPVIEW & LISTVIEW -->
     <string name="toolbar_mapview">I\'m hungry</string>
     <string name="Search_restaurants">Search restaurants</string>
+    <string name="map_view_tab">Map View</string>
+    <string name="list_view_tab">List View</string>
+    <string name="localization_unkown">Localization of the restaurant not found</string>
 
     <!-- RESTOVIEW -->
     <string name="call">CALL</string>
@@ -27,6 +37,7 @@
     <string name="colleague">colleague</string>
 
     <!-- LISTMATESVIEW -->
+    <string name="workmates_tab">Workmates</string>
     <string name="is_eating_at"> is eating at </string>
     <string name="has_not_decided"> hasn\'t decided yet!</string>
     <string name="available_workmates">Available workmates</string>
@@ -36,8 +47,10 @@
     <string name="title_settings">Settings</string>
     <string name="setting_radius">Radius</string>
     <string name="type_of_place">Type of place: </string>
-    <string name="reset_liked">Reset liked restaurants</string>
-    <string name="reset_chosen">Reset chosen restaurant</string>
+    <string name="button_reset_liked">Reset liked</string>
+    <string name="button_reset_chosen">Reset chosen</string>
+    <string name="title_reset_liked">Reset liked restaurants</string>
+    <string name="title_reset_chosen">Reset chosen restaurant</string>
     <string name="confirmation_reset_chosen_resto">Do you confirm your choice to reset chosen restaurant?</string>
     <string name="confirmation_reset_liked_resto">Do you confirm your choice to reset list of liked restaurants?</string>
     <string name="confirm_message_reset">Reset done!</string>
@@ -53,7 +66,29 @@
 
     <!-- MENU -->
     <string name="your_lunch">YOUR LUNCH</string>
+    <string name="no_resto_chosen">No restaurant chosen</string>
     <string name="settings">SETTINGS</string>
     <string name="logout">LOGOUT</string>
+
+
+    <!-- COMMON TEXTS FOR BOTH LANGUAGES -->
+    <string name="app_name">Go4Lunch</string>
+    <string name="title_activity_maps">Map</string>
+    <string name="radius">500</string>
+    <string name="app_label">app_label</string>
+    <string name="search_hint">Search_hint</string>
+    <string name="search">search</string>
+    <string name="image_restaurant">Image_restaurant</string>
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+    <string name="number_of_workmates">number of workmates</string>
+    <string name="number_of_stars">number of stars</string>
+    <string name="français">Français</string>
+    <string name="english">English</string>
+    <string name="go4lunch">Go4Lunch</string>
+    <string name="imageview_drawer">ImageView drawer</string>
+    <string name="image_current_user">image_current_user</string>
+    <string name="icon_button_search">icon_button_search</string>
+    <string name="icon_button_hamburger">icon_button_hamburger</string>
 
 </resources>

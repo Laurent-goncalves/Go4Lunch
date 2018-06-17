@@ -1,6 +1,7 @@
 package com.g.laurent.go4lunch;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.support.test.espresso.ViewInteraction;
 import android.support.test.rule.ActivityTestRule;
 import android.support.test.runner.AndroidJUnit4;
@@ -65,8 +66,17 @@ public class MainActivityTest {
 
     @Test
     public void create_new_users_firebase() {
-        Firebase_update firebase_update = new Firebase_update(mActivityTestRule.getActivity().getApplicationContext());
 
+        SharedPreferences sharedPreferences = mActivityTestRule.getActivity().getSharedPreferences();
+
+        String EXTRA_LAT_CURRENT = "latitude_current_location";
+        String EXTRA_LONG_CURRENT = "longitude_current_location";
+
+        sharedPreferences.edit().putFloat(EXTRA_LAT_CURRENT,48.866667f).apply();
+        sharedPreferences.edit().putFloat(EXTRA_LONG_CURRENT,2.333333f).apply();
+
+
+        Firebase_update firebase_update = new Firebase_update(mActivityTestRule.getActivity().getApplicationContext());
 
         waiting_time(5000);
 

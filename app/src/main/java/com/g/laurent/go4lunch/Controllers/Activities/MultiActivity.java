@@ -5,7 +5,10 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.res.Configuration;
+import android.content.res.Resources;
 import android.graphics.PorterDuff;
+import android.os.Build;
 import android.support.design.widget.NavigationView;
 import android.os.Bundle;
 import android.support.design.widget.TabLayout;
@@ -13,9 +16,9 @@ import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
+import android.util.DisplayMetrics;
 import com.g.laurent.go4lunch.Models.AlarmReceiver;
 import com.g.laurent.go4lunch.Models.CallbackMultiActivity;
-import com.g.laurent.go4lunch.Models.Callback_resto_fb;
 import com.g.laurent.go4lunch.Models.List_Search_Nearby;
 import com.g.laurent.go4lunch.Models.Place_Nearby;
 import com.g.laurent.go4lunch.R;
@@ -29,18 +32,19 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import java.util.Calendar;
 import java.util.List;
+import java.util.Locale;
 import java.util.Objects;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-
-public class MultiActivity extends AppCompatActivity implements Callback_resto_fb, CallbackMultiActivity, SwipeRefreshLayout.OnRefreshListener {
+public class MultiActivity extends AppCompatActivity implements CallbackMultiActivity, SwipeRefreshLayout.OnRefreshListener {
 
     private static final String EXTRA_PREF_RADIUS = "radius_preferences";
     private static final String EXTRA_USER_ID = "user_id_alarm";
     private static final String EXTRA_PREFERENCES = "preferences";
     private static final String EXTRA_PREF_TYPE_PLACE = "type_place_preferences";
     private static final String EXTRA_ENABLE_NOTIF = "enable_notif";
+    private static final String EXTRA_PREF_LANG = "language_preferences";
     @BindView(R.id.activity_main_drawer_layout) DrawerLayout drawerLayout;
     @BindView(R.id.activity_main_nav_view) NavigationView navigationView;
     @BindView(R.id.swiperefresh) SwipeRefreshLayout swipeRefreshLayout;
@@ -70,9 +74,35 @@ public class MultiActivity extends AppCompatActivity implements Callback_resto_f
         sharedPreferences = getSharedPreferences(EXTRA_PREFERENCES, MODE_PRIVATE);
         current_page = 0;
 
+        setLanguageForApp();
+
         // Recover current location
         Google_Maps_Utils google_maps_utils = new Google_Maps_Utils(getApplicationContext(), this, null);
         google_maps_utils.getLocationPermission();
+
+        // Configure toolbar and navigation drawer
+        toolbar_navig_utils = new Toolbar_navig_Utils(this);
+        toolbar_navig_utils.configure_toolbar();
+        toolbar_navig_utils.configureNavigationView();
+    }
+
+    private void setLanguageForApp(){
+
+        String lang = sharedPreferences.getString(EXTRA_PREF_LANG,"en");
+
+        Locale locale = new Locale(lang);
+
+        Resources resources = getResources();
+        Configuration configuration = resources.getConfiguration();
+        DisplayMetrics displayMetrics = resources.getDisplayMetrics();
+        configuration.setLocale(locale);
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N){
+            getApplicationContext().createConfigurationContext(configuration);
+        } else {
+            resources.updateConfiguration(configuration,displayMetrics);
+        }
+        getApplicationContext().getResources().updateConfiguration(configuration, getApplicationContext().getResources().getDisplayMetrics());
     }
 
     @Override
@@ -81,7 +111,7 @@ public class MultiActivity extends AppCompatActivity implements Callback_resto_f
         // Get ViewPager from layout
         pager = findViewById(R.id.viewpager);
 
-        pageAdapter = new MultiFragAdapter(getSupportFragmentManager(), api_key, getApplicationContext(), list_restos);
+        pageAdapter = new MultiFragAdapter(getSupportFragmentManager(), getApplicationContext(), list_restos);
 
         runOnUiThread(() -> {
             pager.setAdapter(pageAdapter);
@@ -99,22 +129,6 @@ public class MultiActivity extends AppCompatActivity implements Callback_resto_f
             // Select the last tab selected before eventual refresh and stop the refresh
             Objects.requireNonNull(tabs.getTabAt(current_page)).select();
             swipeRefreshLayout.setRefreshing(false);
-        });
-
-        pager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
-            @Override
-            public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
-            }
-
-            @Override
-            public void onPageSelected(int position) {
-                current_page = position;
-            }
-
-            @Override
-            public void onPageScrollStateChanged(int state) {
-
-            }
         });
     }
 
@@ -138,11 +152,10 @@ public class MultiActivity extends AppCompatActivity implements Callback_resto_f
                 if (tab.getIcon() != null)
                     tab.getIcon().setColorFilter(getResources().getColor(R.color.colorIconSelected), PorterDuff.Mode.SRC_IN);
 
+                current_page = tab.getPosition();
+
                 // Change tab title if required
-                if (current_page==2)
-                    toolbar_navig_utils.getToolbar().setTitle(getResources().getString(R.string.available_workmates));
-                else
-                    toolbar_navig_utils.getToolbar().setTitle(getResources().getString(R.string.toolbar_mapview));
+                toolbar_navig_utils.refresh_text_toolbar();
 
                 // Disable pull to refresh when mapView is displayed
                 if(tab.getPosition()==0)
@@ -228,7 +241,8 @@ public class MultiActivity extends AppCompatActivity implements Callback_resto_f
                 configureAlarmManager();
             }
         }
-        setContentView(R.layout.activity_maps);
+        // recreate activity to refresh texts (useful in case of change of language)
+        recreate();
     }
 
     // ----------------------------------------------------------------------------------------------------
@@ -239,11 +253,6 @@ public class MultiActivity extends AppCompatActivity implements Callback_resto_f
         this.currentPlaceLatLng = currentPlaceLatLng;
 
         api_key = getResources().getString(R.string.google_maps_key2);
-
-        // Configure toolbar and navigation drawer
-        toolbar_navig_utils = new Toolbar_navig_Utils(this);
-        toolbar_navig_utils.configure_toolbar();
-        toolbar_navig_utils.configureNavigationView();
 
         Firebase_update firebase_update = new Firebase_update(getApplicationContext());
 
@@ -309,31 +318,7 @@ public class MultiActivity extends AppCompatActivity implements Callback_resto_f
 
     @Override
     public void onRefresh() {
-        String radius = String.valueOf(sharedPreferences.getInt(EXTRA_PREF_RADIUS,500));
-        String type = sharedPreferences.getString(EXTRA_PREF_TYPE_PLACE,"restaurant");
-        new List_Search_Nearby(api_key, currentPlaceLatLng, radius, type, this);
-    }
-
-    @Override
-    public void update_chosen_list_restos(List<Place_Nearby> list_restos) {
-
+        Google_Maps_Utils google_maps_utils = new Google_Maps_Utils(getApplicationContext(), this, null);
+        google_maps_utils.getLocationPermission();
     }
 }
-
-
-
-
-
-
-    /*@Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-
-        MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.options_menu, menu);
-
-        searchItem = menu.findItem(R.id.search);
-
-
-        return true;
-    }*/
-

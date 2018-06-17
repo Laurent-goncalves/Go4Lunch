@@ -1,24 +1,18 @@
 package com.g.laurent.go4lunch.Controllers.Fragments;
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
-
-import com.g.laurent.go4lunch.Controllers.Activities.MultiActivity;
 import com.g.laurent.go4lunch.Controllers.Activities.RestoActivity;
 import com.g.laurent.go4lunch.Models.Place_Nearby;
 import com.g.laurent.go4lunch.Models.Workmate;
 import com.g.laurent.go4lunch.R;
 import com.g.laurent.go4lunch.Utils.Firebase_recover;
-import com.g.laurent.go4lunch.Utils.Google_Maps_Utils;
 import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -30,44 +24,27 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
-
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
 import java.lang.reflect.Type;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import butterknife.BindView;
 import butterknife.ButterKnife;
-import static android.content.Context.MODE_PRIVATE;
 
 
 public class MapsFragment extends BaseRestoFragment  {
 
     @BindView(R.id.mapview) MapView mMapView;
-
-
-    private static final String EXTRA_PREFERENCES = "preferences";
-    private static final String EXTRA_PREF_LANG = "language_preferences";
-    private static final String EXTRA_PREF_RADIUS = "radius_preferences";
-    private static final String EXTRA_PREF_TYPE_PLACE = "type_place_preferences";
     private final static String EXTRA_RESTO_DETAILS = "resto_details";
-private MultiActivity mMultiActivity;
     private Firebase_recover firebase_recover;
     private Context context;
     private List<Workmate> list_workmates;
-
 
     public MapsFragment() {
         // Required empty public constructor
     }
 
-    public static MapsFragment newInstance(String api_key, List<Place_Nearby> list_restos) {
+    public static MapsFragment newInstance(List<Place_Nearby> list_restos) {
 
         // Create new fragment
         MapsFragment frag = new MapsFragment();
@@ -84,19 +61,15 @@ private MultiActivity mMultiActivity;
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
 
         // Inflate the layout for this fragment
         View view =inflater.inflate(R.layout.fragment_maps, container, false);
         ButterKnife.bind(this,view);
-        SharedPreferences sharedPreferences = getActivity().getSharedPreferences(EXTRA_PREFERENCES, MODE_PRIVATE);
         mMapView.onCreate(savedInstanceState);
-        context = getActivity().getApplicationContext();
+        context = Objects.requireNonNull(getActivity()).getApplicationContext();
         list_places_nearby_OLD = new ArrayList<>();
-        Google_Maps_Utils google_maps_utils = new Google_Maps_Utils(context,mMultiActivity,null);
-
-        currentPlaceLatLng = new LatLng(48.866667, 2.333333);
 
         if(getArguments()!=null) {
 
@@ -107,19 +80,6 @@ private MultiActivity mMultiActivity;
         }
 
         recover_list_workmates(list_places_nearby);
-        // Recover list of restos nearby
-        /*if(getArguments()!=null) {
-
-            // String radius = String.valueOf(sharedPreferences.getInt(EXTRA_PREF_RADIUS, 500));
-            // String type = sharedPreferences.getString(EXTRA_PREF_TYPE_PLACE, "restaurant");
-
-            String radius = "500";
-            String type = "restaurant";
-            String api_key = getArguments().getString(EXTRA_API_KEY, null);
-
-            if (api_key != null)
-                new List_Search_Nearby(api_key, currentPlaceLatLng, radius, type, this);
-        }*/
 
         return view;
     }
@@ -154,17 +114,14 @@ private MultiActivity mMultiActivity;
             create_marker_for_each_place_nearby(list_places_nearby,mMap);
 
             // Set on click listener for markers of the map
-            mMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
-                @Override
-                public boolean onMarkerClick(Marker marker) {
+            mMap.setOnMarkerClickListener(marker -> {
 
-                    String resto_json = (String) marker.getTag();
-                    Intent intent = new Intent(context, RestoActivity.class);
-                    intent.putExtra(EXTRA_RESTO_DETAILS,resto_json);
-                    startActivity(intent);
+                String resto_json = (String) marker.getTag();
+                Intent intent = new Intent(context, RestoActivity.class);
+                intent.putExtra(EXTRA_RESTO_DETAILS,resto_json);
+                startActivity(intent);
 
-                    return false;
-                }
+                return false;
             });
 
             // zoom on current location if number of resto > 1
@@ -178,16 +135,14 @@ private MultiActivity mMultiActivity;
                     location_zoom = new LatLng(list_places_nearby.get(0).getGeometry().getLocation().getLat(),
                             list_places_nearby.get(0).getGeometry().getLocation().getLng());
                 } catch(Throwable e){
-                    Toast toast = Toast.makeText(context,"Localization of the restaurant not found.",Toast.LENGTH_LONG);
+                    Toast toast = Toast.makeText(context,context.getResources().getString(R.string.localization_unkown),Toast.LENGTH_LONG);
                     toast.show();
                 }
 
                 CameraUpdate yourLocation = CameraUpdateFactory.newLatLngZoom(location_zoom, 16);
                 mMap.animateCamera(yourLocation);
             }
-
         });
-
     }
 
     private void create_marker_for_each_place_nearby(List<Place_Nearby> list_places_nearby,GoogleMap mMap){
@@ -248,10 +203,22 @@ private MultiActivity mMultiActivity;
         if(firebase_recover!=null)
             firebase_recover.recover_list_workmates();
     }
-
-    @Override
-    public void onAttach(Activity activity) {
-        super.onAttach(activity);
-        mMultiActivity=(MultiActivity) activity;
-    }
 }
+
+
+
+
+        // Recover list of restos nearby
+        /*if(getArguments()!=null) {
+
+            // String radius = String.valueOf(sharedPreferences.getInt(EXTRA_PREF_RADIUS, 500));
+            // String type = sharedPreferences.getString(EXTRA_PREF_TYPE_PLACE, "restaurant");
+
+            String radius = "500";
+            String type = "restaurant";
+            String api_key = getArguments().getString(EXTRA_API_KEY, null);
+
+            if (api_key != null)
+                new List_Search_Nearby(api_key, currentPlaceLatLng, radius, type, this);
+        }*/
+

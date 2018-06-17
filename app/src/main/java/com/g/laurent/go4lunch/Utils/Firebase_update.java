@@ -16,13 +16,11 @@ import com.google.firebase.database.FirebaseDatabase;
 public class Firebase_update implements GoogleApiClient.OnConnectionFailedListener {
 
     public Workmate workmate;
-    private Context context;
     private DatabaseReference databaseReference;
     private DatabaseReference databaseReferenceWorkmates;
     private RestoFragment restoFragment;
 
     public Firebase_update(Context context, RestoFragment restoFragment) {
-        this.context=context;
         this.restoFragment=restoFragment;
         FirebaseApp.initializeApp(context);
         databaseReference= FirebaseDatabase.getInstance().getReference();
@@ -30,7 +28,6 @@ public class Firebase_update implements GoogleApiClient.OnConnectionFailedListen
     }
 
     public Firebase_update(Context context) {
-        this.context=context;
         FirebaseApp.initializeApp(context);
         databaseReference= FirebaseDatabase.getInstance().getReference();
         databaseReferenceWorkmates= databaseReference.child("workmates");
@@ -65,7 +62,9 @@ public class Firebase_update implements GoogleApiClient.OnConnectionFailedListen
     public void create_new_user_firebase(FirebaseUser mCurrentUser){
         databaseReferenceWorkmates.child(mCurrentUser.getUid()).child("name").setValue(mCurrentUser.getDisplayName());
         databaseReferenceWorkmates.child(mCurrentUser.getUid()).child("id").setValue(mCurrentUser.getUid());
-        databaseReferenceWorkmates.child(mCurrentUser.getUid()).child("photo_url").setValue(mCurrentUser.getPhotoUrl().toString());
+
+        if(mCurrentUser.getPhotoUrl()!=null)
+            databaseReferenceWorkmates.child(mCurrentUser.getUid()).child("photo_url").setValue(mCurrentUser.getPhotoUrl().toString());
     }
 
     public void initialize_chosen_restaurant(String userId){

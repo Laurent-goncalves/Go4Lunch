@@ -1,6 +1,5 @@
 package com.g.laurent.go4lunch.Controllers.Fragments;
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -29,11 +28,10 @@ import com.g.laurent.go4lunch.Models.Workmate;
 import com.g.laurent.go4lunch.R;
 import com.g.laurent.go4lunch.Utils.Firebase_recover;
 import com.g.laurent.go4lunch.Utils.Firebase_update;
-import com.g.laurent.go4lunch.Views.Resto_Details.WorkmatesViewAdapter;
+import com.g.laurent.go4lunch.Views.WorkmatesViews.WorkmatesViewAdapter;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.gson.Gson;
-
 import java.util.ArrayList;
 import java.util.List;
 import butterknife.BindView;
@@ -259,7 +257,7 @@ public class RestoFragment extends Fragment {
             if(ContextCompat.checkSelfPermission(
                     context,android.Manifest.permission.CALL_PHONE) !=
                     PackageManager.PERMISSION_GRANTED) {
-                ActivityCompat.requestPermissions((Activity) getActivity(), new
+                ActivityCompat.requestPermissions(getActivity(), new
                         String[]{android.Manifest.permission.CALL_PHONE}, 0);
             } else {
                 startActivity(new Intent(Intent.ACTION_CALL, Uri.parse("tel:" + resto.getPhone_number())));
@@ -320,16 +318,12 @@ public class RestoFragment extends Fragment {
     }
 
     private void setOnClickListenerButtonLike(){
-        like_button.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if(mCurrentUser!=null)
-                    firebase_update.update_like_status_workmates(mCurrentUser.getUid(), resto);
-                else
-                    firebase_update.update_like_status_workmates("UXKUE5wPVUfwqgkeSelNRi0MoQU2", resto);
-            }
+        like_button.setOnClickListener(v -> {
+            if(mCurrentUser!=null)
+                firebase_update.update_like_status_workmates(mCurrentUser.getUid(), resto);
+            else
+                firebase_update.update_like_status_workmates("UXKUE5wPVUfwqgkeSelNRi0MoQU2", resto);
         });
-
     }
 
     public void modify_state_button_like() {
@@ -401,16 +395,13 @@ public class RestoFragment extends Fragment {
     }
 
     private void setOnClickListenerButtonRestoValid(){
-        button_valid.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    if(mCurrentUser!=null)
-                        firebase_update.update_chosen_status_workmate(mCurrentUser.getUid(), resto);
-                    else {
-                        firebase_update.update_chosen_status_workmate("UXKUE5wPVUfwqgkeSelNRi0MoQU2", resto);
-                    }
-                }
-            });
+        button_valid.setOnClickListener(v -> {
+            if(mCurrentUser!=null)
+                firebase_update.update_chosen_status_workmate(mCurrentUser.getUid(), resto);
+            else {
+                firebase_update.update_chosen_status_workmate("UXKUE5wPVUfwqgkeSelNRi0MoQU2", resto);
+            }
+        });
     }
 
     public void modify_state_button_choose() {
