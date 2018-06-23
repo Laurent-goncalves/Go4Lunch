@@ -26,7 +26,8 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <uses-library android:name="com.google.android.maps" />
+        <uses-library android:name="com.google.android.maps"
+            android:required="false"/>
         <receiver android:name=".Models.AlarmReceiver"></receiver>
 
         <activity android:name=".Controllers.Activities.MainActivity">
