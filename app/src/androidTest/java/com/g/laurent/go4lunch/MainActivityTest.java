@@ -2,6 +2,7 @@ package com.g.laurent.go4lunch;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.support.test.espresso.ViewInteraction;
 import android.support.test.filters.LargeTest;
 import android.support.test.rule.ActivityTestRule;
 import android.support.test.runner.AndroidJUnit4;
@@ -42,6 +43,12 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
+import static android.support.test.espresso.Espresso.onView;
+import static android.support.test.espresso.action.ViewActions.click;
+import static android.support.test.espresso.matcher.ViewMatchers.isDisplayed;
+import static android.support.test.espresso.matcher.ViewMatchers.withId;
+import static org.hamcrest.Matchers.allOf;
+
 @LargeTest
 @RunWith(AndroidJUnit4.class)
 public class MainActivityTest {
@@ -49,7 +56,36 @@ public class MainActivityTest {
     @Rule
     public ActivityTestRule<MultiActivity> mActivityTestRule = new ActivityTestRule<>(MultiActivity.class);
 
-   // @Test
+    @Test
+    public void TEST_click_on_tabs(){
+
+        ViewInteraction tabView = onView(
+                allOf(childAtPosition(
+                        childAtPosition(
+                                withId(R.id.activity_multi_tabs),
+                                0),
+                        1),
+                        isDisplayed()));
+        tabView.perform(click());
+
+        try {
+            Thread.sleep(5000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+        ViewInteraction tabView2 = onView(
+                allOf(childAtPosition(
+                        childAtPosition(
+                                withId(R.id.activity_multi_tabs),
+                                0),
+                        2),
+                        isDisplayed()));
+        tabView2.perform(click());
+
+    }
+
+    // @Test
     public void create_new_users_firebase() {
 
         SharedPreferences sharedPreferences = mActivityTestRule.getActivity().getSharedPreferences();
@@ -71,7 +107,7 @@ public class MainActivityTest {
         firebase_update.update_full_workmate_data(new Workmate("Brigitte","ID4","https://pbs.twimg.com/profile_images/898819805083467776/IqAVGrO4_400x400.jpg",false,null,null,null,null,null));
     }
 
- /*   @Test
+    /*@Test
     public void TEST_text_opening_hours() {
 
         OpeningHours openingHours = set_fake_openingHours();
