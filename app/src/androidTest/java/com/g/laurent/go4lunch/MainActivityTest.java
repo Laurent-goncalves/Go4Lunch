@@ -1,6 +1,7 @@
 package com.g.laurent.go4lunch;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.support.test.espresso.ViewInteraction;
 import android.support.test.filters.LargeTest;
@@ -59,6 +60,8 @@ public class MainActivityTest {
     @Test
     public void TEST_click_on_tabs(){
 
+        waiting_time(15000);
+
         ViewInteraction tabView = onView(
                 allOf(childAtPosition(
                         childAtPosition(
@@ -68,11 +71,7 @@ public class MainActivityTest {
                         isDisplayed()));
         tabView.perform(click());
 
-        try {
-            Thread.sleep(5000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+        waiting_time(5000);
 
         ViewInteraction tabView2 = onView(
                 allOf(childAtPosition(
