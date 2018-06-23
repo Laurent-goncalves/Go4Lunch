@@ -2,10 +2,9 @@ package com.g.laurent.go4lunch;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.support.test.filters.LargeTest;
 import android.support.test.rule.ActivityTestRule;
 import android.support.test.runner.AndroidJUnit4;
-import android.test.suitebuilder.annotation.LargeTest;
-import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewParent;
@@ -30,6 +29,7 @@ import com.google.android.gms.tasks.RuntimeExecutionException;
 import com.google.android.gms.tasks.Task;
 import com.google.android.gms.tasks.Tasks;
 import junit.framework.Assert;
+
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
 import org.hamcrest.TypeSafeMatcher;
@@ -41,8 +41,6 @@ import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
-import static android.content.ContentValues.TAG;
-
 
 @LargeTest
 @RunWith(AndroidJUnit4.class)
@@ -73,7 +71,7 @@ public class MainActivityTest {
         firebase_update.update_full_workmate_data(new Workmate("Brigitte","ID4","https://pbs.twimg.com/profile_images/898819805083467776/IqAVGrO4_400x400.jpg",false,null,null,null,null,null));
     }
 
-    @Test
+ /*   @Test
     public void TEST_text_opening_hours() {
 
         OpeningHours openingHours = set_fake_openingHours();
@@ -135,7 +133,7 @@ public class MainActivityTest {
         Assert.assertEquals("Closed now",timeCalculation.getInformationAboutOpeningAndClosure(openingHours.getPeriods(),current_time,current_day-1));
 
 
-    }
+    }*/
 
     //@Test
     public void TEST_SearchView_AutoComplete(){
@@ -407,7 +405,7 @@ public class MainActivityTest {
 
         } catch (RuntimeExecutionException e) {
             // If the query did not complete successfully return null
-            Log.e(TAG, "Error getting autocomplete prediction API call", e);
+            //Log.e(TAG, "Error getting autocomplete prediction API call", e);
         }
     }
 
