@@ -8,9 +8,6 @@
          location permissions for the 'MyLocation' functionality. 
     -->
 
-    <uses-feature
-        android:glEsVersion="0x00020000"
-        android:required="true" />
     <uses-permission android:name="com.android.alarm.permission.SET_TIME" />
     <uses-permission android:name="com.android.alarm.permission.SET_ALARM" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
@@ -26,7 +23,7 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <uses-library android:name="com.google.android.maps"/>
+
         <receiver android:name=".Models.AlarmReceiver"></receiver>
 
         <activity android:name=".Controllers.Activities.MainActivity">
