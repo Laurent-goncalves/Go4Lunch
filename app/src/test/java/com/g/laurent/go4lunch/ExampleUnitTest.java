@@ -17,7 +17,7 @@ import java.util.List;
 
 public class ExampleUnitTest {
 
-   // @Test
+    @Test
     public void TEST_sort_place_nearby() {
 
         ListRestoFragment listRestoFragment = new ListRestoFragment();
@@ -70,7 +70,7 @@ public class ExampleUnitTest {
         Assert.assertEquals("[ID3, ID1, ID4, ID2]",list_id.toString());
     }
 
-  //  @Test
+    @Test
     public void TEST_request_places_nearby() {
 
         String type = "restaurant";
