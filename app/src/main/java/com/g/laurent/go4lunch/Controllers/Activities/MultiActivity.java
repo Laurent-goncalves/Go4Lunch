@@ -79,11 +79,6 @@ public class MultiActivity extends AppCompatActivity implements CallbackMultiAct
         // Recover current location
         Google_Maps_Utils google_maps_utils = new Google_Maps_Utils(getApplicationContext(), this, null);
         google_maps_utils.getLocationPermission();
-
-        // Configure toolbar and navigation drawer
-        toolbar_navig_utils = new Toolbar_navig_Utils(this);
-        toolbar_navig_utils.configure_toolbar();
-        toolbar_navig_utils.configureNavigationView();
     }
 
     private void setLanguageForApp(){
@@ -111,7 +106,7 @@ public class MultiActivity extends AppCompatActivity implements CallbackMultiAct
         // Get ViewPager from layout
         pager = findViewById(R.id.viewpager);
 
-        pageAdapter = new MultiFragAdapter(getSupportFragmentManager(), getApplicationContext(), list_restos);
+        pageAdapter = new MultiFragAdapter(getSupportFragmentManager(), getApplicationContext(), list_restos, currentPlaceLatLng);
 
         runOnUiThread(() -> {
             pager.setAdapter(pageAdapter);
@@ -252,6 +247,11 @@ public class MultiActivity extends AppCompatActivity implements CallbackMultiAct
     public void setCurrentPlaceLatLng(LatLng currentPlaceLatLng) {
         this.currentPlaceLatLng = currentPlaceLatLng;
 
+        // Configure toolbar and navigation drawer
+        toolbar_navig_utils = new Toolbar_navig_Utils(this);
+        toolbar_navig_utils.configure_toolbar();
+        toolbar_navig_utils.configureNavigationView();
+
         api_key = getResources().getString(R.string.google_maps_key2);
 
         Firebase_update firebase_update = new Firebase_update(getApplicationContext());
@@ -266,7 +266,7 @@ public class MultiActivity extends AppCompatActivity implements CallbackMultiAct
         String radius = String.valueOf(sharedPreferences.getInt(EXTRA_PREF_RADIUS,500));
         String type = sharedPreferences.getString(EXTRA_PREF_TYPE_PLACE,"restaurant");
 
-        new List_Search_Nearby(api_key, currentPlaceLatLng, radius, type, this);
+        new List_Search_Nearby(api_key, this.currentPlaceLatLng, radius, type, this);
 
         swipeRefreshLayout.setOnRefreshListener(this);
     }

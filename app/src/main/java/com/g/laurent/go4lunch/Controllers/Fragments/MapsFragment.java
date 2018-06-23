@@ -36,15 +36,18 @@ public class MapsFragment extends BaseRestoFragment  {
 
     @BindView(R.id.mapview) MapView mMapView;
     private final static String EXTRA_RESTO_DETAILS = "resto_details";
+    private final static String EXTRA_LAT_CURRENT = "latitude_current_location";
+    private final static String EXTRA_LONG_CURRENT = "longitude_current_location";
     private Firebase_recover firebase_recover;
     private Context context;
     private List<Workmate> list_workmates;
+    private LatLng current_place;
 
     public MapsFragment() {
         // Required empty public constructor
     }
 
-    public static MapsFragment newInstance(List<Place_Nearby> list_restos) {
+    public static MapsFragment newInstance(List<Place_Nearby> list_restos, LatLng current_place) {
 
         // Create new fragment
         MapsFragment frag = new MapsFragment();
@@ -54,7 +57,8 @@ public class MapsFragment extends BaseRestoFragment  {
         Gson gson = new Gson();
         String list_restos_json = gson.toJson(list_restos);
         bundle.putString(EXTRA_LIST_RESTOS_JSON, list_restos_json);
-
+        bundle.putDouble(EXTRA_LAT_CURRENT, current_place.latitude);
+        bundle.putDouble(EXTRA_LONG_CURRENT, current_place.longitude);
         frag.setArguments(bundle);
 
         return(frag);
@@ -77,6 +81,9 @@ public class MapsFragment extends BaseRestoFragment  {
             String json = getArguments().getString(EXTRA_LIST_RESTOS_JSON,null);
             Type list_places = new TypeToken<ArrayList<Place_Nearby>>(){}.getType();
             list_places_nearby = gson.fromJson(json,list_places);
+
+            current_place = new LatLng(getArguments().getDouble(EXTRA_LAT_CURRENT,48.866667),
+                    getArguments().getDouble(EXTRA_LONG_CURRENT,2.333333));
         }
 
         recover_list_workmates(list_places_nearby);
@@ -126,11 +133,13 @@ public class MapsFragment extends BaseRestoFragment  {
 
             // zoom on current location if number of resto > 1
             if(list_places_nearby.size()>1){
-                CameraUpdate yourLocation = CameraUpdateFactory.newLatLngZoom(currentPlaceLatLng, 16);
+
+                CameraUpdate yourLocation = CameraUpdateFactory.newLatLngZoom(current_place, 16);
                 mMap.animateCamera(yourLocation);
+
             } else { // else zoom on the resto from the list
 
-                LatLng location_zoom = currentPlaceLatLng;
+                LatLng location_zoom = current_place;
                 try{
                     location_zoom = new LatLng(list_places_nearby.get(0).getGeometry().getLocation().getLat(),
                             list_places_nearby.get(0).getGeometry().getLocation().getLng());

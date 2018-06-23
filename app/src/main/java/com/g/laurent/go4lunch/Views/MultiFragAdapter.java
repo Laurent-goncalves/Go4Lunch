@@ -9,6 +9,8 @@ import com.g.laurent.go4lunch.Controllers.Fragments.ListRestoFragment;
 import com.g.laurent.go4lunch.Controllers.Fragments.MapsFragment;
 import com.g.laurent.go4lunch.Models.Place_Nearby;
 import com.g.laurent.go4lunch.R;
+import com.google.android.gms.maps.model.LatLng;
+
 import java.util.List;
 
 
@@ -18,10 +20,12 @@ public class MultiFragAdapter extends FragmentPagerAdapter {
     private MapsFragment mapsFragment;
     private ListRestoFragment listRestoFragment;
     private List<Place_Nearby> list_restos;
+    private LatLng current_place;
 
-    public MultiFragAdapter(FragmentManager fm, Context context, List<Place_Nearby> list_restos) {
+    public MultiFragAdapter(FragmentManager fm, Context context, List<Place_Nearby> list_restos, LatLng current_place) {
         super(fm);
         this.context=context;
+        this.current_place=current_place;
         this.list_restos=list_restos;
     }
 
@@ -29,7 +33,7 @@ public class MultiFragAdapter extends FragmentPagerAdapter {
     public Fragment getItem(int position) {
         switch (position){
             case 0: //Page number 1
-                mapsFragment = MapsFragment.newInstance(list_restos);
+                mapsFragment = MapsFragment.newInstance(list_restos, current_place);
                 return mapsFragment;
             case 1: //Page number 2
                 listRestoFragment = ListRestoFragment.newInstance(list_restos);

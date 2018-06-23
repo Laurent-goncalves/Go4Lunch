@@ -64,7 +64,7 @@ public class MainActivityTest {
     @Rule
     public ActivityTestRule<MultiActivity> mActivityTestRule = new ActivityTestRule<>(MultiActivity.class);
 
-    @Test
+   // @Test
     public void create_new_users_firebase() {
 
         SharedPreferences sharedPreferences = mActivityTestRule.getActivity().getSharedPreferences();
@@ -150,17 +150,7 @@ public class MainActivityTest {
 
     }
 
-    @Test
-    public void TEST_get_current_location(){
-
-
-     //   Google_Maps_Utils google_maps_utils = new Google_Maps_Utils(mActivityTestRule.getActivity().getApplicationContext());
-
-
-
-    }
-
-    @Test
+    //@Test
     public void TEST_SearchView_AutoComplete(){
 
         /*Toolbar_navig_Utils toolbar_navig_utils = new Toolbar_navig_Utils(mActivityTestRule.getActivity());

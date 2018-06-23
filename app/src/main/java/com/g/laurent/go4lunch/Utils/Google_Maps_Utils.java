@@ -91,6 +91,8 @@ public class Google_Maps_Utils extends FragmentActivity implements GoogleApiClie
                         // Recover the latitude and longitude of current location
                         currentPlaceLatLng=findPlaceHighestLikelihood(task);
 
+                        System.out.println("eee  currentPlaceLatLng="+currentPlaceLatLng);
+
                         // Stop swipe to refresh
                         activity.getSwipeRefreshLayout().setEnabled(false);
 
@@ -131,6 +133,8 @@ public class Google_Maps_Utils extends FragmentActivity implements GoogleApiClie
 
         Float latitude = activity.getSharedPreferences().getFloat(EXTRA_LAT_CURRENT,0);
         Float longitude = activity.getSharedPreferences().getFloat(EXTRA_LONG_CURRENT,0);
+
+        System.out.println("eee  latitude="+latitude + "   longitude="+longitude);
 
         LatLng last_location;
 

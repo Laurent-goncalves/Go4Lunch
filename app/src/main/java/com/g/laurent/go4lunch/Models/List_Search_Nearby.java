@@ -155,11 +155,9 @@ public class List_Search_Nearby implements Disposable {
                     switch(callback){
 
                         case CALLBACK_MAPS_FRAGMENT:
-                            System.out.println("eee  recover workmates mapsFragment   " + list_places_nearby.get(0).getName_restaurant());
                             mapsFragment.recover_list_workmates(list_places_nearby);
                             break;
                         case CALLBACK_LIST_RESTO_FRAGMENT:
-                            System.out.println("eee  recover workmates listRestoFragment   " + list_places_nearby.get(0).getName_restaurant());
                             listRestoFragment.recover_list_workmates(list_places_nearby);
                             break;
                     }

@@ -7,6 +7,7 @@ import com.google.maps.android.SphericalUtil;
 public class DistanceCalculation {
 
     public LatLngBounds toBounds(LatLng center, double radiusInMeters) {
+
         LatLng southwestCorner =
                 SphericalUtil.computeOffset(center, radiusInMeters, 225.0);
         LatLng northeastCorner =
