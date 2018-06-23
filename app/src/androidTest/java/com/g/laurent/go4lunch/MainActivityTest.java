@@ -2,10 +2,8 @@ package com.g.laurent.go4lunch;
 
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.support.test.espresso.ViewInteraction;
 import android.support.test.rule.ActivityTestRule;
 import android.support.test.runner.AndroidJUnit4;
-import android.test.mock.MockContext;
 import android.test.suitebuilder.annotation.LargeTest;
 import android.util.Log;
 import android.view.View;
@@ -14,16 +12,13 @@ import android.view.ViewParent;
 import com.g.laurent.go4lunch.Controllers.Activities.MultiActivity;
 import com.g.laurent.go4lunch.Controllers.Fragments.MapsFragment;
 import com.g.laurent.go4lunch.Models.List_Search_Nearby;
-import com.g.laurent.go4lunch.Models.Place_Nearby;
 import com.g.laurent.go4lunch.Models.Workmate;
 import com.g.laurent.go4lunch.Utils.DetailsPlace.Close;
 import com.g.laurent.go4lunch.Utils.DetailsPlace.Open;
 import com.g.laurent.go4lunch.Utils.DetailsPlace.OpeningHours;
 import com.g.laurent.go4lunch.Utils.DetailsPlace.Period;
 import com.g.laurent.go4lunch.Utils.Firebase_update;
-import com.g.laurent.go4lunch.Utils.Google_Maps_Utils;
 import com.g.laurent.go4lunch.Utils.TimeCalculation;
-import com.g.laurent.go4lunch.Utils.Toolbar_navig_Utils;
 import com.google.android.gms.common.data.DataBufferUtils;
 import com.google.android.gms.location.places.AutocompletePrediction;
 import com.google.android.gms.location.places.AutocompletePredictionBufferResponse;
@@ -41,20 +36,12 @@ import org.hamcrest.TypeSafeMatcher;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mockito;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import static android.content.ContentValues.TAG;
-import static android.support.test.espresso.Espresso.onView;
-import static android.support.test.espresso.action.ViewActions.closeSoftKeyboard;
-import static android.support.test.espresso.action.ViewActions.replaceText;
-import static android.support.test.espresso.matcher.ViewMatchers.isDisplayed;
-import static android.support.test.espresso.matcher.ViewMatchers.withId;
-import static org.hamcrest.Matchers.allOf;
 
 
 @LargeTest
