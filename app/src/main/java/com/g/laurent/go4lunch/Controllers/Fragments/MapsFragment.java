@@ -57,8 +57,10 @@ public class MapsFragment extends BaseRestoFragment  {
         Gson gson = new Gson();
         String list_restos_json = gson.toJson(list_restos);
         bundle.putString(EXTRA_LIST_RESTOS_JSON, list_restos_json);
-        bundle.putDouble(EXTRA_LAT_CURRENT, current_place.latitude);
-        bundle.putDouble(EXTRA_LONG_CURRENT, current_place.longitude);
+        if(current_place!=null) {
+            bundle.putDouble(EXTRA_LAT_CURRENT, current_place.latitude);
+            bundle.putDouble(EXTRA_LONG_CURRENT, current_place.longitude);
+        }
         frag.setArguments(bundle);
 
         return(frag);
