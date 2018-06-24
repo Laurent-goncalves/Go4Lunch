@@ -52,15 +52,20 @@ public class MultiFragAdapter extends FragmentPagerAdapter {
 
     @Override
     public CharSequence getPageTitle(int position) {
-        switch (position){
-            case 0: //Page number 1
-                return context.getResources().getString(R.string.map_view_tab);
-            case 1: //Page number 2
-                return context.getResources().getString(R.string.list_view_tab);
-            case 2: //Page number 3
-                return context.getResources().getString(R.string.workmates_tab);
-            default:
-                return null;
+
+        if(context.getResources()!=null) {
+            switch (position) {
+                case 0: //Page number 1
+                    return context.getResources().getString(R.string.map_view_tab);
+                case 1: //Page number 2
+                    return context.getResources().getString(R.string.list_view_tab);
+                case 2: //Page number 3
+                    return context.getResources().getString(R.string.workmates_tab);
+                default:
+                    return null;
+            }
+        } else {
+            return null;
         }
     }
 

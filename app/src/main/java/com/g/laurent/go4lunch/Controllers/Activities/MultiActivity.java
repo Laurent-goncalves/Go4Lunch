@@ -76,15 +76,16 @@ public class MultiActivity extends AppCompatActivity implements CallbackMultiAct
 
         if(mCurrentUser==null)
             configureViewPagerAndTabs(null);
+        else {
+            sharedPreferences = getSharedPreferences(EXTRA_PREFERENCES, MODE_PRIVATE);
+            current_page = 0;
 
-        sharedPreferences = getSharedPreferences(EXTRA_PREFERENCES, MODE_PRIVATE);
-        current_page = 0;
+            setLanguageForApp();
 
-        setLanguageForApp();
-
-        // Recover current location
-        Google_Maps_Utils google_maps_utils = new Google_Maps_Utils(getApplicationContext(), this, null);
-        google_maps_utils.getLocationPermission();
+            // Recover current location
+            Google_Maps_Utils google_maps_utils = new Google_Maps_Utils(getApplicationContext(), this, null);
+            google_maps_utils.getLocationPermission();
+        }
     }
 
     private void setLanguageForApp(){
@@ -112,7 +113,8 @@ public class MultiActivity extends AppCompatActivity implements CallbackMultiAct
         // Get ViewPager from layout
         pager = findViewById(R.id.viewpager);
 
-        pageAdapter = new MultiFragAdapter(getSupportFragmentManager(), getApplicationContext(), list_restos, currentPlaceLatLng);
+        if(getApplicationContext()!=null && list_restos!=null)
+            pageAdapter = new MultiFragAdapter(getSupportFragmentManager(), getApplicationContext(), list_restos, currentPlaceLatLng);
 
         runOnUiThread(() -> {
             pager.setAdapter(pageAdapter);
@@ -156,7 +158,9 @@ public class MultiActivity extends AppCompatActivity implements CallbackMultiAct
                 current_page = tab.getPosition();
 
                 // Change tab title if required
-                toolbar_navig_utils.refresh_text_toolbar();
+
+                if(toolbar_navig_utils!=null)
+                    toolbar_navig_utils.refresh_text_toolbar();
 
                 // Disable pull to refresh when mapView is displayed
                 if(tab.getPosition()==0)
@@ -169,8 +173,12 @@ public class MultiActivity extends AppCompatActivity implements CallbackMultiAct
             public void onTabUnselected(TabLayout.Tab tab) {
 
                 // if the searchView is opened, close it
-                if(!toolbar_navig_utils.getSearchView().isIconified())
-                    toolbar_navig_utils.getSearchView().setIconified(true);
+                if(toolbar_navig_utils!=null) {
+                    if (toolbar_navig_utils.getSearchView() != null) {
+                        if (!toolbar_navig_utils.getSearchView().isIconified())
+                            toolbar_navig_utils.getSearchView().setIconified(true);
+                    }
+                }
 
                 // Change color of the tab -> black
                 if (tab.getIcon() != null)
