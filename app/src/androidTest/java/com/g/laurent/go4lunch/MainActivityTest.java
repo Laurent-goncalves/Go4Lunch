@@ -64,6 +64,8 @@ public class MainActivityTest {
     @Test
     public void TEST_click_on_tabs(){
 
+        //mActivityTestRule.launchActivity(null);
+
         waiting_time(15000);
 
         ViewInteraction tabView = onView(
@@ -75,7 +77,7 @@ public class MainActivityTest {
                         isDisplayed()));
         tabView.perform(click());
 
-        waiting_time(5000);
+        waiting_time(1000);
 
         ViewInteraction tabView2 = onView(
                 allOf(childAtPosition(
