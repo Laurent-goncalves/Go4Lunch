@@ -119,39 +119,41 @@ public class MapsFragment extends BaseRestoFragment  {
 
             mMapView.onResume();
 
-            // Create marker for each resto on the map
-            create_marker_for_each_place_nearby(list_places_nearby,mMap);
+            if(list_places_nearby!=null){
+                // Create marker for each resto on the map
+                create_marker_for_each_place_nearby(list_places_nearby,mMap);
 
-            // Set on click listener for markers of the map
-            mMap.setOnMarkerClickListener(marker -> {
+                // Set on click listener for markers of the map
+                mMap.setOnMarkerClickListener(marker -> {
 
-                String resto_json = (String) marker.getTag();
-                Intent intent = new Intent(context, RestoActivity.class);
-                intent.putExtra(EXTRA_RESTO_DETAILS,resto_json);
-                startActivity(intent);
+                    String resto_json = (String) marker.getTag();
+                    Intent intent = new Intent(context, RestoActivity.class);
+                    intent.putExtra(EXTRA_RESTO_DETAILS,resto_json);
+                    startActivity(intent);
 
-                return false;
-            });
+                    return false;
+                });
 
-            // zoom on current location if number of resto > 1
-            if(list_places_nearby.size()>1){
+                // zoom on current location if number of resto > 1
+                if(list_places_nearby.size()>1){
 
-                CameraUpdate yourLocation = CameraUpdateFactory.newLatLngZoom(current_place, 16);
-                mMap.animateCamera(yourLocation);
+                    CameraUpdate yourLocation = CameraUpdateFactory.newLatLngZoom(current_place, 16);
+                    mMap.animateCamera(yourLocation);
 
-            } else { // else zoom on the resto from the list
+                } else { // else zoom on the resto from the list
 
-                LatLng location_zoom = current_place;
-                try{
-                    location_zoom = new LatLng(list_places_nearby.get(0).getGeometry().getLocation().getLat(),
-                            list_places_nearby.get(0).getGeometry().getLocation().getLng());
-                } catch(Throwable e){
-                    Toast toast = Toast.makeText(context,context.getResources().getString(R.string.localization_unkown),Toast.LENGTH_LONG);
-                    toast.show();
+                    LatLng location_zoom = current_place;
+                    try{
+                        location_zoom = new LatLng(list_places_nearby.get(0).getGeometry().getLocation().getLat(),
+                                list_places_nearby.get(0).getGeometry().getLocation().getLng());
+                    } catch(Throwable e){
+                        Toast toast = Toast.makeText(context,context.getResources().getString(R.string.localization_unkown),Toast.LENGTH_LONG);
+                        toast.show();
+                    }
+
+                    CameraUpdate yourLocation = CameraUpdateFactory.newLatLngZoom(location_zoom, 16);
+                    mMap.animateCamera(yourLocation);
                 }
-
-                CameraUpdate yourLocation = CameraUpdateFactory.newLatLngZoom(location_zoom, 16);
-                mMap.animateCamera(yourLocation);
             }
         });
     }
