@@ -124,7 +124,7 @@ public class MainActivityTest {
 
                 });
 
-        waiting_time(5000);
+        waiting_time(15000);
 
         Assert.assertEquals("IDresto1",firebase_recover.getResto_id_chosen());
     }
