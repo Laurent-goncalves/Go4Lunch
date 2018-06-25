@@ -60,7 +60,6 @@ public class MultiActivity extends AppCompatActivity implements CallbackMultiAct
     private FirebaseUser mCurrentUser;
     private Toolbar_navig_Utils toolbar_navig_utils;
 
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -71,8 +70,6 @@ public class MultiActivity extends AppCompatActivity implements CallbackMultiAct
         // Assign and initialize variables
         FirebaseApp.initializeApp(context);
         mCurrentUser = FirebaseAuth.getInstance().getCurrentUser();
-
-        mCurrentUser=null;
 
         if(mCurrentUser==null)
             configureViewPagerAndTabs(null);
@@ -175,8 +172,19 @@ public class MultiActivity extends AppCompatActivity implements CallbackMultiAct
                 // if the searchView is opened, close it
                 if(toolbar_navig_utils!=null) {
                     if (toolbar_navig_utils.getSearchView() != null) {
-                        if (!toolbar_navig_utils.getSearchView().isIconified())
+                        if (!toolbar_navig_utils.getSearchView().isIconified()) {
                             toolbar_navig_utils.getSearchView().setIconified(true);
+
+                            // Recover the previous list of places nearby generated
+                            switch (current_page) {
+                                case 0:
+                                    getPageAdapter().getMapsFragment().recover_previous_state();
+                                    break;
+                                case 1:
+                                    getPageAdapter().getListRestoFragment().recover_previous_state();
+                                    break;
+                            }
+                        }
                     }
                 }
 

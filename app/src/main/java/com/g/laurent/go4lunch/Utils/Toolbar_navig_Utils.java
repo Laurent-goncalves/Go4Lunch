@@ -98,7 +98,7 @@ public class Toolbar_navig_Utils implements NavigationView.OnNavigationItemSelec
         });
     }
 
-    private void create_onClickListener_Closing_searchView(){
+    public void create_onClickListener_Closing_searchView(){
         searchView.setOnCloseListener(() -> {
             title_toolbar.setVisibility(View.VISIBLE);
             hamburger.setVisibility(View.VISIBLE);

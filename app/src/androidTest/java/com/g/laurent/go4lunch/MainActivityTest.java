@@ -3,14 +3,19 @@ package com.g.laurent.go4lunch;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.support.annotation.NonNull;
 import android.support.test.espresso.ViewInteraction;
 import android.support.test.filters.LargeTest;
 import android.support.test.rule.ActivityTestRule;
 import android.support.test.rule.GrantPermissionRule;
 import android.support.test.runner.AndroidJUnit4;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewParent;
+import android.widget.Toast;
+
+import com.firebase.ui.auth.AuthUI;
 import com.g.laurent.go4lunch.Controllers.Activities.MultiActivity;
 import com.g.laurent.go4lunch.Controllers.Fragments.MapsFragment;
 import com.g.laurent.go4lunch.Models.List_Search_Nearby;
@@ -19,6 +24,7 @@ import com.g.laurent.go4lunch.Utils.DetailsPlace.Close;
 import com.g.laurent.go4lunch.Utils.DetailsPlace.Open;
 import com.g.laurent.go4lunch.Utils.DetailsPlace.OpeningHours;
 import com.g.laurent.go4lunch.Utils.DetailsPlace.Period;
+import com.g.laurent.go4lunch.Utils.Firebase_recover;
 import com.g.laurent.go4lunch.Utils.Firebase_update;
 import com.g.laurent.go4lunch.Utils.TimeCalculation;
 import com.google.android.gms.common.data.DataBufferUtils;
@@ -28,9 +34,15 @@ import com.google.android.gms.location.places.GeoDataClient;
 import com.google.android.gms.location.places.Places;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
+import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.RuntimeExecutionException;
 import com.google.android.gms.tasks.Task;
 import com.google.android.gms.tasks.Tasks;
+import com.google.firebase.auth.AuthResult;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseAuthException;
+import com.google.firebase.auth.FirebaseUser;
+
 import junit.framework.Assert;
 
 import org.hamcrest.Description;
@@ -55,16 +67,16 @@ import static org.hamcrest.Matchers.allOf;
 @RunWith(AndroidJUnit4.class)
 public class MainActivityTest {
 
+    private Firebase_recover firebase_recover;
+
     @Rule
     public GrantPermissionRule mGrantPermissionRule = GrantPermissionRule.grant(android.Manifest.permission.ACCESS_FINE_LOCATION);
 
     @Rule
     public ActivityTestRule<MultiActivity> mActivityTestRule = new ActivityTestRule<>(MultiActivity.class);
 
-    @Test
+    //@Test
     public void TEST_click_on_tabs(){
-
-        //mActivityTestRule.launchActivity(null);
 
         waiting_time(15000);
 
@@ -79,15 +91,42 @@ public class MainActivityTest {
 
         waiting_time(1000);
 
-        ViewInteraction tabView2 = onView(
+      /*  ViewInteraction tabView2 = onView(
                 allOf(childAtPosition(
                         childAtPosition(
                                 withId(R.id.activity_multi_tabs),
                                 0),
                         2),
                         isDisplayed()));
-        tabView2.perform(click());
+        tabView2.perform(click());*/
 
+    }
+
+    @Test
+    public void TEST_auth_anonymous(){
+
+        FirebaseAuth mFirebaseAuth = FirebaseAuth.getInstance();
+
+        mFirebaseAuth.signInAnonymously()
+                .addOnCompleteListener(mActivityTestRule.getActivity(), new OnCompleteListener<AuthResult>() {
+                    @Override
+                    public void onComplete(@NonNull Task<AuthResult> task) {
+
+                        if (task.isSuccessful()) {
+                            // Sign in success, update UI with the signed-in user's information
+
+                            firebase_recover = new Firebase_recover(mActivityTestRule.getActivity().getApplicationContext(),
+                                    "ID1");
+
+                            firebase_recover.recover_workmate_chosen_resto();
+                        }
+                    }
+
+                });
+
+        waiting_time(5000);
+
+        Assert.assertEquals("IDresto1",firebase_recover.getResto_id_chosen());
     }
 
     // @Test
@@ -112,7 +151,8 @@ public class MainActivityTest {
         firebase_update.update_full_workmate_data(new Workmate("Brigitte","ID4","https://pbs.twimg.com/profile_images/898819805083467776/IqAVGrO4_400x400.jpg",false,null,null,null,null,null));
     }
 
-    /*@Test
+
+    @Test
     public void TEST_text_opening_hours() {
 
         OpeningHours openingHours = set_fake_openingHours();
@@ -172,9 +212,7 @@ public class MainActivityTest {
         //                                                                       current_time
 
         Assert.assertEquals("Closed now",timeCalculation.getInformationAboutOpeningAndClosure(openingHours.getPeriods(),current_time,current_day-1));
-
-
-    }*/
+    }
 
     //@Test
     public void TEST_SearchView_AutoComplete(){

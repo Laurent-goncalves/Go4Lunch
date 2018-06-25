@@ -36,8 +36,8 @@ public class Firebase_recover {
     private final static String INITIAL_LIST_WORKMATES = "initial_list_workmates";
     private final static String EXTRA_PLACE_ID = "placeId_resto";
     private String callback;
-    private Callback_alarm callback_alarm;
     private Context context;
+    private Callback_alarm callback_alarm;
     private List<String> list_restos_liked;
     private String resto_id_chosen;
 
@@ -73,12 +73,12 @@ public class Firebase_recover {
         databaseReferenceWorkmates= databaseReference.child("workmates");
     }
 
-    public Firebase_recover(Context context, MultiActivity multiActivity, String userId) {
+    public Firebase_recover(Context context, Callback_alarm callback){
         FirebaseApp.initializeApp(context);
-        this.multiActivity=multiActivity;
-        this.context = context;
+        this.callback = CALLBACK_ALARM;
+        this.callback_alarm = callback;
         DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference();
-        databaseReferenceWorkmates= databaseReference.child("workmates").child(userId).child("resto_id");
+        databaseReferenceWorkmates= databaseReference.child("workmates");
     }
 
     public Firebase_recover(Context context, String userId) {
@@ -87,14 +87,6 @@ public class Firebase_recover {
         list_restos_liked = new ArrayList<>();
         DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference();
         databaseReferenceWorkmates= databaseReference.child("workmates").child(userId);
-    }
-
-    public Firebase_recover(Context context, Callback_alarm callback){
-        FirebaseApp.initializeApp(context);
-        this.callback = CALLBACK_ALARM;
-        this.callback_alarm = callback;
-        DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference();
-        databaseReferenceWorkmates= databaseReference.child("workmates");
     }
 
     // ----------------------------------------------------------------------------------------------
@@ -194,6 +186,7 @@ public class Firebase_recover {
         databaseReferenceChosenResto.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot data) {
+
                 if(data!=null) {
                     resto_id_chosen = (String) data.getValue();
                 }
@@ -204,7 +197,6 @@ public class Firebase_recover {
             }
         });
     }
-
 
     private Boolean is_workmate_in_list(String user_id, List<Workmate> list_workmates){
 
@@ -251,7 +243,6 @@ public class Firebase_recover {
     // ----------------------------------- TOOLS , GETTER AND SETTER --------------------------------
     // ----------------------------------------------------------------------------------------------
 
-
     public List<String> getList_restos_liked() {
         return list_restos_liked;
     }
@@ -287,4 +278,29 @@ public class Firebase_recover {
         });
 
     }
+
+    public DatabaseReference getDatabaseReferenceWorkmates() {
+        return databaseReferenceWorkmates;
+    }
 }
+
+
+/*
+
+    public Firebase_recover(Context context, MultiActivity multiActivity, String userId) {
+        FirebaseApp.initializeApp(context);
+        this.multiActivity=multiActivity;
+        this.context = context;
+        DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference();
+        databaseReferenceWorkmates= databaseReference.child("workmates").child(userId).child("resto_id");
+    }
+
+    public Firebase_recover(Context context, String userId) {
+        FirebaseApp.initializeApp(context);
+        this.context = context;
+        list_restos_liked = new ArrayList<>();
+        DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference();
+        databaseReferenceWorkmates= databaseReference.child("workmates").child(userId);
+    }
+
+ */
