@@ -38,6 +38,7 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.RuntimeExecutionException;
 import com.google.android.gms.tasks.Task;
 import com.google.android.gms.tasks.Tasks;
+import com.google.firebase.FirebaseApp;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseAuthException;
@@ -107,13 +108,13 @@ public class MainActivityTest {
     @Before
     public void authentication_firebase(){
 
+        FirebaseApp.initializeApp(mActivityTestRule.getActivity());
         FirebaseAuth mFirebaseAuth = FirebaseAuth.getInstance();
 
-        mFirebaseAuth.signInAnonymously()
+        mFirebaseAuth.signInWithEmailAndPassword("develop.lgontest@gmail.com", "Password77")
                 .addOnCompleteListener(mActivityTestRule.getActivity(), new OnCompleteListener<AuthResult>() {
                     @Override
                     public void onComplete(@NonNull Task<AuthResult> task) {
-
                         if (task.isSuccessful()) {
                             // Sign in success, update UI with the signed-in user's information
 
@@ -122,12 +123,11 @@ public class MainActivityTest {
 
                             firebase_recover.recover_workmate_chosen_resto();
                         }
-                    }
 
+                    }
                 });
 
         waiting_time(15000);
-
     }
 
     @Test
