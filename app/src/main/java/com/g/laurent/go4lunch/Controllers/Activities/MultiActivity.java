@@ -116,8 +116,6 @@ public class MultiActivity extends AppCompatActivity implements CallbackMultiAct
 
         if(getApplicationContext()!=null && list_restos!=null)
             pageAdapter = new MultiFragAdapter(getSupportFragmentManager(), getApplicationContext(), list_restos, currentPlaceLatLng);
-        else if(getApplicationContext()==null)
-            System.out.println("eee context null");
 
         runOnUiThread(() -> {
             pager.setAdapter(pageAdapter);

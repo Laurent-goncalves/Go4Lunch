@@ -53,14 +53,9 @@ public class MainActivityTestEspresso {
     @Test
     public void mainActivityTestEspresso() {
 
-        waiting_time(5000);
+        waiting_time(15000);
         mActivityTestRule.getActivity().configureViewPagerAndTabs(build_fake_list_place_nearby());
-        waiting_time(5000);
-
-        /*mActivityTestRule.getActivity().setPageAdapter(new MultiFragAdapter(mActivityTestRule.getActivity().getSupportFragmentManager(),
-                mActivityTestRule.getActivity().getApplicationContext(), build_fake_list_place_nearby(), null));
-*/
-        waiting_time(2000);
+        waiting_time(15000);
 
         mActivityTestRule.getActivity().setToolbar();
 
