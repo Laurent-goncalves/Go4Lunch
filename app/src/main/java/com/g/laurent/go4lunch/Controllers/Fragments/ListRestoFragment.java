@@ -4,6 +4,7 @@ import android.app.Fragment;
 import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.v4.app.FragmentActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -11,6 +12,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
+
+import com.g.laurent.go4lunch.Controllers.Activities.MultiActivity;
 import com.g.laurent.go4lunch.Models.Place_Nearby;
 import com.g.laurent.go4lunch.Models.Workmate;
 import com.g.laurent.go4lunch.R;
@@ -27,6 +30,8 @@ import java.util.Objects;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
+import static android.support.test.internal.runner.junit4.statement.UiThreadStatement.runOnUiThread;
+
 /**
  * A simple {@link Fragment} subclass.
  */
@@ -40,6 +45,7 @@ public class ListRestoFragment extends BaseRestoFragment {
     private String placeId;
     private Firebase_recover firebase_recover;
     private Context context;
+    FragmentActivity activity;
 
     public ListRestoFragment() {
         // Required empty public constructor
@@ -68,6 +74,7 @@ public class ListRestoFragment extends BaseRestoFragment {
         View view =inflater.inflate(R.layout.fragment_list_resto, container, false);
         ButterKnife.bind(this,view);
         context = Objects.requireNonNull(getActivity()).getApplicationContext();
+        activity=getActivity();
 
         // Recover list of restaurants on firebase
         firebase_recover = new Firebase_recover(context,this);
@@ -100,19 +107,22 @@ public class ListRestoFragment extends BaseRestoFragment {
 
     private void configure_recycler_view(){
 
-        getActivity().runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                if(context!=null) {
-                    // Create adapter passing in the sample user data
-                    ListViewAdapter adapter = new ListViewAdapter(context, list_places_nearby, list_workmates, currentPlaceLatLng);
-                    // Attach the adapter to the recyclerview to populate items
-                    recyclerView.setAdapter(adapter);
-                    // Set layout manager to position the items
-                    recyclerView.setLayoutManager(new LinearLayoutManager(context));
+        try {
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    if (context != null) {
+                        // Create adapter passing in the sample user data
+                        ListViewAdapter adapter = new ListViewAdapter(context, list_places_nearby, list_workmates, currentPlaceLatLng);
+                        // Attach the adapter to the recyclerview to populate items
+                        recyclerView.setAdapter(adapter);
+                        // Set layout manager to position the items
+                        recyclerView.setLayoutManager(new LinearLayoutManager(context));
+                    }
                 }
-            }
-        });
+            });
+        } catch(Throwable ignored){}
+
     }
 
     public void recover_previous_state(){

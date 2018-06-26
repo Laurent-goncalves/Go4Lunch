@@ -221,24 +221,33 @@ public class Toolbar_navig_Utils implements NavigationView.OnNavigationItemSelec
 
         activity.getNavigationView().setNavigationItemSelectedListener(this);
 
-        configure_title_menu_navigDrawer();
+        activity.runOnUiThread(new Runnable() {
+                                   @Override
+                                   public void run() {
 
-        if (mCurrentUser != null) {
 
-            ImageView picture_user = activity.getNavigationView().getHeaderView(0).findViewById(R.id.current_user_image_drawer);
-            TextView name_user = activity.getNavigationView().getHeaderView(0).findViewById(R.id.current_user_name_drawer);
-            TextView email_user = activity.getNavigationView().getHeaderView(0).findViewById(R.id.current_user_email_drawer);
+                                       configure_title_menu_navigDrawer();
 
-            name_user.setText(mCurrentUser.getDisplayName());
-            email_user.setText(mCurrentUser.getEmail());
+                                       if (mCurrentUser != null) {
 
-            if (mCurrentUser.getPhotoUrl() != null)
-                Glide.with(context)
-                        .load(mCurrentUser.getPhotoUrl().toString())
-                        .apply(RequestOptions.circleCropTransform())
-                        .into(picture_user);
+                                           ImageView picture_user = activity.getNavigationView().getHeaderView(0).findViewById(R.id.current_user_image_drawer);
+                                           TextView name_user = activity.getNavigationView().getHeaderView(0).findViewById(R.id.current_user_name_drawer);
+                                           TextView email_user = activity.getNavigationView().getHeaderView(0).findViewById(R.id.current_user_email_drawer);
 
-        }
+                                           name_user.setText(mCurrentUser.getDisplayName());
+                                           email_user.setText(mCurrentUser.getEmail());
+
+                                           if (mCurrentUser.getPhotoUrl() != null)
+                                               Glide.with(context)
+                                                       .load(mCurrentUser.getPhotoUrl().toString())
+                                                       .apply(RequestOptions.circleCropTransform())
+                                                       .into(picture_user);
+
+                                       }
+                                   }
+                               });
+
+
     }
 
     private void configure_title_menu_navigDrawer(){
@@ -251,8 +260,9 @@ public class Toolbar_navig_Utils implements NavigationView.OnNavigationItemSelec
 
         MenuItem menuLogOut = activity.getNavigationView().getMenu().findItem(R.id.activity_main_drawer_logout);
         menuLogOut.setTitle(context.getResources().getString(R.string.logout));
-    }
 
+
+    }
 
     @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {

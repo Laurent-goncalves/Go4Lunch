@@ -15,6 +15,7 @@ import com.g.laurent.go4lunch.Models.Workmate;
 import com.g.laurent.go4lunch.R;
 import com.g.laurent.go4lunch.Utils.DetailsPlace.Geometry;
 import com.g.laurent.go4lunch.Utils.DetailsPlace.Location;
+import com.g.laurent.go4lunch.Views.MultiFragAdapter;
 import com.google.android.gms.maps.model.LatLng;
 
 import org.hamcrest.Description;
@@ -56,10 +57,14 @@ public class MainActivityTestEspresso {
         mActivityTestRule.getActivity().configureViewPagerAndTabs(build_fake_list_place_nearby());
         waiting_time(5000);
 
+        /*mActivityTestRule.getActivity().setPageAdapter(new MultiFragAdapter(mActivityTestRule.getActivity().getSupportFragmentManager(),
+                mActivityTestRule.getActivity().getApplicationContext(), build_fake_list_place_nearby(), null));
+*/
+        waiting_time(2000);
 
         mActivityTestRule.getActivity().setToolbar();
-        waiting_time(2000);
-        mActivityTestRule.getActivity().getPageAdapter().getListRestoFragment().set_list_of_workmates(build_fake_list_workmates());
+
+        //mActivityTestRule.getActivity().getPageAdapter().getListRestoFragment().set_list_of_workmates(build_fake_list_workmates());
 
         ViewInteraction tabView = onView(
                 allOf(childAtPosition(
