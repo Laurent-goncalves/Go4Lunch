@@ -2,6 +2,7 @@ package com.g.laurent.go4lunch.Controllers.Activities;
 
 
 import android.support.test.espresso.ViewInteraction;
+import android.support.test.espresso.contrib.RecyclerViewActions;
 import android.support.test.rule.ActivityTestRule;
 import android.support.test.rule.GrantPermissionRule;
 import android.support.test.runner.AndroidJUnit4;
@@ -53,9 +54,9 @@ public class MainActivityTestEspresso {
     @Test
     public void mainActivityTestEspresso() {
 
-        waiting_time(15000);
+        waiting_time(10000);
         mActivityTestRule.getActivity().configureViewPagerAndTabs(build_fake_list_place_nearby());
-        waiting_time(15000);
+        waiting_time(10000);
 
         mActivityTestRule.getActivity().setToolbar();
 
@@ -90,13 +91,9 @@ public class MainActivityTestEspresso {
 
         waiting_time(3000);
 
-        ViewInteraction recyclerView = onView(
-                allOf(withId(R.id.list_view_resto),
-                        childAtPosition(
-                                withClassName(is("android.widget.RelativeLayout")),
-                                2)));
-        recyclerView.perform(actionOnItemAtPosition(0, click()));
-
+        onView(withId(R.id.list_view_resto))
+                .perform(RecyclerViewActions.actionOnItemAtPosition(0, click()));
+        
         waiting_time(5000);
 
         pressBack();
