@@ -23,6 +23,7 @@ import android.widget.Toast;
 import com.firebase.ui.auth.AuthUI;
 import com.g.laurent.go4lunch.Controllers.Activities.MultiActivity;
 import com.g.laurent.go4lunch.Controllers.Activities.SettingActivity;
+import com.g.laurent.go4lunch.Controllers.Fragments.ListRestoFragment;
 import com.g.laurent.go4lunch.Controllers.Fragments.MapsFragment;
 import com.g.laurent.go4lunch.Controllers.Fragments.SettingsFragment;
 import com.g.laurent.go4lunch.Models.List_Search_Nearby;
@@ -37,6 +38,7 @@ import com.g.laurent.go4lunch.Utils.DetailsPlace.Period;
 import com.g.laurent.go4lunch.Utils.Firebase_recover;
 import com.g.laurent.go4lunch.Utils.Firebase_update;
 import com.g.laurent.go4lunch.Utils.TimeCalculation;
+import com.g.laurent.go4lunch.Views.MultiFragAdapter;
 import com.google.android.gms.common.data.DataBufferUtils;
 import com.google.android.gms.location.places.AutocompletePrediction;
 import com.google.android.gms.location.places.AutocompletePredictionBufferResponse;
@@ -203,15 +205,9 @@ public class MainActivityTest {
 
         waiting_time(5000);
 
-        ViewInteraction switch_ = onView(
-                allOf(withId(R.id.switch_french_english),
-                        childAtPosition(
-                                childAtPosition(
-                                        withClassName(is("android.widget.LinearLayout")),
-                                        1),
-                                1),
-                        isDisplayed()));
-        switch_.perform(click());
+        onView(withId(R.id.switch_french_english)).perform(click());
+
+
 
 
         // Get the language set by the user
@@ -394,7 +390,7 @@ public class MainActivityTest {
 
         return new_list_places_nearby;
     }
-    
+
     private OpeningHours set_fake_openingHours(){
 
         OpeningHours openingHours = new OpeningHours();
@@ -524,6 +520,18 @@ public class MainActivityTest {
 
 
 /*
+
+        /*ViewInteraction switch_ = onView(
+                allOf(withId(R.id.switch_french_english),
+                        childAtPosition(
+                                childAtPosition(
+                                        withClassName(is("android.widget.LinearLayout")),
+                                        1),
+                                1),
+                        isDisplayed()));
+        switch_.perform(click());
+
+
     @Test
     public void check_liked_and_chosen_resto() {
 
@@ -632,7 +640,7 @@ public class MainActivityTest {
 
 
 
-  /*  @Test
+    @Test
     public void Test_like_resto_saving_on_Firebase() {
 
         mActivityTestRule.getActivity().configure_and_show_ListRestoFragment();
