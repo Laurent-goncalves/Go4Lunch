@@ -48,6 +48,7 @@ import junit.framework.Assert;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
 import org.hamcrest.TypeSafeMatcher;
+import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -102,8 +103,9 @@ public class MainActivityTest {
 
     }
 
-    @Test
-    public void TEST_auth_anonymous(){
+
+    @Before
+    public void authentication_firebase(){
 
         FirebaseAuth mFirebaseAuth = FirebaseAuth.getInstance();
 
@@ -125,6 +127,11 @@ public class MainActivityTest {
                 });
 
         waiting_time(15000);
+
+    }
+
+    @Test
+    public void TEST_auth_anonymous(){
 
         Assert.assertEquals("IDresto1",firebase_recover.getResto_id_chosen());
     }
