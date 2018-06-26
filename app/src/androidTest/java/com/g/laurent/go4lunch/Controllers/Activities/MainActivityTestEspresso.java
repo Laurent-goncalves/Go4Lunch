@@ -91,12 +91,12 @@ public class MainActivityTestEspresso {
 
         waiting_time(3000);
 
-        onView(withId(R.id.list_view_resto))
+        /*onView(withId(R.id.list_view_resto))
                 .perform(RecyclerViewActions.actionOnItemAtPosition(0, click()));
 
         waiting_time(5000);
 
-        pressBack();
+        pressBack();*/
 
         // Added a sleep statement to match the app's execution delay.
         // The recommended way to handle such scenarios is to use Espresso idling resources:
