@@ -93,7 +93,7 @@ public class MainActivityTestEspresso {
 
         onView(withId(R.id.list_view_resto))
                 .perform(RecyclerViewActions.actionOnItemAtPosition(0, click()));
-        
+
         waiting_time(5000);
 
         pressBack();

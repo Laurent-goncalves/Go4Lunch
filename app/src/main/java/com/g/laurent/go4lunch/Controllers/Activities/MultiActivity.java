@@ -76,6 +76,8 @@ public class MultiActivity extends AppCompatActivity implements CallbackMultiAct
         FirebaseApp.initializeApp(context);
         mCurrentUser = FirebaseAuth.getInstance().getCurrentUser();
 
+        mCurrentUser=null;
+
         if(mCurrentUser!=null){
             sharedPreferences = getSharedPreferences(EXTRA_PREFERENCES, MODE_PRIVATE);
             current_page = 0;
