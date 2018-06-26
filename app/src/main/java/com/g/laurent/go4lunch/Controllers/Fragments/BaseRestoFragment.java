@@ -157,23 +157,26 @@ public abstract class BaseRestoFragment extends Fragment {
 
     public void sort_list_places_nearby_by_workmates(){
 
-        String[][] tab_number_workmates = create_tab_restoId_by_workmate_number();
-        List<String> list_sorted = sort_by_workmates_number(tab_number_workmates);
-        List<Place_Nearby> new_list_places_nearby = new ArrayList<>();
+        if(list_workmates!=null){
 
-        for(String restoId : list_sorted){
-            for(Place_Nearby resto : list_places_nearby){
-                if(resto!=null && restoId!=null){
-                    if(resto.getPlaceId()!=null){
-                        if(resto.getPlaceId().equals(restoId)){
-                            new_list_places_nearby.add(resto);
-                            break;
+            String[][] tab_number_workmates = create_tab_restoId_by_workmate_number();
+            List<String> list_sorted = sort_by_workmates_number(tab_number_workmates);
+            List<Place_Nearby> new_list_places_nearby = new ArrayList<>();
+
+            for(String restoId : list_sorted){
+                for(Place_Nearby resto : list_places_nearby){
+                    if(resto!=null && restoId!=null){
+                        if(resto.getPlaceId()!=null){
+                            if(resto.getPlaceId().equals(restoId)){
+                                new_list_places_nearby.add(resto);
+                                break;
+                            }
                         }
                     }
                 }
             }
+            list_places_nearby = new_list_places_nearby;
         }
-        list_places_nearby = new_list_places_nearby;
     }
 
     private String[][] create_tab_restoId_by_workmate_number(){

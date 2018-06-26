@@ -2,6 +2,7 @@ package com.g.laurent.go4lunch.Controllers.Activities;
 
 import android.app.AlarmManager;
 import android.app.PendingIntent;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -21,10 +22,7 @@ import com.g.laurent.go4lunch.Models.AlarmReceiver;
 import com.g.laurent.go4lunch.Models.CallbackMultiActivity;
 import com.g.laurent.go4lunch.Models.List_Search_Nearby;
 import com.g.laurent.go4lunch.Models.Place_Nearby;
-import com.g.laurent.go4lunch.Models.Workmate;
 import com.g.laurent.go4lunch.R;
-import com.g.laurent.go4lunch.Utils.DetailsPlace.Geometry;
-import com.g.laurent.go4lunch.Utils.DetailsPlace.Location;
 import com.g.laurent.go4lunch.Utils.Firebase_update;
 import com.g.laurent.go4lunch.Utils.Google_Maps_Utils;
 import com.g.laurent.go4lunch.Utils.Toolbar_navig_Utils;
@@ -34,10 +32,7 @@ import com.google.firebase.FirebaseApp;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
-import net.bytebuddy.implementation.bytecode.Throw;
-
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 import java.util.Locale;
@@ -116,20 +111,11 @@ public class MultiActivity extends AppCompatActivity implements CallbackMultiAct
     @Override
     public void configureViewPagerAndTabs(List<Place_Nearby> list_restos) {
 
-        String excep = null;
-
         // Get ViewPager from layout
         pager = findViewById(R.id.viewpager);
 
         if(getApplicationContext()!=null && list_restos!=null)
             pageAdapter = new MultiFragAdapter(getSupportFragmentManager(), getApplicationContext(), list_restos, currentPlaceLatLng);
-        else {
-            try {
-                throw new IOException("context null dans configureViewPagerAndTabs");
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
 
         runOnUiThread(() -> {
             pager.setAdapter(pageAdapter);
@@ -359,6 +345,10 @@ public class MultiActivity extends AppCompatActivity implements CallbackMultiAct
 
     public SwipeRefreshLayout getSwipeRefreshLayout() {
         return swipeRefreshLayout;
+    }
+
+    public TabLayout getTabs() {
+        return tabs;
     }
 
     @Override

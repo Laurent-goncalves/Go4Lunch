@@ -16,6 +16,7 @@ import butterknife.ButterKnife;
 public class SettingActivity extends AppCompatActivity {
 
     @BindView(R.id.activity_setting_toolbar) Toolbar toolbar;
+    SettingsFragment settingsFragment;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -28,7 +29,8 @@ public class SettingActivity extends AppCompatActivity {
 
     public void configure_and_show_settings_fragment(){
 
-        SettingsFragment settingsFragment = new SettingsFragment();
+        settingsFragment = new SettingsFragment();
+
         FragmentTransaction fragmentTransaction = getFragmentManager().beginTransaction();
         fragmentTransaction.add(R.id.setting_activity_main, settingsFragment);
         fragmentTransaction.commit();
@@ -69,5 +71,9 @@ public class SettingActivity extends AppCompatActivity {
             setResult(Activity.RESULT_CANCELED,returnIntent);
 
         finish();
+    }
+
+    public SettingsFragment getSettingsFragment() {
+        return settingsFragment;
     }
 }

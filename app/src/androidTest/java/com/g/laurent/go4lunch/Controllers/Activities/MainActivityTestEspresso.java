@@ -1,16 +1,22 @@
 package com.g.laurent.go4lunch.Controllers.Activities;
 
 
+import android.app.Activity;
+import android.support.design.widget.TabLayout;
 import android.support.test.espresso.ViewInteraction;
 import android.support.test.espresso.contrib.RecyclerViewActions;
 import android.support.test.rule.ActivityTestRule;
 import android.support.test.rule.GrantPermissionRule;
 import android.support.test.runner.AndroidJUnit4;
+import android.support.test.runner.lifecycle.ActivityLifecycleMonitorRegistry;
+import android.support.test.runner.lifecycle.Stage;
 import android.test.suitebuilder.annotation.LargeTest;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewParent;
+import android.widget.Switch;
 
+import com.g.laurent.go4lunch.Controllers.Fragments.SettingsFragment;
 import com.g.laurent.go4lunch.Models.Place_Nearby;
 import com.g.laurent.go4lunch.Models.Workmate;
 import com.g.laurent.go4lunch.R;
@@ -18,6 +24,11 @@ import com.g.laurent.go4lunch.Utils.DetailsPlace.Geometry;
 import com.g.laurent.go4lunch.Utils.DetailsPlace.Location;
 import com.g.laurent.go4lunch.Views.MultiFragAdapter;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.firebase.FirebaseApp;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.FirebaseDatabase;
+
+import junit.framework.Assert;
 
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
@@ -27,8 +38,11 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
+import java.util.Objects;
 
+import static android.support.test.InstrumentationRegistry.getInstrumentation;
 import static android.support.test.espresso.Espresso.onView;
 import static android.support.test.espresso.Espresso.pressBack;
 import static android.support.test.espresso.action.ViewActions.click;
@@ -53,6 +67,8 @@ public class MainActivityTestEspresso {
 
     @Test
     public void mainActivityTestEspresso() {
+
+        //FirebaseDatabase.getInstance().goOffline();
 
         waiting_time(5000);
         mActivityTestRule.getActivity().configureViewPagerAndTabs(build_fake_list_place_nearby());
@@ -89,10 +105,11 @@ public class MainActivityTestEspresso {
 
         waiting_time(3000);
 
+        mActivityTestRule.getActivity().getPageAdapter().getListRestoFragment().setList_places_nearby(build_fake_list_place_nearby());
+
         mActivityTestRule.getActivity().getPageAdapter().getListRestoFragment().configure_recycler_view();
 
         waiting_time(3000);
-
 
         onView(withId(R.id.list_view_resto))
                 .perform(RecyclerViewActions.actionOnItemAtPosition(0, click()));
@@ -141,20 +158,93 @@ public class MainActivityTestEspresso {
                                 3),
                         isDisplayed()));
         appCompatButton4.perform(click());
+    }
+
+    @Test
+    public void TEST_change_language(){
+
+        waiting_time(5000);
+        mActivityTestRule.getActivity().configureViewPagerAndTabs(build_fake_list_place_nearby());
+
+        waiting_time(8000);
+
+        mActivityTestRule.getActivity().configure_and_show_settings_activity();
+
 
         waiting_time(2000);
-        ViewInteraction appCompatImageButton = onView(
-                allOf(withId(R.id.button_hamburger), withContentDescription("icon_button_hamburger"),
+        SettingActivity settingActivity = getActivityInstance();
+
+        waiting_time(5000);
+
+        ViewInteraction switch_ = onView(
+                allOf(withId(R.id.switch_french_english),
                         childAtPosition(
-                                allOf(withId(R.id.toolbar_linearlayout),
-                                        childAtPosition(
-                                                withId(R.id.activity_main_toolbar),
-                                                0)),
-                                0),
+                                childAtPosition(
+                                        withClassName(is("android.widget.LinearLayout")),
+                                        1),
+                                1),
                         isDisplayed()));
-        appCompatImageButton.perform(click());
+        switch_.perform(click());
 
 
+        // Get the language set by the user
+        SettingsFragment settingsFragment = (SettingsFragment) settingActivity.getSettingsFragment();
+        Switch button_switch = settingsFragment.getSwitch_fr_eng();
+        String lang;
+
+        if(button_switch.isChecked())
+            lang = "en";
+        else
+            lang = "fr";
+
+
+        // Click on "done"
+        waiting_time(1000);
+        ViewInteraction appCompatButton2 = onView(
+                allOf(withId(R.id.done_button), childAtPosition(
+                                allOf(withId(R.id.framelayout_setting_frag),
+                                        childAtPosition(
+                                                withId(R.id.setting_activity_main),
+                                                1)),
+                                2),
+                        isDisplayed()));
+        appCompatButton2.perform(click());
+
+        waiting_time(3000);
+
+        mActivityTestRule.getActivity().configureViewPagerAndTabs(build_fake_list_place_nearby());
+        waiting_time(10000);
+
+        // Check the language of tabs
+        TabLayout tabs = mActivityTestRule.getActivity().getTabs();
+
+        switch(lang){
+            case "fr":
+                Assert.assertEquals("Carte", Objects.requireNonNull(tabs.getTabAt(0)).getText());
+                break;
+            case "en":
+                Assert.assertEquals("Map View", Objects.requireNonNull(tabs.getTabAt(0)).getText());
+                break;
+        }
+    }
+
+
+    public SettingActivity getActivityInstance() {
+
+        final SettingActivity[] currentActivity = new SettingActivity[1];
+
+        getInstrumentation().runOnMainSync(new Runnable() {
+            public void run() {
+                Collection resumedActivities = ActivityLifecycleMonitorRegistry.getInstance().getActivitiesInStage(Stage.RESUMED);
+                if (resumedActivities.iterator().hasNext()) {
+
+                    if(resumedActivities.iterator().next() instanceof SettingActivity)
+                        currentActivity[0] = (SettingActivity) resumedActivities.iterator().next();
+                }
+            }
+        });
+
+        return currentActivity[0];
     }
 
     private List<Place_Nearby> build_fake_list_place_nearby(){

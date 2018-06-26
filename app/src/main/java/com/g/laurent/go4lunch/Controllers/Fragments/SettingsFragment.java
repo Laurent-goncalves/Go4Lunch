@@ -51,9 +51,6 @@ public class SettingsFragment extends Fragment implements AdapterView.OnItemSele
     @BindView(R.id.enable_notif) TextView enable_notification_textview;
     @BindView(R.id.setting_radius) TextView radius_textview;
     @BindView(R.id.setting_type_place) TextView type_place__textview;
-
-
-
     private SharedPreferences sharedPreferences;
     private Context context;
     private Firebase_update firebase_update;
@@ -359,4 +356,7 @@ public class SettingsFragment extends Fragment implements AdapterView.OnItemSele
         button_reset_liked.setText(context.getResources().getString(R.string.button_reset_liked));
     }
 
+    public Switch getSwitch_fr_eng() {
+        return switch_fr_eng;
+    }
 }
