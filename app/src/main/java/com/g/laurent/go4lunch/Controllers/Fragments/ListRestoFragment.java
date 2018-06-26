@@ -22,6 +22,8 @@ import com.g.laurent.go4lunch.Views.RestoListViews.ListViewAdapter;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
+
+import java.io.IOException;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
@@ -105,7 +107,7 @@ public class ListRestoFragment extends BaseRestoFragment {
             firebase_recover.recover_list_workmates();
     }
 
-    private void configure_recycler_view(){
+    public void configure_recycler_view(){
 
         try {
             runOnUiThread(new Runnable() {
@@ -118,6 +120,13 @@ public class ListRestoFragment extends BaseRestoFragment {
                         recyclerView.setAdapter(adapter);
                         // Set layout manager to position the items
                         recyclerView.setLayoutManager(new LinearLayoutManager(context));
+                    } else {
+                        try {
+                            throw new IOException("context null dans configure recyclerView");
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+
                     }
                 }
             });

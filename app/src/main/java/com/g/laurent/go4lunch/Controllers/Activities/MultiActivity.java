@@ -34,6 +34,9 @@ import com.google.firebase.FirebaseApp;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
+import net.bytebuddy.implementation.bytecode.Throw;
+
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
@@ -113,11 +116,20 @@ public class MultiActivity extends AppCompatActivity implements CallbackMultiAct
     @Override
     public void configureViewPagerAndTabs(List<Place_Nearby> list_restos) {
 
+        String excep = null;
+
         // Get ViewPager from layout
         pager = findViewById(R.id.viewpager);
 
         if(getApplicationContext()!=null && list_restos!=null)
             pageAdapter = new MultiFragAdapter(getSupportFragmentManager(), getApplicationContext(), list_restos, currentPlaceLatLng);
+        else {
+            try {
+                throw new IOException("context null dans configureViewPagerAndTabs");
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
 
         runOnUiThread(() -> {
             pager.setAdapter(pageAdapter);

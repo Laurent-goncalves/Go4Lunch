@@ -54,13 +54,11 @@ public class MainActivityTestEspresso {
     @Test
     public void mainActivityTestEspresso() {
 
-        waiting_time(10000);
+        waiting_time(5000);
         mActivityTestRule.getActivity().configureViewPagerAndTabs(build_fake_list_place_nearby());
         waiting_time(10000);
 
         mActivityTestRule.getActivity().setToolbar();
-
-        //mActivityTestRule.getActivity().getPageAdapter().getListRestoFragment().set_list_of_workmates(build_fake_list_workmates());
 
         ViewInteraction tabView = onView(
                 allOf(childAtPosition(
@@ -91,12 +89,17 @@ public class MainActivityTestEspresso {
 
         waiting_time(3000);
 
-        /*onView(withId(R.id.list_view_resto))
+        mActivityTestRule.getActivity().getPageAdapter().getListRestoFragment().configure_recycler_view();
+
+        waiting_time(3000);
+
+
+        onView(withId(R.id.list_view_resto))
                 .perform(RecyclerViewActions.actionOnItemAtPosition(0, click()));
 
         waiting_time(5000);
 
-        pressBack();*/
+        pressBack();
 
         // Added a sleep statement to match the app's execution delay.
         // The recommended way to handle such scenarios is to use Espresso idling resources:
