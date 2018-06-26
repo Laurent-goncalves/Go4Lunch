@@ -54,16 +54,18 @@ public class WorkmatesViewHolder extends RecyclerView.ViewHolder {
 
             case TYPE_DISPLAY_WORKMATES_LIST:
                     if(workmates!=null){
-                        if(workmates.getChosen()){
-                            text = workmates.getName() + " " + context.getResources().getString(R.string.is_eating_at) + " " + workmates.getResto_name();
-                            workmates_text.setText(text);
-                            workmates_text.setTextColor(Color.BLACK);
-                            workmates_text.setTypeface(null, Typeface.NORMAL);
-                        } else {
-                            text = workmates.getName() + " " + context.getResources().getString(R.string.has_not_decided);
-                            workmates_text.setText(text);
-                            workmates_text.setTextColor(Color.DKGRAY);
-                            workmates_text.setTypeface(null, Typeface.ITALIC);
+                        if(workmates.getChosen()!=null) {
+                            if (workmates.getChosen()) {
+                                text = workmates.getName() + " " + context.getResources().getString(R.string.is_eating_at) + " " + workmates.getResto_name();
+                                workmates_text.setText(text);
+                                workmates_text.setTextColor(Color.BLACK);
+                                workmates_text.setTypeface(null, Typeface.NORMAL);
+                            } else {
+                                text = workmates.getName() + " " + context.getResources().getString(R.string.has_not_decided);
+                                workmates_text.setText(text);
+                                workmates_text.setTextColor(Color.DKGRAY);
+                                workmates_text.setTypeface(null, Typeface.ITALIC);
+                            }
                         }
                     }
                 break;

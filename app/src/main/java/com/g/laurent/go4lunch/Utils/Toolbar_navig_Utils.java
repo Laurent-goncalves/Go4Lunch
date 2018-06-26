@@ -50,6 +50,7 @@ public class Toolbar_navig_Utils implements NavigationView.OnNavigationItemSelec
     private int radius;
     private String api_key;
     private List<Place_Nearby> list_place_nearby_autocomplete;
+    private Google_Maps_Utils google_maps_utils;
 
     public Toolbar_navig_Utils(MultiActivity activity) {
         this.activity = activity;
@@ -98,7 +99,7 @@ public class Toolbar_navig_Utils implements NavigationView.OnNavigationItemSelec
         });
     }
 
-    public void create_onClickListener_Closing_searchView(){
+    private void create_onClickListener_Closing_searchView(){
         searchView.setOnCloseListener(() -> {
             title_toolbar.setVisibility(View.VISIBLE);
             hamburger.setVisibility(View.VISIBLE);
@@ -125,16 +126,20 @@ public class Toolbar_navig_Utils implements NavigationView.OnNavigationItemSelec
             list_placesId.add(list_place_nearby_autocomplete.get(position).getPlaceId());
 
             if(activity.getCurrentPage()==0) {
-                new List_Search_Nearby(api_key, list_placesId, activity.get_Page_Adapter().getMapsFragment());
+                new List_Search_Nearby(api_key, list_placesId, activity.getPageAdapter().getMapsFragment());
             } else if(activity.getCurrentPage()==1) {
-                new List_Search_Nearby(api_key, list_placesId, activity.get_Page_Adapter().getListRestoFragment());
+                new List_Search_Nearby(api_key, list_placesId, activity.getPageAdapter().getListRestoFragment());
             }
         });
     }
 
     private void create_setOnQueryTextListener_searchView(){
+        google_maps_utils=null;
 
-        Google_Maps_Utils google_maps_utils = new Google_Maps_Utils(context,activity,this);
+        try{
+            google_maps_utils = new Google_Maps_Utils(context,activity,this);
+        } catch (Throwable ignored){}
+
 
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
@@ -144,14 +149,17 @@ public class Toolbar_navig_Utils implements NavigationView.OnNavigationItemSelec
                 DistanceCalculation distanceCalculation = new DistanceCalculation();
                 bounds = distanceCalculation.toBounds(currentPlaceLatLng,radius);
 
-                switch (activity.getCurrentPage()) {
-                    case 0:
-                        google_maps_utils.googleplacespredictions(activity.get_API_KEY(), query, bounds, null, activity.get_Page_Adapter().getMapsFragment());
-                        break;
-                    case 1:
-                        google_maps_utils.googleplacespredictions(activity.get_API_KEY(), query, bounds, activity.get_Page_Adapter().getListRestoFragment(), null);
-                        break;
+                if(google_maps_utils!=null){
+                    switch (activity.getCurrentPage()) {
+                        case 0:
+                            google_maps_utils.googleplacespredictions(activity.get_API_KEY(), query, bounds, null, activity.getPageAdapter().getMapsFragment());
+                            break;
+                        case 1:
+                            google_maps_utils.googleplacespredictions(activity.get_API_KEY(), query, bounds, activity.getPageAdapter().getListRestoFragment(), null);
+                            break;
+                    }
                 }
+
                 return false;
             }
 
@@ -301,11 +309,16 @@ public class Toolbar_navig_Utils implements NavigationView.OnNavigationItemSelec
 
     public void refresh_text_toolbar() {
 
+        Toolbar toolbar = activity.findViewById(R.id.activity_main_toolbar);
+
+        if(title_toolbar==null)
+            title_toolbar = toolbar.findViewById(R.id.title_toolbar);
+
         if(activity.getCurrentPage()==2)
             title_toolbar.setText(context.getResources().getString(R.string.available_workmates));
         else
             title_toolbar.setText(context.getResources().getString(R.string.toolbar_mapview));
-
+if(searchView!=null)
         searchView.setQueryHint(context.getResources().getString(R.string.Search_restaurants));
     }
 }

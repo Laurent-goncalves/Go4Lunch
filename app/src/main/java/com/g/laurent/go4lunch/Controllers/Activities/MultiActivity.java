@@ -21,7 +21,10 @@ import com.g.laurent.go4lunch.Models.AlarmReceiver;
 import com.g.laurent.go4lunch.Models.CallbackMultiActivity;
 import com.g.laurent.go4lunch.Models.List_Search_Nearby;
 import com.g.laurent.go4lunch.Models.Place_Nearby;
+import com.g.laurent.go4lunch.Models.Workmate;
 import com.g.laurent.go4lunch.R;
+import com.g.laurent.go4lunch.Utils.DetailsPlace.Geometry;
+import com.g.laurent.go4lunch.Utils.DetailsPlace.Location;
 import com.g.laurent.go4lunch.Utils.Firebase_update;
 import com.g.laurent.go4lunch.Utils.Google_Maps_Utils;
 import com.g.laurent.go4lunch.Utils.Toolbar_navig_Utils;
@@ -30,6 +33,8 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 import java.util.Locale;
@@ -71,9 +76,7 @@ public class MultiActivity extends AppCompatActivity implements CallbackMultiAct
         FirebaseApp.initializeApp(context);
         mCurrentUser = FirebaseAuth.getInstance().getCurrentUser();
 
-        if(mCurrentUser==null)
-            configureViewPagerAndTabs(null);
-        else {
+        if(mCurrentUser!=null){
             sharedPreferences = getSharedPreferences(EXTRA_PREFERENCES, MODE_PRIVATE);
             current_page = 0;
 
@@ -84,6 +87,7 @@ public class MultiActivity extends AppCompatActivity implements CallbackMultiAct
             google_maps_utils.getLocationPermission();
         }
     }
+
 
     private void setLanguageForApp(){
 
@@ -293,6 +297,11 @@ public class MultiActivity extends AppCompatActivity implements CallbackMultiAct
         swipeRefreshLayout.setOnRefreshListener(this);
     }
 
+    public void setToolbar() {
+        toolbar_navig_utils = new Toolbar_navig_Utils(this);
+        toolbar_navig_utils.configureNavigationView();
+    }
+
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
@@ -308,10 +317,6 @@ public class MultiActivity extends AppCompatActivity implements CallbackMultiAct
 
     public String get_API_KEY(){
         return api_key;
-    }
-
-    public MultiFragAdapter get_Page_Adapter(){
-        return pageAdapter;
     }
 
     public DrawerLayout getDrawerLayout() {

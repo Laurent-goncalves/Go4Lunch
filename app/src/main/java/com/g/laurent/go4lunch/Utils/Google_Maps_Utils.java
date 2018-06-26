@@ -63,14 +63,12 @@ public class Google_Maps_Utils extends FragmentActivity implements GoogleApiClie
                 android.Manifest.permission.ACCESS_FINE_LOCATION)
                 == PackageManager.PERMISSION_GRANTED) {
             mLocationPermissionGranted = true;
-            System.out.println("eee permission OK ");
             getNumberResults(activity);
 
         } else {
             ActivityCompat.requestPermissions(activity,
                     new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION},
                     PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION);
-            System.out.println("eee permission NOK ");
             currentPlaceLatLng = find_last_current_location();
             activity.setCurrentPlaceLatLng(currentPlaceLatLng);
         }
@@ -134,8 +132,6 @@ public class Google_Maps_Utils extends FragmentActivity implements GoogleApiClie
 
         Float latitude = activity.getSharedPreferences().getFloat(EXTRA_LAT_CURRENT,0);
         Float longitude = activity.getSharedPreferences().getFloat(EXTRA_LONG_CURRENT,0);
-
-        System.out.println("eee  latitude="+latitude + "   longitude="+longitude);
 
         LatLng last_location;
 

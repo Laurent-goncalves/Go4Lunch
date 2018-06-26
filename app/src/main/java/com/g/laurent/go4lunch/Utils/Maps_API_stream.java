@@ -14,8 +14,7 @@ public class Maps_API_stream {
 
         return search_nearby_request.getNearbyPlaces(api_key,type,radius,location)
                 .subscribeOn(Schedulers.io())
-                //.observeOn(AndroidSchedulers.mainThread());
-                .observeOn(Schedulers.newThread());  // TEST
+                .observeOn(Schedulers.newThread());
     }
 
     public static Observable<DetailsPlace> streamFetchgetDetailsPlaces(String api_key, Result result){
@@ -23,8 +22,7 @@ public class Maps_API_stream {
 
         return details_place_request.getDetailsPlaces(api_key,result.getPlaceId())
                 .subscribeOn(Schedulers.io())
-                //.observeOn(AndroidSchedulers.mainThread());
-                .observeOn(Schedulers.newThread());  // TEST
+                .observeOn(Schedulers.newThread());
     }
 
     public static Observable<DetailsPlace> streamFetchgetDetailsPlaces(String api_key, String placeId){
@@ -32,8 +30,7 @@ public class Maps_API_stream {
 
         return details_place_request.getDetailsPlaces(api_key,placeId)
                 .subscribeOn(Schedulers.io())
-                //.observeOn(AndroidSchedulers.mainThread());
-                .observeOn(Schedulers.newThread());  // TEST
+                .observeOn(Schedulers.newThread());
     }
 
 }

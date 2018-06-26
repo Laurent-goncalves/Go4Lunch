@@ -100,14 +100,19 @@ public class ListRestoFragment extends BaseRestoFragment {
 
     private void configure_recycler_view(){
 
-        if(context!=null) {
-            // Create adapter passing in the sample user data
-            ListViewAdapter adapter = new ListViewAdapter(context, list_places_nearby, list_workmates, currentPlaceLatLng);
-            // Attach the adapter to the recyclerview to populate items
-            recyclerView.setAdapter(adapter);
-            // Set layout manager to position the items
-            recyclerView.setLayoutManager(new LinearLayoutManager(context));
-        }
+        getActivity().runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                if(context!=null) {
+                    // Create adapter passing in the sample user data
+                    ListViewAdapter adapter = new ListViewAdapter(context, list_places_nearby, list_workmates, currentPlaceLatLng);
+                    // Attach the adapter to the recyclerview to populate items
+                    recyclerView.setAdapter(adapter);
+                    // Set layout manager to position the items
+                    recyclerView.setLayoutManager(new LinearLayoutManager(context));
+                }
+            }
+        });
     }
 
     public void recover_previous_state(){

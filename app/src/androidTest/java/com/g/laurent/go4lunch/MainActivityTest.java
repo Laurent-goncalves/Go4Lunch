@@ -69,8 +69,6 @@ import static org.hamcrest.Matchers.allOf;
 @RunWith(AndroidJUnit4.class)
 public class MainActivityTest {
 
-    private Firebase_recover firebase_recover;
-
     @Rule
     public GrantPermissionRule mGrantPermissionRule = GrantPermissionRule.grant(android.Manifest.permission.ACCESS_FINE_LOCATION);
 
@@ -103,61 +101,6 @@ public class MainActivityTest {
         tabView2.perform(click());*/
 
     }
-
-
-    @Before
-    public void authentication_firebase(){
-
-        FirebaseApp.initializeApp(mActivityTestRule.getActivity());
-        FirebaseAuth mFirebaseAuth = FirebaseAuth.getInstance();
-
-        mFirebaseAuth.signInWithEmailAndPassword("develop.lgontest@gmail.com", "Password77")
-                .addOnCompleteListener(mActivityTestRule.getActivity(), new OnCompleteListener<AuthResult>() {
-                    @Override
-                    public void onComplete(@NonNull Task<AuthResult> task) {
-                        if (task.isSuccessful()) {
-                            // Sign in success, update UI with the signed-in user's information
-
-                            firebase_recover = new Firebase_recover(mActivityTestRule.getActivity().getApplicationContext(),
-                                    "ID1");
-
-                            firebase_recover.recover_workmate_chosen_resto();
-                        }
-
-                    }
-                });
-
-        waiting_time(15000);
-    }
-
-    @Test
-    public void TEST_auth_anonymous(){
-
-        Assert.assertEquals("IDresto1",firebase_recover.getResto_id_chosen());
-    }
-
-    // @Test
-    public void create_new_users_firebase() {
-
-        SharedPreferences sharedPreferences = mActivityTestRule.getActivity().getSharedPreferences();
-
-        String EXTRA_LAT_CURRENT = "latitude_current_location";
-        String EXTRA_LONG_CURRENT = "longitude_current_location";
-
-        sharedPreferences.edit().putFloat(EXTRA_LAT_CURRENT,48.866667f).apply();
-        sharedPreferences.edit().putFloat(EXTRA_LONG_CURRENT,2.333333f).apply();
-
-
-        Firebase_update firebase_update = new Firebase_update(mActivityTestRule.getActivity().getApplicationContext());
-
-        waiting_time(5000);
-
-        firebase_update.update_full_workmate_data(new Workmate("Sean","ID1","https://i.pinimg.com/originals/e7/c4/dc/e7c4dc04867ad87c2437f22cc1859f5d.jpg",true,"IDresto1","McDo",null,null,null));
-        firebase_update.update_full_workmate_data(new Workmate("Hugh","ID2","https://upload.wikimedia.org/wikipedia/commons/thumb/f/f7/Hugh_Jackman_%282017%29.jpg/1200px-Hugh_Jackman_%282017%29.jpg",false,null,null,null,null,null));
-        firebase_update.update_full_workmate_data(new Workmate("George","ID3","https://gal.img.pmdstatic.net/fit/http.3A.2F.2Fprd2-bone-image.2Es3-website-eu-west-1.2Eamazonaws.2Ecom.2Fprismamedia_people.2F2017.2F06.2F30.2F2249dbc4-7761-4990-87af-258d04ba95ee.2Ejpeg/2419x1677/quality/80/george-clooney.jpg",true,"IDresto3",null,"Le Trucanous",null,null));
-        firebase_update.update_full_workmate_data(new Workmate("Brigitte","ID4","https://pbs.twimg.com/profile_images/898819805083467776/IqAVGrO4_400x400.jpg",false,null,null,null,null,null));
-    }
-
 
     @Test
     public void TEST_text_opening_hours() {
@@ -221,39 +164,6 @@ public class MainActivityTest {
         Assert.assertEquals("Closed now",timeCalculation.getInformationAboutOpeningAndClosure(openingHours.getPeriods(),current_time,current_day-1));
     }
 
-    //@Test
-    public void TEST_SearchView_AutoComplete(){
-
-        /*Toolbar_navig_Utils toolbar_navig_utils = new Toolbar_navig_Utils(mActivityTestRule.getActivity());
-
-        mActivityTestRule.getActivity().runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                toolbar_navig_utils.configure_toolbar();
-
-                waiting_time(5000);
-
-                ViewInteraction searchAutoComplete = onView(
-                        allOf(withId(R.id.search_src_text),
-                                childAtPosition(
-                                        allOf(withId(R.id.search_plate),
-                                                childAtPosition(
-                                                        withId(R.id.search_edit_frame),
-                                                        1)),
-                                        0),
-                                isDisplayed()));
-                searchAutoComplete.perform(replaceText("japonais"), closeSoftKeyboard());
-            }
-        });*/
-
-
-
-       // toolbar_navig_utils.getSearchAutoComplete().setText("japonais");
-
-
-
-    }
-
     private OpeningHours set_fake_openingHours(){
 
         OpeningHours openingHours = new OpeningHours();
@@ -289,7 +199,100 @@ public class MainActivityTest {
         return openingHours;
     }
 
-    /*
+    public void googleplacespredictions(String query, Context context){
+
+        List<String> list_places_nearby = new ArrayList<>();
+        LatLngBounds bounds = new LatLngBounds(new LatLng(38.46572222050097, -107.75668023304138),new LatLng(39.913037779499035, -105.88929176695862));
+        GeoDataClient mGeoDataClient = Places.getGeoDataClient(context);
+
+        Task<AutocompletePredictionBufferResponse> results =
+                mGeoDataClient.getAutocompletePredictions(query, bounds, GeoDataClient.BoundsMode.STRICT, null);
+
+        try {
+            Tasks.await(results, 60, TimeUnit.SECONDS);
+        } catch (ExecutionException | InterruptedException | TimeoutException e) {
+            e.printStackTrace();
+        }
+
+        try {
+            AutocompletePredictionBufferResponse autocompletePredictions = results.getResult();
+
+            // Freeze the results immutable representation that can be stored safely.
+            ArrayList<AutocompletePrediction> al = DataBufferUtils.freezeAndClose(autocompletePredictions);
+
+            for (AutocompletePrediction p : al) {
+                list_places_nearby.add(p.getPlaceId());
+            }
+
+            MapsFragment mapsFragment = mActivityTestRule.getActivity().getPageAdapter().getMapsFragment();
+
+            List_Search_Nearby list_search_nearby = new List_Search_Nearby("AIzaSyCAzX1ILkJlqSsTMkRJHSGEMAQWuqxSxKA",list_places_nearby,mapsFragment);
+
+            waiting_time(5000);
+
+
+        } catch (RuntimeExecutionException e) {
+            // If the query did not complete successfully return null
+            //Log.e(TAG, "Error getting autocomplete prediction API call", e);
+        }
+    }
+
+    private static Matcher<View> childAtPosition(
+            final Matcher<View> parentMatcher, final int position) {
+
+        return new TypeSafeMatcher<View>() {
+            @Override
+            public void describeTo(Description description) {
+                description.appendText("Child at position " + position + " in parent ");
+                parentMatcher.describeTo(description);
+            }
+
+            @Override
+            public boolean matchesSafely(View view) {
+                ViewParent parent = view.getParent();
+                return parent instanceof ViewGroup && parentMatcher.matches(parent)
+                        && view.equals(((ViewGroup) parent).getChildAt(position));
+            }
+        };
+    }
+
+    private void waiting_time(int time){
+        try {
+            Thread.sleep(time);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+}
+
+
+    /*@Before
+    public void authentication_firebase(){
+
+        FirebaseApp.initializeApp(mActivityTestRule.getActivity());
+        FirebaseAuth mFirebaseAuth = FirebaseAuth.getInstance();
+
+        mFirebaseAuth.signInWithEmailAndPassword("develop.lgontest@gmail.com", "Password77")
+                .addOnCompleteListener(mActivityTestRule.getActivity(), new OnCompleteListener<AuthResult>() {
+                    @Override
+                    public void onComplete(@NonNull Task<AuthResult> task) {
+                        if (task.isSuccessful()) {
+                            // Sign in success, update UI with the signed-in user's information
+
+                            firebase_recover = new Firebase_recover(mActivityTestRule.getActivity().getApplicationContext(),
+                                    "ID1");
+
+                            firebase_recover.recover_workmate_chosen_resto();
+                        }
+
+                    }
+                });
+
+        waiting_time(15000);
+    }*/
+
+
+/*
     @Test
     public void check_liked_and_chosen_resto() {
 
@@ -457,71 +460,6 @@ public class MainActivityTest {
     }*/
 
 
-    public void googleplacespredictions(String query, Context context){
-
-        List<String> list_places_nearby = new ArrayList<>();
-        LatLngBounds bounds = new LatLngBounds(new LatLng(38.46572222050097, -107.75668023304138),new LatLng(39.913037779499035, -105.88929176695862));
-        GeoDataClient mGeoDataClient = Places.getGeoDataClient(context);
-
-        Task<AutocompletePredictionBufferResponse> results =
-                mGeoDataClient.getAutocompletePredictions(query, bounds, GeoDataClient.BoundsMode.STRICT, null);
-
-        try {
-            Tasks.await(results, 60, TimeUnit.SECONDS);
-        } catch (ExecutionException | InterruptedException | TimeoutException e) {
-            e.printStackTrace();
-        }
-
-        try {
-            AutocompletePredictionBufferResponse autocompletePredictions = results.getResult();
-
-            // Freeze the results immutable representation that can be stored safely.
-            ArrayList<AutocompletePrediction> al = DataBufferUtils.freezeAndClose(autocompletePredictions);
-
-            for (AutocompletePrediction p : al) {
-                list_places_nearby.add(p.getPlaceId());
-            }
-
-            MapsFragment mapsFragment = mActivityTestRule.getActivity().getPageAdapter().getMapsFragment();
-
-            List_Search_Nearby list_search_nearby = new List_Search_Nearby("AIzaSyCAzX1ILkJlqSsTMkRJHSGEMAQWuqxSxKA",list_places_nearby,mapsFragment);
-
-            waiting_time(5000);
-
-
-        } catch (RuntimeExecutionException e) {
-            // If the query did not complete successfully return null
-            //Log.e(TAG, "Error getting autocomplete prediction API call", e);
-        }
-    }
-
-    private static Matcher<View> childAtPosition(
-            final Matcher<View> parentMatcher, final int position) {
-
-        return new TypeSafeMatcher<View>() {
-            @Override
-            public void describeTo(Description description) {
-                description.appendText("Child at position " + position + " in parent ");
-                parentMatcher.describeTo(description);
-            }
-
-            @Override
-            public boolean matchesSafely(View view) {
-                ViewParent parent = view.getParent();
-                return parent instanceof ViewGroup && parentMatcher.matches(parent)
-                        && view.equals(((ViewGroup) parent).getChildAt(position));
-            }
-        };
-    }
-
-    private void waiting_time(int time){
-        try {
-            Thread.sleep(time);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-    }
-}
 /*
         ViewInteraction appCompatImageButton = onView(
                 allOf(withContentDescription("Open navigation drawer"),
@@ -561,4 +499,29 @@ public class MainActivityTest {
                                         1),
                                 1),
                         isDisplayed()));
-        appCompatButton3.perform(click());*/
+        appCompatButton3.perform(click());
+
+
+
+        // @Test
+    public void create_new_users_firebase() {
+
+        SharedPreferences sharedPreferences = mActivityTestRule.getActivity().getSharedPreferences();
+
+        String EXTRA_LAT_CURRENT = "latitude_current_location";
+        String EXTRA_LONG_CURRENT = "longitude_current_location";
+
+        sharedPreferences.edit().putFloat(EXTRA_LAT_CURRENT,48.866667f).apply();
+        sharedPreferences.edit().putFloat(EXTRA_LONG_CURRENT,2.333333f).apply();
+
+
+        Firebase_update firebase_update = new Firebase_update(mActivityTestRule.getActivity().getApplicationContext());
+
+        waiting_time(5000);
+
+        firebase_update.update_full_workmate_data(new Workmate("Sean","ID1","https://i.pinimg.com/originals/e7/c4/dc/e7c4dc04867ad87c2437f22cc1859f5d.jpg",true,"IDresto1","McDo",null,null,null));
+        firebase_update.update_full_workmate_data(new Workmate("Hugh","ID2","https://upload.wikimedia.org/wikipedia/commons/thumb/f/f7/Hugh_Jackman_%282017%29.jpg/1200px-Hugh_Jackman_%282017%29.jpg",false,null,null,null,null,null));
+        firebase_update.update_full_workmate_data(new Workmate("George","ID3","https://gal.img.pmdstatic.net/fit/http.3A.2F.2Fprd2-bone-image.2Es3-website-eu-west-1.2Eamazonaws.2Ecom.2Fprismamedia_people.2F2017.2F06.2F30.2F2249dbc4-7761-4990-87af-258d04ba95ee.2Ejpeg/2419x1677/quality/80/george-clooney.jpg",true,"IDresto3",null,"Le Trucanous",null,null));
+        firebase_update.update_full_workmate_data(new Workmate("Brigitte","ID4","https://pbs.twimg.com/profile_images/898819805083467776/IqAVGrO4_400x400.jpg",false,null,null,null,null,null));
+    }
+        */
