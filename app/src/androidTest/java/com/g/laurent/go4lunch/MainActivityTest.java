@@ -95,12 +95,17 @@ public class MainActivityTest {
     public ActivityTestRule<MultiActivity> mActivityTestRule = new ActivityTestRule<>(MultiActivity.class);
 
     @Test
-    public void mainActivityTestEspresso() {
+    public void TEST_click_on_tabs() {
 
         //FirebaseDatabase.getInstance().goOffline();
 
         waiting_time(5000);
-        mActivityTestRule.getActivity().configureViewPagerAndTabs(build_fake_list_place_nearby());
+
+        List<Place_Nearby> list_places = build_fake_list_place_nearby();
+
+        waiting_time(2000);
+
+        mActivityTestRule.getActivity().configureViewPagerAndTabs(list_places);
         waiting_time(10000);
 
         mActivityTestRule.getActivity().setToolbar();
@@ -134,11 +139,7 @@ public class MainActivityTest {
 
         waiting_time(3000);
 
-        mActivityTestRule.getActivity().getPageAdapter().getListRestoFragment().setList_places_nearby(build_fake_list_place_nearby());
-
-        mActivityTestRule.getActivity().getPageAdapter().getListRestoFragment().configure_recycler_view();
-
-        waiting_time(3000);
+        waiting_time(10000);
 
         onView(withId(R.id.list_view_resto))
                 .perform(RecyclerViewActions.actionOnItemAtPosition(0, click()));
@@ -195,19 +196,27 @@ public class MainActivityTest {
         waiting_time(5000);
         mActivityTestRule.getActivity().configureViewPagerAndTabs(build_fake_list_place_nearby());
 
-        waiting_time(8000);
+        waiting_time(2000);
+
 
         mActivityTestRule.getActivity().configure_and_show_settings_activity();
 
 
-        waiting_time(2000);
+        waiting_time(8000);
+
+        //onView(withId(R.id.switch_french_english)).perform(click());
+
+        ViewInteraction switch_ = onView(
+                allOf(withId(R.id.switch_french_english),
+                        childAtPosition(
+                                childAtPosition(
+                                        withClassName(is("android.widget.LinearLayout")),
+                                        1),
+                                1),
+                        isDisplayed()));
+        switch_.perform(click());
+
         SettingActivity settingActivity = getActivityInstance();
-
-        waiting_time(5000);
-
-        onView(withId(R.id.switch_french_english)).perform(click());
-
-
 
 
         // Get the language set by the user
@@ -219,7 +228,6 @@ public class MainActivityTest {
             lang = "en";
         else
             lang = "fr";
-
 
         // Click on "done"
         waiting_time(1000);
@@ -236,7 +244,7 @@ public class MainActivityTest {
         waiting_time(3000);
 
         mActivityTestRule.getActivity().configureViewPagerAndTabs(build_fake_list_place_nearby());
-        waiting_time(10000);
+        waiting_time(5000);
 
         // Check the language of tabs
         TabLayout tabs = mActivityTestRule.getActivity().getTabs();
@@ -264,7 +272,9 @@ public class MainActivityTest {
         //                     /\
         //                 current_time
 
-        Assert.assertEquals("Open at 11h",timeCalculation.getInformationAboutOpeningAndClosure(openingHours.getPeriods(),current_time,current_day-1));
+        String text = mActivityTestRule.getActivity().getApplicationContext().getResources().getString(R.string.open_at);
+
+        Assert.assertEquals(text + " 11h",timeCalculation.getInformationAboutOpeningAndClosure(openingHours.getPeriods(),current_time,current_day-1));
 
         current_time = 1200;
 
@@ -273,7 +283,9 @@ public class MainActivityTest {
         //                                /\
         //                          current_time
 
-        Assert.assertEquals("Open until 13h15",timeCalculation.getInformationAboutOpeningAndClosure(openingHours.getPeriods(),current_time,current_day-1));
+        text = mActivityTestRule.getActivity().getApplicationContext().getResources().getString(R.string.open_until);
+
+        Assert.assertEquals(text +" 13h15",timeCalculation.getInformationAboutOpeningAndClosure(openingHours.getPeriods(),current_time,current_day-1));
 
         current_time = 1300;
 
@@ -282,7 +294,9 @@ public class MainActivityTest {
         //                                      /\
         //                                 current_time
 
-        Assert.assertEquals("Closed soon (in 15 min)",timeCalculation.getInformationAboutOpeningAndClosure(openingHours.getPeriods(),current_time,current_day-1));
+        text = mActivityTestRule.getActivity().getApplicationContext().getResources().getString(R.string.closed_soon);
+
+        Assert.assertEquals(text + " 15 min)",timeCalculation.getInformationAboutOpeningAndClosure(openingHours.getPeriods(),current_time,current_day-1));
 
         current_time = 1400;
 
@@ -291,7 +305,9 @@ public class MainActivityTest {
         //                                              /\
         //                                        current_time
 
-        Assert.assertEquals("Open at 19h",timeCalculation.getInformationAboutOpeningAndClosure(openingHours.getPeriods(),current_time,current_day-1));
+        text = mActivityTestRule.getActivity().getApplicationContext().getResources().getString(R.string.open_at);
+
+        Assert.assertEquals(text + " 19h",timeCalculation.getInformationAboutOpeningAndClosure(openingHours.getPeriods(),current_time,current_day-1));
 
         current_time = 2130;
 
@@ -300,7 +316,9 @@ public class MainActivityTest {
         //                                                                /\
         //                                                            current_time
 
-        Assert.assertEquals("Open until 22h30",timeCalculation.getInformationAboutOpeningAndClosure(openingHours.getPeriods(),current_time,current_day-1));
+        text = mActivityTestRule.getActivity().getApplicationContext().getResources().getString(R.string.open_until);
+
+        Assert.assertEquals(text + " 22h30",timeCalculation.getInformationAboutOpeningAndClosure(openingHours.getPeriods(),current_time,current_day-1));
 
 
         current_time = 2300;
@@ -310,7 +328,9 @@ public class MainActivityTest {
         //                                                                            /\
         //                                                                       current_time
 
-        Assert.assertEquals("Closed now",timeCalculation.getInformationAboutOpeningAndClosure(openingHours.getPeriods(),current_time,current_day-1));
+        text = mActivityTestRule.getActivity().getApplicationContext().getResources().getString(R.string.closed_now);
+
+        Assert.assertEquals(text,timeCalculation.getInformationAboutOpeningAndClosure(openingHours.getPeriods(),current_time,current_day-1));
     }
 
     public SettingActivity getActivityInstance() {
