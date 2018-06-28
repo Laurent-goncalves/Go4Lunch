@@ -140,7 +140,7 @@ public class MainActivityTest {
 
         waiting_time(5000);
 
-        mActivityTestRule.getActivity().getPageAdapter().getListRestoFragment().setList_places_nearby(list_places);
+        /*mActivityTestRule.getActivity().getPageAdapter().getListRestoFragment().setList_places_nearby(list_places);
         mActivityTestRule.getActivity().getPageAdapter().getListRestoFragment().configure_recycler_view();
 
         waiting_time(3000);
@@ -150,7 +150,7 @@ public class MainActivityTest {
 
         waiting_time(5000);
 
-        pressBack();
+        pressBack();*/
 
         // Added a sleep statement to match the app's execution delay.
         // The recommended way to handle such scenarios is to use Espresso idling resources:
