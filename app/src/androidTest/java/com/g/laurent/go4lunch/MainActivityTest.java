@@ -139,7 +139,10 @@ public class MainActivityTest {
 
         waiting_time(5000);
 
-        waiting_time(100);
+        mActivityTestRule.getActivity().getPageAdapter().getListRestoFragment().setList_places_nearby(list_places);
+        mActivityTestRule.getActivity().getPageAdapter().getListRestoFragment().configure_recycler_view();
+
+        waiting_time(3000);
 
         onView(withId(R.id.list_view_resto))
                 .perform(RecyclerViewActions.actionOnItemAtPosition(0, click()));
@@ -198,13 +201,13 @@ public class MainActivityTest {
         waiting_time(5000);
         mActivityTestRule.getActivity().configureViewPagerAndTabs(build_fake_list_place_nearby());
 
-        waiting_time(2000);
+        waiting_time(1000);
 
 
         mActivityTestRule.getActivity().configure_and_show_settings_activity();
 
 
-        waiting_time(8000);
+        waiting_time(5000);
 
         //onView(withId(R.id.switch_french_english)).perform(click());
 
@@ -241,8 +244,10 @@ public class MainActivityTest {
         });
 
 
+
+
         // Click on "done"
-        waiting_time(3000);
+        waiting_time(1000);
         ViewInteraction appCompatButton2 = onView(
                 allOf(withId(R.id.done_button), childAtPosition(
                         allOf(withId(R.id.framelayout_setting_frag),
@@ -256,7 +261,7 @@ public class MainActivityTest {
         waiting_time(3000);
 
         mActivityTestRule.getActivity().configureViewPagerAndTabs(build_fake_list_place_nearby());
-        waiting_time(5000);
+        waiting_time(3000);
 
         // Check the language of tabs
         TabLayout tabs = mActivityTestRule.getActivity().getTabs();
@@ -269,6 +274,7 @@ public class MainActivityTest {
                 Assert.assertEquals("Map View", Objects.requireNonNull(tabs.getTabAt(0)).getText());
                 break;
         }
+
     }
 
     @Test
