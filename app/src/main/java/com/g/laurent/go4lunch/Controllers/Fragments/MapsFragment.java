@@ -63,7 +63,7 @@ public class MapsFragment extends BaseRestoFragment  {
         }
         frag.setArguments(bundle);
 
-        return(frag);
+        return frag;
     }
 
     @Override

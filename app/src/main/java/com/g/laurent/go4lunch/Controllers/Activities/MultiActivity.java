@@ -112,12 +112,15 @@ public class MultiActivity extends AppCompatActivity implements CallbackMultiAct
         // Get ViewPager from layout
         pager = findViewById(R.id.viewpager);
 
-        if(getApplicationContext()!=null && list_restos!=null){
-            System.out.println("eee1 pageAdapter créé");
-            pageAdapter = new MultiFragAdapter(getSupportFragmentManager(), getApplicationContext(), list_restos, currentPlaceLatLng);
-        }
+
 
         runOnUiThread(() -> {
+
+            if(getApplicationContext()!=null && list_restos!=null){
+                System.out.println("eee1 pageAdapter créé");
+                pageAdapter = new MultiFragAdapter(getSupportFragmentManager(), getApplicationContext(), list_restos, currentPlaceLatLng);
+            }
+
             pager.setAdapter(pageAdapter);
 
             // Get TabLayout from layout

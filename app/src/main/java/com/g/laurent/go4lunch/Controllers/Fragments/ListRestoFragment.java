@@ -66,7 +66,7 @@ public class ListRestoFragment extends BaseRestoFragment {
 
         frag.setArguments(bundle);
 
-        return(frag);
+        return frag;
     }
 
     @Override

@@ -104,11 +104,11 @@ public class MainActivityTest {
         List<Place_Nearby> list_places = build_fake_list_place_nearby();
 
         waiting_time(2000);
+        //mActivityTestRule.getActivity().configureViewPagerAndTabs(list_places);
+        waiting_time(100);
 
-        mActivityTestRule.getActivity().configureViewPagerAndTabs(list_places);
         waiting_time(10000);
-
-        mActivityTestRule.getActivity().setToolbar();
+        //mActivityTestRule.getActivity().setToolbar();
 
         ViewInteraction tabView = onView(
                 allOf(childAtPosition(
@@ -137,9 +137,9 @@ public class MainActivityTest {
                         isDisplayed()));
         tabView3.perform(click());
 
-        waiting_time(3000);
+        waiting_time(5000);
 
-        waiting_time(10000);
+        waiting_time(100);
 
         onView(withId(R.id.list_view_resto))
                 .perform(RecyclerViewActions.actionOnItemAtPosition(0, click()));
@@ -190,6 +190,8 @@ public class MainActivityTest {
         appCompatButton4.perform(click());
     }
 
+    String lang;
+
     @Test
     public void TEST_change_language(){
 
@@ -206,7 +208,7 @@ public class MainActivityTest {
 
         //onView(withId(R.id.switch_french_english)).perform(click());
 
-        ViewInteraction switch_ = onView(
+        /*ViewInteraction switch_ = onView(
                 allOf(withId(R.id.switch_french_english),
                         childAtPosition(
                                 childAtPosition(
@@ -214,7 +216,7 @@ public class MainActivityTest {
                                         1),
                                 1),
                         isDisplayed()));
-        switch_.perform(click());
+        switch_.perform(click());*/
 
         SettingActivity settingActivity = getActivityInstance();
 
@@ -222,15 +224,25 @@ public class MainActivityTest {
         // Get the language set by the user
         SettingsFragment settingsFragment = (SettingsFragment) settingActivity.getSettingsFragment();
         Switch button_switch = settingsFragment.getSwitch_fr_eng();
-        String lang;
 
-        if(button_switch.isChecked())
-            lang = "en";
-        else
-            lang = "fr";
+
+        mActivityTestRule.getActivity().runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+
+                if(button_switch.isChecked()){
+                    button_switch.setChecked(false);
+                    lang = "fr";
+                } else {
+                    button_switch.setChecked(true);
+                    lang = "en";
+                }
+            }
+        });
+
 
         // Click on "done"
-        waiting_time(1000);
+        waiting_time(3000);
         ViewInteraction appCompatButton2 = onView(
                 allOf(withId(R.id.done_button), childAtPosition(
                         allOf(withId(R.id.framelayout_setting_frag),

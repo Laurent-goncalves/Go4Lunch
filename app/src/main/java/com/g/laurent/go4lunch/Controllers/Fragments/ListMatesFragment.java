@@ -36,7 +36,7 @@ public class ListMatesFragment extends Fragment {
     public static ListMatesFragment newInstance() {
 
         // Create new fragment
-        return(new ListMatesFragment());
+        return new ListMatesFragment();
     }
 
     @Override

@@ -36,7 +36,6 @@ public class MultiFragAdapter extends FragmentPagerAdapter {
                 mapsFragment = MapsFragment.newInstance(list_restos, current_place);
                 return mapsFragment;
             case 1: //Page number 2
-                System.out.println("eee ListRestoFragment créé");
                 listRestoFragment = ListRestoFragment.newInstance(list_restos);
                 return listRestoFragment;
             case 2: //Page number 3
