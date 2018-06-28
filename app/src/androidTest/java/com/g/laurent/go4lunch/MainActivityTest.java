@@ -158,6 +158,13 @@ public class MainActivityTest {
 
         waiting_time(5000);
 
+        onView(withId(R.id.sort_by_number_workmates)).perform(click());
+        waiting_time(1000);
+        onView(withId(R.id.sort_by_number_stars)).perform(click());
+        waiting_time(1000);
+        onView(withId(R.id.sort_by_distance)).perform(click());
+
+        /*
         ViewInteraction appCompatButton2 = onView(
                 allOf(withId(R.id.sort_by_number_workmates), withText("colleague"),
                         childAtPosition(
@@ -191,7 +198,7 @@ public class MainActivityTest {
                                                 0)),
                                 3),
                         isDisplayed()));
-        appCompatButton4.perform(click());
+        appCompatButton4.perform(click());*/
 
         mActivityTestRule.finishActivity();
     }
