@@ -92,11 +92,12 @@ public class MainActivityTest {
     public GrantPermissionRule mGrantPermissionRule = GrantPermissionRule.grant(android.Manifest.permission.ACCESS_FINE_LOCATION);
 
     @Rule
-    public ActivityTestRule<MultiActivity> mActivityTestRule = new ActivityTestRule<>(MultiActivity.class);
+    public ActivityTestRule<MultiActivity> mActivityTestRule = new ActivityTestRule<>(MultiActivity.class, false,false);
 
     @Test
     public void TEST_click_on_tabs() {
 
+        mActivityTestRule.launchActivity(null);
         //FirebaseDatabase.getInstance().goOffline();
 
         waiting_time(5000);
@@ -191,6 +192,8 @@ public class MainActivityTest {
                                 3),
                         isDisplayed()));
         appCompatButton4.perform(click());
+
+        mActivityTestRule.finishActivity();
     }
 
     String lang;
@@ -198,6 +201,7 @@ public class MainActivityTest {
     @Test
     public void TEST_change_language(){
 
+        mActivityTestRule.launchActivity(null);
         waiting_time(5000);
         mActivityTestRule.getActivity().configureViewPagerAndTabs(build_fake_list_place_nearby());
 
@@ -235,19 +239,16 @@ public class MainActivityTest {
 
                 if(button_switch.isChecked()){
                     button_switch.setChecked(false);
-                    lang = "fr";
+                    lang = "en";
                 } else {
                     button_switch.setChecked(true);
-                    lang = "en";
+                    lang = "fr";
                 }
             }
         });
 
-
-
-
         // Click on "done"
-        waiting_time(1000);
+        waiting_time(5000);
         ViewInteraction appCompatButton2 = onView(
                 allOf(withId(R.id.done_button), childAtPosition(
                         allOf(withId(R.id.framelayout_setting_frag),
@@ -258,10 +259,10 @@ public class MainActivityTest {
                         isDisplayed()));
         appCompatButton2.perform(click());
 
-        waiting_time(3000);
+        waiting_time(10000);
 
         mActivityTestRule.getActivity().configureViewPagerAndTabs(build_fake_list_place_nearby());
-        waiting_time(3000);
+        waiting_time(1000);
 
         // Check the language of tabs
         TabLayout tabs = mActivityTestRule.getActivity().getTabs();
@@ -275,10 +276,14 @@ public class MainActivityTest {
                 break;
         }
 
+        mActivityTestRule.finishActivity();
     }
 
     @Test
     public void TEST_text_opening_hours() {
+
+        mActivityTestRule.launchActivity(null);
+        waiting_time(5000);
 
         OpeningHours openingHours = set_fake_openingHours();
         TimeCalculation timeCalculation = new TimeCalculation(mActivityTestRule.getActivity().getApplicationContext());
@@ -349,6 +354,8 @@ public class MainActivityTest {
         text = mActivityTestRule.getActivity().getApplicationContext().getResources().getString(R.string.closed_now);
 
         Assert.assertEquals(text,timeCalculation.getInformationAboutOpeningAndClosure(openingHours.getPeriods(),current_time,current_day-1));
+
+        mActivityTestRule.finishActivity();
     }
 
     public SettingActivity getActivityInstance() {
