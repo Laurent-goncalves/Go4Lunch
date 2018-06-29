@@ -242,8 +242,18 @@ public class ListRestoFragment extends BaseRestoFragment {
         this.placeId = placeId;
     }
 
+    public Button getButton_workmates() {
+        return button_workmates;
+    }
 
+    public Button getButton_stars() {
+        return button_stars;
+    }
 
-    // ------------------------ UNUSED METHODS -----------------------------------
+    public Button getButton_distance() {
+        return button_distance;
+    }
+
+// ------------------------ UNUSED METHODS -----------------------------------
 
 }

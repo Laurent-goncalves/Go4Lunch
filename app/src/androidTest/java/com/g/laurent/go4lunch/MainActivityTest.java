@@ -157,49 +157,20 @@ public class MainActivityTest {
         // https://google.github.io/android-testing-support-library/docs/espresso/idling-resource/index.html
 
         waiting_time(5000);
+        mActivityTestRule.getActivity().runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                mActivityTestRule.getActivity().getPageAdapter().getListRestoFragment().getButton_workmates().performClick();
+                waiting_time(1000);
+                mActivityTestRule.getActivity().getPageAdapter().getListRestoFragment().getButton_stars().performClick();
+                waiting_time(1000);
+                mActivityTestRule.getActivity().getPageAdapter().getListRestoFragment().getButton_distance().performClick();
 
-        onView(withId(R.id.sort_by_number_workmates)).perform(click());
-        waiting_time(1000);
-        onView(withId(R.id.sort_by_number_stars)).perform(click());
-        waiting_time(1000);
-        onView(withId(R.id.sort_by_distance)).perform(click());
 
-        /*
-        ViewInteraction appCompatButton2 = onView(
-                allOf(withId(R.id.sort_by_number_workmates), withText("colleague"),
-                        childAtPosition(
-                                allOf(withId(R.id.linearlayout_buttons_sorting),
-                                        childAtPosition(
-                                                withClassName(is("android.widget.RelativeLayout")),
-                                                0)),
-                                1),
-                        isDisplayed()));
-        appCompatButton2.perform(click());
+            }
+        });
 
-        waiting_time(1000);
-        ViewInteraction appCompatButton3 = onView(
-                allOf(withId(R.id.sort_by_number_stars), withText("stars"),
-                        childAtPosition(
-                                allOf(withId(R.id.linearlayout_buttons_sorting),
-                                        childAtPosition(
-                                                withClassName(is("android.widget.RelativeLayout")),
-                                                0)),
-                                2),
-                        isDisplayed()));
-        appCompatButton3.perform(click());
-
-        waiting_time(1000);
-        ViewInteraction appCompatButton4 = onView(
-                allOf(withId(R.id.sort_by_distance), withText("distance"),
-                        childAtPosition(
-                                allOf(withId(R.id.linearlayout_buttons_sorting),
-                                        childAtPosition(
-                                                withClassName(is("android.widget.RelativeLayout")),
-                                                0)),
-                                3),
-                        isDisplayed()));
-        appCompatButton4.perform(click());*/
-
+        waiting_time(6000);
         mActivityTestRule.finishActivity();
     }
 
@@ -210,30 +181,14 @@ public class MainActivityTest {
 
         mActivityTestRule.launchActivity(null);
         waiting_time(5000);
-        mActivityTestRule.getActivity().configureViewPagerAndTabs(build_fake_list_place_nearby());
 
+        mActivityTestRule.getActivity().configureViewPagerAndTabs(build_fake_list_place_nearby());
         waiting_time(1000);
 
-
         mActivityTestRule.getActivity().configure_and_show_settings_activity();
-
-
         waiting_time(5000);
 
-        //onView(withId(R.id.switch_french_english)).perform(click());
-
-        /*ViewInteraction switch_ = onView(
-                allOf(withId(R.id.switch_french_english),
-                        childAtPosition(
-                                childAtPosition(
-                                        withClassName(is("android.widget.LinearLayout")),
-                                        1),
-                                1),
-                        isDisplayed()));
-        switch_.perform(click());*/
-
         SettingActivity settingActivity = getActivityInstance();
-
 
         // Get the language set by the user
         SettingsFragment settingsFragment = (SettingsFragment) settingActivity.getSettingsFragment();
