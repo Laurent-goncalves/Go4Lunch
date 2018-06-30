@@ -174,6 +174,7 @@ public class MainActivityTest {
         waiting_time(12000);
 
         Intent intent = new Intent(mActivityTestRule.getActivity().getApplicationContext(),RestoActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 
         Gson gson = new Gson();
         String resto_json = gson.toJson(list_places.get(0));
