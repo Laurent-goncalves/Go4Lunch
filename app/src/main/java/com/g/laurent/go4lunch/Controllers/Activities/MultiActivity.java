@@ -1,8 +1,8 @@
 package com.g.laurent.go4lunch.Controllers.Activities;
 
 import android.app.AlarmManager;
+import android.support.v4.app.FragmentTransaction;
 import android.app.PendingIntent;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -18,6 +18,7 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.util.DisplayMetrics;
+import com.g.laurent.go4lunch.Controllers.Fragments.ListRestoFragment;
 import com.g.laurent.go4lunch.Models.AlarmReceiver;
 import com.g.laurent.go4lunch.Models.CallbackMultiActivity;
 import com.g.laurent.go4lunch.Models.List_Search_Nearby;
@@ -31,8 +32,6 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-
-import java.io.IOException;
 import java.util.Calendar;
 import java.util.List;
 import java.util.Locale;
@@ -74,6 +73,8 @@ public class MultiActivity extends AppCompatActivity implements CallbackMultiAct
         FirebaseApp.initializeApp(context);
         mCurrentUser = FirebaseAuth.getInstance().getCurrentUser();
 
+        mCurrentUser=null;
+
         if(mCurrentUser!=null){
             sharedPreferences = getSharedPreferences(EXTRA_PREFERENCES, MODE_PRIVATE);
             current_page = 0;
@@ -111,13 +112,11 @@ public class MultiActivity extends AppCompatActivity implements CallbackMultiAct
 
         // Get ViewPager from layout
         pager = findViewById(R.id.viewpager);
-
-
+        pager.setOffscreenPageLimit(3);
 
         runOnUiThread(() -> {
 
             if(getApplicationContext()!=null && list_restos!=null){
-                System.out.println("eee1 pageAdapter créé");
                 pageAdapter = new MultiFragAdapter(getSupportFragmentManager(), getApplicationContext(), list_restos, currentPlaceLatLng);
             }
 
@@ -273,6 +272,16 @@ public class MultiActivity extends AppCompatActivity implements CallbackMultiAct
     // -------------------------------------- GETTER and SETTER -------------------------------------------
     // ----------------------------------------------------------------------------------------------------
 
+    public ListRestoFragment listRestoFragment;
+
+    public void configure_and_show_listrestofragment() {
+        listRestoFragment = new ListRestoFragment();
+
+        FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
+        fragmentTransaction.replace(R.id.multi_activity_fragment, listRestoFragment);
+        fragmentTransaction.commit();
+    }
+
     public void setCurrentPlaceLatLng(LatLng currentPlaceLatLng) {
         this.currentPlaceLatLng = currentPlaceLatLng;
 
@@ -332,6 +341,10 @@ public class MultiActivity extends AppCompatActivity implements CallbackMultiAct
 
     public NavigationView getNavigationView() {
         return navigationView;
+    }
+
+    public ViewPager getPager() {
+        return pager;
     }
 
     public SharedPreferences getSharedPreferences() {

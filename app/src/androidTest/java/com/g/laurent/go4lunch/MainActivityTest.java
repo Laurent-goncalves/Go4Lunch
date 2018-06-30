@@ -13,6 +13,7 @@ import android.support.test.rule.GrantPermissionRule;
 import android.support.test.runner.AndroidJUnit4;
 import android.support.test.runner.lifecycle.ActivityLifecycleMonitorRegistry;
 import android.support.test.runner.lifecycle.Stage;
+import android.support.v4.view.ViewPager;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
@@ -98,18 +99,13 @@ public class MainActivityTest {
     public void TEST_click_on_tabs() {
 
         mActivityTestRule.launchActivity(null);
-        //FirebaseDatabase.getInstance().goOffline();
-
-        waiting_time(5000);
 
         List<Place_Nearby> list_places = build_fake_list_place_nearby();
 
-        waiting_time(2000);
-        //mActivityTestRule.getActivity().configureViewPagerAndTabs(list_places);
-        waiting_time(100);
+        waiting_time(10000);
+        mActivityTestRule.getActivity().configureViewPagerAndTabs(list_places);
 
         waiting_time(10000);
-        //mActivityTestRule.getActivity().setToolbar();
 
         ViewInteraction tabView = onView(
                 allOf(childAtPosition(
@@ -139,42 +135,51 @@ public class MainActivityTest {
         tabView3.perform(click());
 
         waiting_time(5000);
+        mActivityTestRule.finishActivity();
+    }
 
-        /*mActivityTestRule.getActivity().getPageAdapter().getListRestoFragment().setList_places_nearby(list_places);
-        mActivityTestRule.getActivity().getPageAdapter().getListRestoFragment().configure_recycler_view();
+    @Test
+    public void TEST_list_restofragment(){
 
-        waiting_time(3000);
+        mActivityTestRule.launchActivity(null);
+
+        List<Place_Nearby> list_places = build_fake_list_place_nearby();
+
+        waiting_time(10000);
+
+        mActivityTestRule.getActivity().configure_and_show_listrestofragment();
+
+        waiting_time(5000);
+
+        mActivityTestRule.getActivity().listRestoFragment.setList_places_nearby(list_places);
+        mActivityTestRule.getActivity().listRestoFragment.configure_recycler_view();
+
+        waiting_time(8000);
+
+        mActivityTestRule.getActivity().runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+
+                mActivityTestRule.getActivity().listRestoFragment.getButton_workmates().performClick();
+                waiting_time(1000);
+                mActivityTestRule.getActivity().listRestoFragment.getButton_stars().performClick();
+                waiting_time(1000);
+                mActivityTestRule.getActivity().listRestoFragment.getButton_distance().performClick();
+            }
+        });
+
+        waiting_time(12000);
 
         onView(withId(R.id.list_view_resto))
                 .perform(RecyclerViewActions.actionOnItemAtPosition(0, click()));
 
         waiting_time(5000);
 
-        pressBack();*/
-
-        // Added a sleep statement to match the app's execution delay.
-        // The recommended way to handle such scenarios is to use Espresso idling resources:
-        // https://google.github.io/android-testing-support-library/docs/espresso/idling-resource/index.html
-
-        waiting_time(5000);
-        mActivityTestRule.getActivity().runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                mActivityTestRule.getActivity().getPageAdapter().getListRestoFragment().getButton_workmates().performClick();
-                waiting_time(1000);
-                mActivityTestRule.getActivity().getPageAdapter().getListRestoFragment().getButton_stars().performClick();
-                waiting_time(1000);
-                mActivityTestRule.getActivity().getPageAdapter().getListRestoFragment().getButton_distance().performClick();
-
-
-            }
-        });
-
-        waiting_time(6000);
+        pressBack();
         mActivityTestRule.finishActivity();
     }
 
-    String lang;
+    private String lang;
 
     @Test
     public void TEST_change_language(){
@@ -498,6 +503,18 @@ public class MainActivityTest {
         }
     }
 }
+
+        /*mActivityTestRule.getActivity().getPageAdapter().getListRestoFragment().setList_places_nearby(list_places);
+        mActivityTestRule.getActivity().getPageAdapter().getListRestoFragment().configure_recycler_view();
+
+        waiting_time(3000);
+
+        onView(withId(R.id.list_view_resto))
+                .perform(RecyclerViewActions.actionOnItemAtPosition(0, click()));
+
+        waiting_time(5000);
+
+        pressBack();*/
 
 
     /*@Before

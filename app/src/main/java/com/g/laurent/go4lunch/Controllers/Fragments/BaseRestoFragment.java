@@ -24,8 +24,6 @@ public abstract class BaseRestoFragment extends Fragment {
         // Required empty public constructor
     }
 
-
-
     protected Boolean is_resto_chosen_by_workmates(Place_Nearby resto, List<Workmate> workmateList){
 
         Boolean answer = false;
@@ -150,8 +148,6 @@ public abstract class BaseRestoFragment extends Fragment {
 
         return list_index_sorted;
     }
-
-
 
     // -------------------------------- SORT BY WORKMATE ----------------------------------------------
 

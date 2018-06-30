@@ -52,15 +52,7 @@ public class SettingActivity extends AppCompatActivity {
     @Override
     public void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
-        System.out.println("eee onConfigurationChanged");
-
-        /*FrameLayout frameLayout = getActivity().findViewById(R.id.framelayout_setting_frag);
-        frameLayout.removeAllViews();
-        LayoutInflater inflater = (LayoutInflater) getActivity().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        View view = inflater.inflate(R.layout.fragment_settings, null);
-        frameLayout.addView(view);*/
     }
-
 
     public void send_result_enable_notification(int result) {
         Intent returnIntent = new Intent();
