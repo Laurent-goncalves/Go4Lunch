@@ -23,6 +23,7 @@ import android.widget.Toast;
 
 import com.firebase.ui.auth.AuthUI;
 import com.g.laurent.go4lunch.Controllers.Activities.MultiActivity;
+import com.g.laurent.go4lunch.Controllers.Activities.RestoActivity;
 import com.g.laurent.go4lunch.Controllers.Activities.SettingActivity;
 import com.g.laurent.go4lunch.Controllers.Fragments.ListRestoFragment;
 import com.g.laurent.go4lunch.Controllers.Fragments.MapsFragment;
@@ -56,6 +57,7 @@ import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseAuthException;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.gson.Gson;
 
 import junit.framework.Assert;
 
@@ -141,6 +143,7 @@ public class MainActivityTest {
     @Test
     public void TEST_list_restofragment(){
 
+        String EXTRA_RESTO_DETAILS = "resto_details";
         mActivityTestRule.launchActivity(null);
 
         List<Place_Nearby> list_places = build_fake_list_place_nearby();
@@ -170,8 +173,12 @@ public class MainActivityTest {
 
         waiting_time(12000);
 
-        onView(withId(R.id.list_view_resto))
-                .perform(RecyclerViewActions.actionOnItemAtPosition(0, click()));
+        Intent intent = new Intent(mActivityTestRule.getActivity().getApplicationContext(),RestoActivity.class);
+
+        Gson gson = new Gson();
+        String resto_json = gson.toJson(list_places.get(0));
+        intent.putExtra(EXTRA_RESTO_DETAILS,resto_json);
+        mActivityTestRule.getActivity().getApplicationContext().startActivity(intent);
 
         waiting_time(5000);
 
