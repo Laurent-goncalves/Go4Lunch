@@ -247,7 +247,8 @@ public class RestoFragment extends Fragment {
             button.setCompoundDrawableTintList(ColorStateList.valueOf(ContextCompat.getColor(getActivity().getApplicationContext(),(color))));
         else {
             Drawable[] wrapDrawable = button.getCompoundDrawables();
-            DrawableCompat.setTint(wrapDrawable[0], getResources().getColor(color));
+            if(wrapDrawable[0]!=null)
+            DrawableCompat.setTint(wrapDrawable[0], context.getResources().getColor(color));
         }
     }
 
