@@ -1,6 +1,5 @@
 package com.g.laurent.go4lunch;
 
-import android.content.Context;
 import android.content.Intent;
 import android.support.design.widget.TabLayout;
 import android.support.test.espresso.ViewInteraction;
@@ -14,15 +13,11 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewParent;
 import android.widget.Switch;
-
 import com.g.laurent.go4lunch.Controllers.Activities.MultiActivity;
 import com.g.laurent.go4lunch.Controllers.Activities.RestoActivity;
 import com.g.laurent.go4lunch.Controllers.Activities.SettingActivity;
-import com.g.laurent.go4lunch.Controllers.Fragments.MapsFragment;
 import com.g.laurent.go4lunch.Controllers.Fragments.SettingsFragment;
-import com.g.laurent.go4lunch.Models.ListSearchNearby;
 import com.g.laurent.go4lunch.Models.PlaceNearby;
-import com.g.laurent.go4lunch.Models.Workmate;
 import com.g.laurent.go4lunch.Utils.DetailsPlace.Close;
 import com.g.laurent.go4lunch.Utils.DetailsPlace.Geometry;
 import com.g.laurent.go4lunch.Utils.DetailsPlace.Location;
@@ -30,20 +25,8 @@ import com.g.laurent.go4lunch.Utils.DetailsPlace.Open;
 import com.g.laurent.go4lunch.Utils.DetailsPlace.OpeningHours;
 import com.g.laurent.go4lunch.Utils.DetailsPlace.Period;
 import com.g.laurent.go4lunch.Utils.TimeCalculation;
-import com.google.android.gms.common.data.DataBufferUtils;
-import com.google.android.gms.location.places.AutocompletePrediction;
-import com.google.android.gms.location.places.AutocompletePredictionBufferResponse;
-import com.google.android.gms.location.places.GeoDataClient;
-import com.google.android.gms.location.places.Places;
-import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.LatLngBounds;
-import com.google.android.gms.tasks.RuntimeExecutionException;
-import com.google.android.gms.tasks.Task;
-import com.google.android.gms.tasks.Tasks;
 import com.google.gson.Gson;
-
 import junit.framework.Assert;
-
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
 import org.hamcrest.TypeSafeMatcher;
@@ -54,19 +37,13 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
-
 import static android.support.test.InstrumentationRegistry.getInstrumentation;
 import static android.support.test.espresso.Espresso.onView;
 import static android.support.test.espresso.Espresso.pressBack;
 import static android.support.test.espresso.action.ViewActions.click;
 import static android.support.test.espresso.matcher.ViewMatchers.isDisplayed;
 import static android.support.test.espresso.matcher.ViewMatchers.withId;
-import static android.support.test.espresso.matcher.ViewMatchers.withText;
 import static org.hamcrest.Matchers.allOf;
-import static org.hamcrest.Matchers.is;
 
 @LargeTest
 @RunWith(AndroidJUnit4.class)
@@ -140,16 +117,13 @@ public class MainActivityTest {
 
         waiting_time(8000);
 
-        mActivityTestRule.getActivity().runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
+        mActivityTestRule.getActivity().runOnUiThread(() -> {
 
-                mActivityTestRule.getActivity().listRestoFragment.getButton_workmates().performClick();
-                waiting_time(1000);
-                mActivityTestRule.getActivity().listRestoFragment.getButton_stars().performClick();
-                waiting_time(1000);
-                mActivityTestRule.getActivity().listRestoFragment.getButton_distance().performClick();
-            }
+            mActivityTestRule.getActivity().listRestoFragment.getButton_workmates().performClick();
+            waiting_time(1000);
+            mActivityTestRule.getActivity().listRestoFragment.getButton_stars().performClick();
+            waiting_time(1000);
+            mActivityTestRule.getActivity().listRestoFragment.getButton_distance().performClick();
         });
 
         waiting_time(12000);
@@ -185,21 +159,18 @@ public class MainActivityTest {
         SettingActivity settingActivity = getActivityInstance();
 
         // Get the language set by the user
-        SettingsFragment settingsFragment = (SettingsFragment) settingActivity.getSettingsFragment();
+        SettingsFragment settingsFragment = settingActivity.getSettingsFragment();
         Switch button_switch = settingsFragment.getSwitch_fr_eng();
 
 
-        mActivityTestRule.getActivity().runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
+        mActivityTestRule.getActivity().runOnUiThread(() -> {
 
-                if(button_switch.isChecked()){
-                    button_switch.setChecked(false);
-                    lang = "en";
-                } else {
-                    button_switch.setChecked(true);
-                    lang = "fr";
-                }
+            if(button_switch.isChecked()){
+                button_switch.setChecked(false);
+                lang = "en";
+            } else {
+                button_switch.setChecked(true);
+                lang = "fr";
             }
         });
 
@@ -318,14 +289,12 @@ public class MainActivityTest {
 
         final SettingActivity[] currentActivity = new SettingActivity[1];
 
-        getInstrumentation().runOnMainSync(new Runnable() {
-            public void run() {
-                Collection resumedActivities = ActivityLifecycleMonitorRegistry.getInstance().getActivitiesInStage(Stage.RESUMED);
-                if (resumedActivities.iterator().hasNext()) {
+        getInstrumentation().runOnMainSync(() -> {
+            Collection resumedActivities = ActivityLifecycleMonitorRegistry.getInstance().getActivitiesInStage(Stage.RESUMED);
+            if (resumedActivities.iterator().hasNext()) {
 
-                    if(resumedActivities.iterator().next() instanceof SettingActivity)
-                        currentActivity[0] = (SettingActivity) resumedActivities.iterator().next();
-                }
+                if(resumedActivities.iterator().next() instanceof SettingActivity)
+                    currentActivity[0] = (SettingActivity) resumedActivities.iterator().next();
             }
         });
 
@@ -343,11 +312,6 @@ public class MainActivityTest {
         location1.setLng(2.3430747831421286);
         geometry1.setLocation(location1);
         Double rating1 = 3.3d;
-        List<Workmate> list_workmates1 = new ArrayList<>();
-        list_workmates1.add(new Workmate("Jean",null,null,null,null,null,null,null,null));
-        list_workmates1.add(new Workmate("Kevin",null,null,null,null,null,null,null,null));
-        list_workmates1.add(new Workmate("Sami",null,null,null,null,null,null,null,null));
-        list_workmates1.add(new Workmate("Caro",null,null,null,null,null,null,null,null));
 
         String id2 = "ID2";
         Geometry geometry2 = new Geometry();
@@ -356,11 +320,6 @@ public class MainActivityTest {
         location2.setLng(2.3578805769043356);
         geometry2.setLocation(location2);
         Double rating2 = 2.3d;
-        List<Workmate> list_workmates2 = new ArrayList<>();
-        list_workmates2.add(new Workmate("Jean",null,null,null,null,null,null,null,null));
-        list_workmates2.add(new Workmate("Kevin",null,null,null,null,null,null,null,null));
-        list_workmates2.add(new Workmate("Sami",null,null,null,null,null,null,null,null));
-
 
         String id3 = "ID3";
         Geometry geometry3 = new Geometry();
@@ -369,10 +328,6 @@ public class MainActivityTest {
         location3.setLng(2.3683948362427145);
         geometry3.setLocation(location3);
         Double rating3 = 1.6d;
-        List<Workmate> list_workmates3 = new ArrayList<>();
-        list_workmates3.add(new Workmate("Jean",null,null,null,null,null,null,null,null));
-        list_workmates3.add(new Workmate("Kevin",null,null,null,null,null,null,null,null));
-
 
         String id4 = "ID4";
         Geometry geometry4 = new Geometry();
@@ -381,8 +336,6 @@ public class MainActivityTest {
         location4.setLng(2.385861381347695);
         geometry4.setLocation(location4);
         Double rating4 = 0.9d;
-        List<Workmate> list_workmates4 = new ArrayList<>();
-        list_workmates4.add(new Workmate("Jean",null,null,null,null,null,null,null,null));
 
         new_list_places_nearby.add(new PlaceNearby("Resto 4",id4,geometry4,null,rating4,null,"rue saint nicolas",null,null,null,null));
         new_list_places_nearby.add(new PlaceNearby("Resto 1",id1,geometry1,null,rating1,null,"rue leo lagrange",null,null,null,null));
@@ -427,44 +380,6 @@ public class MainActivityTest {
         return openingHours;
     }
 
-    public void googleplacespredictions(String query, Context context){
-
-        List<String> list_places_nearby = new ArrayList<>();
-        LatLngBounds bounds = new LatLngBounds(new LatLng(38.46572222050097, -107.75668023304138),new LatLng(39.913037779499035, -105.88929176695862));
-        GeoDataClient mGeoDataClient = Places.getGeoDataClient(context);
-
-        Task<AutocompletePredictionBufferResponse> results =
-                mGeoDataClient.getAutocompletePredictions(query, bounds, GeoDataClient.BoundsMode.STRICT, null);
-
-        try {
-            Tasks.await(results, 60, TimeUnit.SECONDS);
-        } catch (ExecutionException | InterruptedException | TimeoutException e) {
-            e.printStackTrace();
-        }
-
-        try {
-            AutocompletePredictionBufferResponse autocompletePredictions = results.getResult();
-
-            // Freeze the results immutable representation that can be stored safely.
-            ArrayList<AutocompletePrediction> al = DataBufferUtils.freezeAndClose(autocompletePredictions);
-
-            for (AutocompletePrediction p : al) {
-                list_places_nearby.add(p.getPlaceId());
-            }
-
-            MapsFragment mapsFragment = mActivityTestRule.getActivity().getPageAdapter().getMapsFragment();
-
-            ListSearchNearby list_search_nearby = new ListSearchNearby("AIzaSyCAzX1ILkJlqSsTMkRJHSGEMAQWuqxSxKA",list_places_nearby,mapsFragment);
-
-            waiting_time(5000);
-
-
-        } catch (RuntimeExecutionException e) {
-            // If the query did not complete successfully return null
-            //Log.e(TAG, "Error getting autocomplete prediction API call", e);
-        }
-    }
-
     private static Matcher<View> childAtPosition(
             final Matcher<View> parentMatcher, final int position) {
 
@@ -492,288 +407,3 @@ public class MainActivityTest {
         }
     }
 }
-
-        /*mActivityTestRule.getActivity().getPageAdapter().getListRestoFragment().setList_places_nearby(list_places);
-        mActivityTestRule.getActivity().getPageAdapter().getListRestoFragment().configure_recycler_view();
-
-        waiting_time(3000);
-
-        onView(withId(R.id.list_view_resto))
-                .perform(RecyclerViewActions.actionOnItemAtPosition(0, click()));
-
-        waiting_time(5000);
-
-        pressBack();*/
-
-
-    /*@Before
-    public void authentication_firebase(){
-
-        FirebaseApp.initializeApp(mActivityTestRule.getActivity());
-        FirebaseAuth mFirebaseAuth = FirebaseAuth.getInstance();
-
-        mFirebaseAuth.signInWithEmailAndPassword("develop.lgontest@gmail.com", "Password77")
-                .addOnCompleteListener(mActivityTestRule.getActivity(), new OnCompleteListener<AuthResult>() {
-                    @Override
-                    public void onComplete(@NonNull Task<AuthResult> task) {
-                        if (task.isSuccessful()) {
-                            // Sign in success, update UI with the signed-in user's information
-
-                            firebase_recover = new FirebaseRecover(mActivityTestRule.getActivity().getApplicationContext(),
-                                    "ID1");
-
-                            firebase_recover.recover_workmate_chosen_resto();
-                        }
-
-                    }
-                });
-
-        waiting_time(15000);
-    }*/
-
-
-/*
-
-        /*ViewInteraction switch_ = onView(
-                allOf(withId(R.id.switch_french_english),
-                        childAtPosition(
-                                childAtPosition(
-                                        withClassName(is("android.widget.LinearLayout")),
-                                        1),
-                                1),
-                        isDisplayed()));
-        switch_.perform(click());
-
-
-    @Test
-    public void check_liked_and_chosen_resto() {
-
-        FirebaseUpdate firebase_update = new FirebaseUpdate(mActivityTestRule.getActivity().getApplicationContext());
-        firebase_update.initialize_like_status_and_chosen_restaurant("UXKUE5wPVUfwqgkeSelNRi0MoQU2");
-
-        waiting_time(1000);
-
-        // Click on List Restos View
-        ViewInteraction tabView = onView(
-                allOf(childAtPosition(
-                        childAtPosition(
-                                withId(R.id.activity_multi_tabs),
-                                0),
-                        1),
-                        isDisplayed()));
-        tabView.perform(click());
-        waiting_time(2000);
-
-        // click on Workmates fragment
-        ViewInteraction tabView2 = onView(
-                allOf(childAtPosition(
-                        childAtPosition(
-                                withId(R.id.activity_multi_tabs),
-                                0),
-                        2),
-                        isDisplayed()));
-        tabView2.perform(click());
-        waiting_time(2000);
-
-        // Click on List Restos View
-        ViewInteraction tabView3 = onView(
-                allOf(childAtPosition(
-                        childAtPosition(
-                                withId(R.id.activity_multi_tabs),
-                                0),
-                        1),
-                        isDisplayed()));
-        tabView3.perform(click());
-        waiting_time(2000);
-
-        // click on 1st item of recyclerView
-        ViewInteraction recyclerView = onView(
-                allOf(withId(R.id.list_view_resto),
-                        childAtPosition(
-                                withClassName(is("android.widget.RelativeLayout")),
-                                2)));
-        recyclerView.perform(actionOnItemAtPosition(0, click()));
-
-        // Find the id of the first item
-        MultiFragAdapter adapter= mActivityTestRule.getActivity().getPageAdapter();
-
-        waiting_time(2000);
-
-        ListRestoFragment list_restos_fragment = adapter.getListRestoFragment();
-        String placeId_ref = list_restos_fragment.getList_places_nearby().get(0).getPlaceId();
-
-
-        // click on button to choose the restaurant
-        ViewInteraction circleImageView = onView(
-                allOf(withId(R.id.valid_restaurant),
-                        childAtPosition(
-                                childAtPosition(
-                                        withClassName(is("android.widget.LinearLayout")),
-                                        0),
-                                2)));
-        circleImageView.perform(scrollTo(), click());
-        waiting_time(2000);
-
-        // click on button to like the restaurant
-        ViewInteraction appCompatButton2 = onView(
-                allOf(withId(R.id.like_button), withText("LIKE"),
-                        childAtPosition(
-                                childAtPosition(
-                                        withClassName(is("android.widget.LinearLayout")),
-                                        1),
-                                1)));
-        appCompatButton2.perform(scrollTo(), click());
-        waiting_time(2000);
-
-        // Recover the list of liked restos and the resto chosen by the user
-        FirebaseRecover firebase_recover = new FirebaseRecover(mActivityTestRule.getActivity().getApplicationContext(),
-                "UXKUE5wPVUfwqgkeSelNRi0MoQU2");
-
-        firebase_recover.recover_workmate_liked_restos();
-        firebase_recover.recover_workmate_chosen_resto();
-        waiting_time(5000);
-
-
-        // Check if the resto liked is among resto_id of the list on Firebase
-        List<String> list_places = firebase_recover.getList_restos_liked();
-        Boolean resto_chosen = false;
-
-        for(String restoid : list_places){
-            if(restoid.equals(placeId_ref))
-                resto_chosen=true;
-        }
-
-        Assert.assertTrue(resto_chosen);
-
-        // Check if the resto_id on Firebase is the one chosen by the user
-        String restoid_chosen=firebase_recover.getResto_id_chosen();
-        Assert.assertEquals(placeId_ref,restoid_chosen);
-
-    }
-
-
-
-    @Test
-    public void Test_like_resto_saving_on_Firebase() {
-
-        mActivityTestRule.getActivity().configure_and_show_ListRestoFragment();
-
-        waiting_time(5000);
-
-        ListRestoFragment list_restos_fragment = mActivityTestRule.getActivity().getListRestoFragment();
-        String placeId_ref =list_restos_fragment.getList_places_nearby().get(0).getPlaceId();
-
-        // Click on restaurant item in the list
-        onView(withId(R.id.list_view_resto))
-                .perform(RecyclerViewActions.actionOnItemAtPosition(0, click()));
-
-        // Click on button like restaurant
-        ViewInteraction appCompatButton3 = onView(
-                allOf(withId(R.id.like_button), withText("LIKE"),
-                        childAtPosition(
-                                childAtPosition(
-                                        withClassName(is("android.widget.LinearLayout")),
-                                        1),
-                                1)));
-        appCompatButton3.perform(scrollTo(), click());
-
-        waiting_time(2000);
-        FirebaseRecover firebase_recover = new FirebaseRecover(mActivityTestRule.getActivity().getApplicationContext(),
-                list_restos_fragment);
-
-        firebase_recover.recover_workmate_restoId("UXKUE5wPVUfwqgkeSelNRi0MoQU2");
-        waiting_time(3000);
-        Assert.assertEquals(placeId_ref,list_restos_fragment.getPlaceId());
-    }
-
-
-    @Test
-    public void TEST_bounds() {
-
-        Context context = mActivityTestRule.getActivity().getApplicationContext();
-
-        LatLng current_location = new LatLng(48.87116360802959,2.337829608029594);
-        int radius = 500;
-
-        DistanceCalculation tool_calcul_distance = new DistanceCalculation();
-        LatLngBounds bounds = tool_calcul_distance.create_LatLngBounds(radius, current_location);
-
-
-        //GoogleMapsUtils google_maps_utils = new GoogleMapsUtils(context);
-
-        googleplacespredictions("Starbuck",context);
-
-
-        String distance = tool_calcul_distance.calulate_distance(bounds.southwest.latitude,bounds.southwest.longitude,current_location.latitude,current_location.longitude);
-
-        // System.out.println(bounds);
-        // Assert.assertEquals(String.valueOf(radius),distance);
-
-    }*/
-
-
-/*
-        ViewInteraction appCompatImageButton = onView(
-                allOf(withContentDescription("Open navigation drawer"),
-                        childAtPosition(
-                                allOf(withId(R.id.activity_main_toolbar),
-                                        childAtPosition(
-                                                withClassName(is("android.widget.LinearLayout")),
-                                                0)),
-                                0),
-                        isDisplayed()));
-        appCompatImageButton.perform(click());
-
-        ViewInteraction navigationMenuItemView = onView(
-                allOf(childAtPosition(
-                        allOf(withId(R.id.design_navigation_view),
-                                childAtPosition(
-                                        withId(R.id.activity_main_nav_view),
-                                        0)),
-                        3),
-                        isDisplayed()));
-        navigationMenuItemView.perform(click());
-
-        // Added a sleep statement to match the app's execution delay.
-        // The recommended way to handle such scenarios is to use Espresso idling resources:
-        // https://google.github.io/android-testing-support-library/docs/espresso/idling-resource/index.html
-        try {
-            Thread.sleep(3586940);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-
-        ViewInteraction appCompatButton3 = onView(
-                allOf(withId(R.id.done_button), withText("Done"),
-                        childAtPosition(
-                                childAtPosition(
-                                        withId(R.id.setting_activity_main),
-                                        1),
-                                1),
-                        isDisplayed()));
-        appCompatButton3.perform(click());
-
-
-
-        // @Test
-    public void create_new_users_firebase() {
-
-        SharedPreferences sharedPreferences = mActivityTestRule.getActivity().getSharedPreferences();
-
-        String EXTRA_LAT_CURRENT = "latitude_current_location";
-        String EXTRA_LONG_CURRENT = "longitude_current_location";
-
-        sharedPreferences.edit().putFloat(EXTRA_LAT_CURRENT,48.866667f).apply();
-        sharedPreferences.edit().putFloat(EXTRA_LONG_CURRENT,2.333333f).apply();
-
-
-        FirebaseUpdate firebase_update = new FirebaseUpdate(mActivityTestRule.getActivity().getApplicationContext());
-
-        waiting_time(5000);
-
-        firebase_update.update_full_workmate_data(new Workmate("Sean","ID1","https://i.pinimg.com/originals/e7/c4/dc/e7c4dc04867ad87c2437f22cc1859f5d.jpg",true,"IDresto1","McDo",null,null,null));
-        firebase_update.update_full_workmate_data(new Workmate("Hugh","ID2","https://upload.wikimedia.org/wikipedia/commons/thumb/f/f7/Hugh_Jackman_%282017%29.jpg/1200px-Hugh_Jackman_%282017%29.jpg",false,null,null,null,null,null));
-        firebase_update.update_full_workmate_data(new Workmate("George","ID3","https://gal.img.pmdstatic.net/fit/http.3A.2F.2Fprd2-bone-image.2Es3-website-eu-west-1.2Eamazonaws.2Ecom.2Fprismamedia_people.2F2017.2F06.2F30.2F2249dbc4-7761-4990-87af-258d04ba95ee.2Ejpeg/2419x1677/quality/80/george-clooney.jpg",true,"IDresto3",null,"Le Trucanous",null,null));
-        firebase_update.update_full_workmate_data(new Workmate("Brigitte","ID4","https://pbs.twimg.com/profile_images/898819805083467776/IqAVGrO4_400x400.jpg",false,null,null,null,null,null));
-    }
-        */

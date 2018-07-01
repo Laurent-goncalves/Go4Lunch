@@ -1,5 +1,6 @@
 package com.g.laurent.go4lunch;
 
+import android.content.Context;
 import com.g.laurent.go4lunch.Controllers.Fragments.ListRestoFragment;
 import com.g.laurent.go4lunch.Models.ListSearchNearby;
 import com.g.laurent.go4lunch.Models.PlaceNearby;
@@ -11,6 +12,7 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import junit.framework.Assert;
 import org.junit.Test;
+import org.mockito.Mockito;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -54,7 +56,7 @@ public class ExampleUnitTest {
         // sort by workmates number
         list_id = new ArrayList<>();
         new_list_places_nearby = build_fake_list_place_nearby();
-        List<Workmate> new_list_workmates = new ArrayList<>();
+        List<Workmate> new_list_workmates;
         new_list_workmates = build_fake_list_workmates();
 
         listRestoFragment.setList_places_nearby(new_list_places_nearby);
@@ -77,10 +79,11 @@ public class ExampleUnitTest {
         String radius = "500";
         String api_key = "AIzaSyBiRkG6clZcF-KhwQIPGq5t8h-KBk-8ldA";
         LatLng latLng = new LatLng(48.6102599, 2.474805);
+        Context context = Mockito.mock(Context.class);
 
-        ListSearchNearby list_search_nearby = new ListSearchNearby(api_key,latLng,radius,type,null);
+        ListSearchNearby list_search_nearby = new ListSearchNearby(context,api_key,latLng,radius,type,null);
 
-        waiting_time(5000);
+        waiting_time();
         Assert.assertTrue(list_search_nearby.getList_places_nearby().size()>0);
     }
 
@@ -111,11 +114,6 @@ public class ExampleUnitTest {
         location1.setLng(2.3430747831421286);
         geometry1.setLocation(location1);
         Double rating1 = 3.3d;
-        List<Workmate> list_workmates1 = new ArrayList<>();
-        list_workmates1.add(new Workmate("Jean",null,null,null,null,null,null,null,null));
-        list_workmates1.add(new Workmate("Kevin",null,null,null,null,null,null,null,null));
-        list_workmates1.add(new Workmate("Sami",null,null,null,null,null,null,null,null));
-        list_workmates1.add(new Workmate("Caro",null,null,null,null,null,null,null,null));
 
         String id2 = "ID2";
         Geometry geometry2 = new Geometry();
@@ -124,11 +122,6 @@ public class ExampleUnitTest {
         location2.setLng(2.3578805769043356);
         geometry2.setLocation(location2);
         Double rating2 = 2.3d;
-        List<Workmate> list_workmates2 = new ArrayList<>();
-        list_workmates2.add(new Workmate("Jean",null,null,null,null,null,null,null,null));
-        list_workmates2.add(new Workmate("Kevin",null,null,null,null,null,null,null,null));
-        list_workmates2.add(new Workmate("Sami",null,null,null,null,null,null,null,null));
-
 
         String id3 = "ID3";
         Geometry geometry3 = new Geometry();
@@ -137,10 +130,6 @@ public class ExampleUnitTest {
         location3.setLng(2.3683948362427145);
         geometry3.setLocation(location3);
         Double rating3 = 1.6d;
-        List<Workmate> list_workmates3 = new ArrayList<>();
-        list_workmates3.add(new Workmate("Jean",null,null,null,null,null,null,null,null));
-        list_workmates3.add(new Workmate("Kevin",null,null,null,null,null,null,null,null));
-
 
         String id4 = "ID4";
         Geometry geometry4 = new Geometry();
@@ -149,8 +138,6 @@ public class ExampleUnitTest {
         location4.setLng(2.385861381347695);
         geometry4.setLocation(location4);
         Double rating4 = 0.9d;
-        List<Workmate> list_workmates4 = new ArrayList<>();
-        list_workmates4.add(new Workmate("Jean",null,null,null,null,null,null,null,null));
 
         new_list_places_nearby.add(new PlaceNearby(null,id4,geometry4,null,rating4,null,null,null,null,null,null));
         new_list_places_nearby.add(new PlaceNearby(null,id1,geometry1,null,rating1,null,null,null,null,null,null));
@@ -179,9 +166,9 @@ public class ExampleUnitTest {
         return new_list_workmates;
     }
 
-    private void waiting_time(int time){
+    private void waiting_time(){
         try {
-            Thread.sleep(time);
+            Thread.sleep(5000);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
