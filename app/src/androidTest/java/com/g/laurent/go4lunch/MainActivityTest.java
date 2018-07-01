@@ -126,7 +126,7 @@ public class MainActivityTest {
             mActivityTestRule.getActivity().listRestoFragment.getButton_distance().performClick();
         });
 
-        waiting_time(12000);
+        waiting_time(20000);
 
         Intent intent = new Intent(mActivityTestRule.getActivity().getApplicationContext(),RestoActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);

@@ -20,6 +20,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.util.DisplayMetrics;
 import android.view.View;
 import android.widget.ProgressBar;
+import android.widget.Toast;
 
 import com.g.laurent.go4lunch.Controllers.Fragments.ListRestoFragment;
 import com.g.laurent.go4lunch.Models.AlarmReceiver;
@@ -104,8 +105,6 @@ public class MultiActivity extends AppCompatActivity implements CallbackMultiAct
             firebase_update.create_new_user_firebase(mCurrentUser);
         }
 
-        // this.configureAlarmManager();
-
         tabs = findViewById(R.id.activity_multi_tabs);
 
         String radius = String.valueOf(sharedPreferences.getInt(EXTRA_PREF_RADIUS,500));
@@ -135,7 +134,14 @@ public class MultiActivity extends AppCompatActivity implements CallbackMultiAct
         getApplicationContext().getResources().updateConfiguration(configuration, getApplicationContext().getResources().getDisplayMetrics());
     }
 
-    @Override
+    public void message_error_API_request(String error){
+
+        Toast toast = Toast.makeText(getApplicationContext(),getApplicationContext().getResources().getString(R.string.error_get_list_restos) +"\n"
+                + error,Toast.LENGTH_LONG);
+        toast.show();
+        mProgressBar.setVisibility(View.GONE);
+    }
+
     public void configureViewPagerAndTabs(List<PlaceNearby> list_restos) {
 
         // Get ViewPager from layout
@@ -146,9 +152,8 @@ public class MultiActivity extends AppCompatActivity implements CallbackMultiAct
 
             if(getApplicationContext()!=null && list_restos!=null){
                 pageAdapter = new MultiFragAdapter(getSupportFragmentManager(), getApplicationContext(), list_restos, currentPlaceLatLng);
+                pager.setAdapter(pageAdapter);
             }
-
-            pager.setAdapter(pageAdapter);
 
             // Get TabLayout from layout
             tabs = findViewById(R.id.activity_multi_tabs);
@@ -185,11 +190,9 @@ public class MultiActivity extends AppCompatActivity implements CallbackMultiAct
             public void onTabSelected(TabLayout.Tab tab) {
                 // Change color of the tab -> orange
                 if (tab.getIcon() != null)
-                    tab.getIcon().setColorFilter(getResources().getColor(R.color.colorIconSelected), PorterDuff.Mode.SRC_IN);
+                    tab.getIcon().setColorFilter(getApplicationContext().getResources().getColor(R.color.colorIconSelected), PorterDuff.Mode.SRC_IN);
 
                 current_page = tab.getPosition();
-
-                // Change tab title if required
 
                 if(mToolbar_navig_utils !=null)
                     mToolbar_navig_utils.refresh_text_toolbar();
@@ -225,7 +228,7 @@ public class MultiActivity extends AppCompatActivity implements CallbackMultiAct
 
                 // Change color of the tab -> black
                 if (tab.getIcon() != null)
-                    tab.getIcon().setColorFilter(getResources().getColor(R.color.colorIconNotSelected), PorterDuff.Mode.SRC_IN);
+                    tab.getIcon().setColorFilter(getApplicationContext().getResources().getColor(R.color.colorIconNotSelected), PorterDuff.Mode.SRC_IN);
             }
 
             @Override

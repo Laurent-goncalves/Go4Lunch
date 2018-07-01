@@ -89,9 +89,7 @@ public class ListSearchNearby implements Disposable {
 
             @Override
             public void onError(Throwable e) {
-                Toast toast = Toast.makeText(context,context.getResources().getString(R.string.error_get_list_restos) +"\n"
-                        + e.toString(),Toast.LENGTH_LONG);
-                toast.show();
+                callbackMultiActivity.message_error_API_request(e.toString());
             }
 
             @Override
