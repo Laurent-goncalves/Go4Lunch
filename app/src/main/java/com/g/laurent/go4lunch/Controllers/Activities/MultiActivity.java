@@ -18,15 +18,18 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.util.DisplayMetrics;
+import android.view.View;
+import android.widget.ProgressBar;
+
 import com.g.laurent.go4lunch.Controllers.Fragments.ListRestoFragment;
 import com.g.laurent.go4lunch.Models.AlarmReceiver;
 import com.g.laurent.go4lunch.Models.CallbackMultiActivity;
-import com.g.laurent.go4lunch.Models.List_Search_Nearby;
-import com.g.laurent.go4lunch.Models.Place_Nearby;
+import com.g.laurent.go4lunch.Models.ListSearchNearby;
+import com.g.laurent.go4lunch.Models.PlaceNearby;
 import com.g.laurent.go4lunch.R;
-import com.g.laurent.go4lunch.Utils.Firebase_update;
-import com.g.laurent.go4lunch.Utils.Google_Maps_Utils;
-import com.g.laurent.go4lunch.Utils.Toolbar_navig_Utils;
+import com.g.laurent.go4lunch.Utils.FirebaseUpdate;
+import com.g.laurent.go4lunch.Utils.GoogleMapsUtils;
+import com.g.laurent.go4lunch.Utils.ToolbarNavigUtils;
 import com.g.laurent.go4lunch.Views.MultiFragAdapter;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.firebase.FirebaseApp;
@@ -50,6 +53,7 @@ public class MultiActivity extends AppCompatActivity implements CallbackMultiAct
     @BindView(R.id.activity_main_drawer_layout) DrawerLayout drawerLayout;
     @BindView(R.id.activity_main_nav_view) NavigationView navigationView;
     @BindView(R.id.swiperefresh) SwipeRefreshLayout swipeRefreshLayout;
+    @BindView(R.id.progressBar) ProgressBar mProgressBar;
     private AlarmManager alarmMgr;
     private PendingIntent alarmIntent;
     private TabLayout tabs;
@@ -60,7 +64,7 @@ public class MultiActivity extends AppCompatActivity implements CallbackMultiAct
     private String api_key;
     private LatLng currentPlaceLatLng;
     private FirebaseUser mCurrentUser;
-    private Toolbar_navig_Utils toolbar_navig_utils;
+    private ToolbarNavigUtils mToolbar_navig_utils;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -70,23 +74,47 @@ public class MultiActivity extends AppCompatActivity implements CallbackMultiAct
         ButterKnife.bind(this);
 
         // Assign and initialize variables
+        if(mProgressBar!=null)
+            mProgressBar.setVisibility(View.VISIBLE);
+
         FirebaseApp.initializeApp(context);
         mCurrentUser = FirebaseAuth.getInstance().getCurrentUser();
+        api_key = context.getResources().getString(R.string.google_maps_key2);
+        sharedPreferences = getSharedPreferences(EXTRA_PREFERENCES, MODE_PRIVATE);
+        current_page = 0;
 
-        mCurrentUser=null;
+        // Set the language of the app by getting the settings in sharedpreferrences
+        setLanguageForApp();
 
-        if(mCurrentUser!=null){
-            sharedPreferences = getSharedPreferences(EXTRA_PREFERENCES, MODE_PRIVATE);
-            current_page = 0;
-
-            setLanguageForApp();
-
-            // Recover current location
-            Google_Maps_Utils google_maps_utils = new Google_Maps_Utils(getApplicationContext(), this, null);
-            google_maps_utils.getLocationPermission();
-        }
+        // Recover current location
+        GoogleMapsUtils google_maps_utils = new GoogleMapsUtils(getApplicationContext(), this, null);
+        google_maps_utils.getLocationPermission();
     }
 
+    public void setCurrentPlaceLatLng(LatLng currentPlaceLatLng) {
+        this.currentPlaceLatLng = currentPlaceLatLng;
+
+        // Configure toolbar and navigation drawer
+        mToolbar_navig_utils = new ToolbarNavigUtils(this);
+        mToolbar_navig_utils.configure_toolbar();
+        mToolbar_navig_utils.configureNavigationView();
+
+        if (mCurrentUser != null) {
+            FirebaseUpdate firebase_update = new FirebaseUpdate(getApplicationContext());
+            firebase_update.create_new_user_firebase(mCurrentUser);
+        }
+
+        // this.configureAlarmManager();
+
+        tabs = findViewById(R.id.activity_multi_tabs);
+
+        String radius = String.valueOf(sharedPreferences.getInt(EXTRA_PREF_RADIUS,500));
+        String type = sharedPreferences.getString(EXTRA_PREF_TYPE_PLACE,"restaurant");
+
+        new ListSearchNearby(getApplicationContext(), api_key, this.currentPlaceLatLng, radius, type, this);
+
+        swipeRefreshLayout.setOnRefreshListener(this);
+    }
 
     private void setLanguageForApp(){
 
@@ -108,7 +136,7 @@ public class MultiActivity extends AppCompatActivity implements CallbackMultiAct
     }
 
     @Override
-    public void configureViewPagerAndTabs(List<Place_Nearby> list_restos) {
+    public void configureViewPagerAndTabs(List<PlaceNearby> list_restos) {
 
         // Get ViewPager from layout
         pager = findViewById(R.id.viewpager);
@@ -135,6 +163,7 @@ public class MultiActivity extends AppCompatActivity implements CallbackMultiAct
             // Select the last tab selected before eventual refresh and stop the refresh
             Objects.requireNonNull(tabs.getTabAt(current_page)).select();
             swipeRefreshLayout.setRefreshing(false);
+            mProgressBar.setVisibility(View.GONE);
         });
     }
 
@@ -162,8 +191,8 @@ public class MultiActivity extends AppCompatActivity implements CallbackMultiAct
 
                 // Change tab title if required
 
-                if(toolbar_navig_utils!=null)
-                    toolbar_navig_utils.refresh_text_toolbar();
+                if(mToolbar_navig_utils !=null)
+                    mToolbar_navig_utils.refresh_text_toolbar();
 
                 // Disable pull to refresh when mapView is displayed
                 if(tab.getPosition()==0)
@@ -176,10 +205,10 @@ public class MultiActivity extends AppCompatActivity implements CallbackMultiAct
             public void onTabUnselected(TabLayout.Tab tab) {
 
                 // if the searchView is opened, close it
-                if(toolbar_navig_utils!=null) {
-                    if (toolbar_navig_utils.getSearchView() != null) {
-                        if (!toolbar_navig_utils.getSearchView().isIconified()) {
-                            toolbar_navig_utils.getSearchView().setIconified(true);
+                if(mToolbar_navig_utils !=null) {
+                    if (mToolbar_navig_utils.getSearchView() != null) {
+                        if (!mToolbar_navig_utils.getSearchView().isIconified()) {
+                            mToolbar_navig_utils.getSearchView().setIconified(true);
 
                             // Recover the previous list of places nearby generated
                             switch (current_page) {
@@ -206,8 +235,40 @@ public class MultiActivity extends AppCompatActivity implements CallbackMultiAct
     }
 
     // ---------------------------------------------------------------------------------
-    // ------------------------ CREATE NEW LIST OF RESTAURANTS -------------------------
+    // -------------------         CONFIGURATION OF SETTINGS         -------------------
     // ---------------------------------------------------------------------------------
+
+    public void configure_and_show_settings_activity() {
+
+        Intent intent = new Intent(this, SettingActivity.class);
+        int requestCode = 0;
+        if (sharedPreferences != null) {
+            if (sharedPreferences.getBoolean(EXTRA_ENABLE_NOTIF, false)) {
+                requestCode = 1; // if the user has enabled notifications, requestCode is 1
+            } else {
+                requestCode = 0; // if the user hasn't enabled notifications, requestCode is 0
+            }
+        }
+        startActivityForResult(intent, requestCode); // launch settingActivity
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        // request code 1 = enable notif ; request code 0 = disable notif
+        if (requestCode == 1) {
+            if (resultCode == RESULT_CANCELED) { // if the user decided to disable notification, whereas it was enabled when opening settings
+                if (alarmMgr != null) {
+                    alarmMgr.cancel(alarmIntent);
+                }
+            }
+        } else {
+            if (resultCode == RESULT_FIRST_USER) { // if the user has enabled notif, whereas it was disabled when opening settings
+                configureAlarmManager();
+            }
+        }
+        // recreate activity to refresh texts (useful in case of change of language)
+        recreate();
+    }
 
     public void configureAlarmManager() {
 
@@ -232,40 +293,14 @@ public class MultiActivity extends AppCompatActivity implements CallbackMultiAct
         }
     }
 
-    // ---------------------------------------------------------------------------------
-    // -------------------         CONFIGURATION OF SETTINGS         -------------------
-    // ---------------------------------------------------------------------------------
-
-    public void configure_and_show_settings_activity() {
-
-        Intent intent = new Intent(this, SettingActivity.class);
-        int requestCode = 0;
-        if (sharedPreferences != null) {
-            if (sharedPreferences.getBoolean(EXTRA_ENABLE_NOTIF, false)) {
-                requestCode = 1;
-            } else {
-                requestCode = 0;
-            }
-        }
-        startActivityForResult(intent, requestCode);
-    }
-
     @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        // request code 1 = enable notif ; request code 0 = disable notif
-        if (requestCode == 1) {
-            if (resultCode == RESULT_CANCELED) { // if the user decided to disable notification, whereas it was enabled when opening settings
-                if (alarmMgr != null) {
-                    alarmMgr.cancel(alarmIntent);
-                }
-            }
-        } else {
-            if (resultCode == RESULT_FIRST_USER) { // if the user has enabled notif, whereas it was disabled when opening settings
-                configureAlarmManager();
-            }
-        }
-        // recreate activity to refresh texts (useful in case of change of language)
-        recreate();
+    public void onRefresh() {
+        GoogleMapsUtils google_maps_utils = new GoogleMapsUtils(getApplicationContext(), this, null);
+        google_maps_utils.getLocationPermission();
+
+        // Launch progressBar
+        if(mProgressBar!=null)
+            mProgressBar.setVisibility(View.VISIBLE);
     }
 
     // ----------------------------------------------------------------------------------------------------
@@ -282,49 +317,8 @@ public class MultiActivity extends AppCompatActivity implements CallbackMultiAct
         fragmentTransaction.commit();
     }
 
-    public void setCurrentPlaceLatLng(LatLng currentPlaceLatLng) {
-        this.currentPlaceLatLng = currentPlaceLatLng;
-
-        // Configure toolbar and navigation drawer
-        toolbar_navig_utils = new Toolbar_navig_Utils(this);
-        toolbar_navig_utils.configure_toolbar();
-        toolbar_navig_utils.configureNavigationView();
-
-        api_key = getResources().getString(R.string.google_maps_key2);
-
-        Firebase_update firebase_update = new Firebase_update(getApplicationContext());
-
-        if (mCurrentUser != null)
-            firebase_update.create_new_user_firebase(mCurrentUser);
-
-        // this.configureAlarmManager();
-
-        tabs = findViewById(R.id.activity_multi_tabs);
-
-        String radius = String.valueOf(sharedPreferences.getInt(EXTRA_PREF_RADIUS,500));
-        String type = sharedPreferences.getString(EXTRA_PREF_TYPE_PLACE,"restaurant");
-
-        new List_Search_Nearby(api_key, this.currentPlaceLatLng, radius, type, this);
-
-        swipeRefreshLayout.setOnRefreshListener(this);
-    }
-
-    public void setToolbar() {
-        toolbar_navig_utils = new Toolbar_navig_Utils(this);
-        toolbar_navig_utils.configureNavigationView();
-    }
-
-    @Override
-    public void onSaveInstanceState(Bundle outState) {
-        super.onSaveInstanceState(outState);
-    }
-
     public MultiFragAdapter getPageAdapter() {
         return pageAdapter;
-    }
-
-    public void setPageAdapter(MultiFragAdapter pageAdapter) {
-        this.pageAdapter = pageAdapter;
     }
 
     public int getCurrentPage(){
@@ -343,10 +337,6 @@ public class MultiActivity extends AppCompatActivity implements CallbackMultiAct
         return navigationView;
     }
 
-    public ViewPager getPager() {
-        return pager;
-    }
-
     public SharedPreferences getSharedPreferences() {
         return sharedPreferences;
     }
@@ -363,13 +353,11 @@ public class MultiActivity extends AppCompatActivity implements CallbackMultiAct
         return swipeRefreshLayout;
     }
 
-    public TabLayout getTabs() {
-        return tabs;
+    public ProgressBar getProgressBar() {
+        return mProgressBar;
     }
 
-    @Override
-    public void onRefresh() {
-        Google_Maps_Utils google_maps_utils = new Google_Maps_Utils(getApplicationContext(), this, null);
-        google_maps_utils.getLocationPermission();
+    public TabLayout getTabs() {
+        return tabs;
     }
 }

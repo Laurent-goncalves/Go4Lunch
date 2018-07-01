@@ -1,7 +1,8 @@
 package com.g.laurent.go4lunch.Utils;
 
 import android.content.Context;
-import com.g.laurent.go4lunch.Models.Place_Nearby;
+
+import com.g.laurent.go4lunch.Models.PlaceNearby;
 import com.g.laurent.go4lunch.R;
 import com.g.laurent.go4lunch.Utils.DetailsPlace.Period;
 import java.util.ArrayList;
@@ -23,7 +24,7 @@ public class TimeCalculation {
         current_time = Integer.parseInt(current_hour + current_minute);
     }
 
-    public String getTextOpeningHours(Place_Nearby place_nearby) {
+    public String getTextOpeningHours(PlaceNearby place_nearby) {
 
         String text = null;
 

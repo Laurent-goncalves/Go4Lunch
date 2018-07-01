@@ -8,7 +8,8 @@ import android.content.Intent;
 import android.graphics.Color;
 import android.support.v4.app.NotificationCompat;
 import com.g.laurent.go4lunch.R;
-import com.g.laurent.go4lunch.Utils.Firebase_recover;
+import com.g.laurent.go4lunch.Utils.FirebaseRecover;
+
 import java.util.List;
 
 public class AlarmReceiver extends BroadcastReceiver implements Callback_alarm {
@@ -31,7 +32,7 @@ public class AlarmReceiver extends BroadcastReceiver implements Callback_alarm {
                 user_id=intent.getExtras().getString(EXTRA_USER_ID,null);
         }
 
-        Firebase_recover firebase_recover = new Firebase_recover(mContext, callback);
+        FirebaseRecover firebase_recover = new FirebaseRecover(mContext, callback);
         firebase_recover.recover_list_workmates();
     }
 

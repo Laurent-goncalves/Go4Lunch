@@ -18,12 +18,23 @@
     <string name="map_view_tab">Map View</string>
     <string name="list_view_tab">List View</string>
     <string name="localization_unkown">Localization of the restaurant not found</string>
+    <string name="error_getting_autocomplete_predic">Error getting autocomplete prediction API call</string>
+    <string name="error_geolocalization">Error geolocalization</string>
+    <string name="error_current_location">Error to get current location</string>
+
+    <!-- WEBACTIVITY -->
+    <string name="press_twice">Please press a second time to exit website</string>
+
+    <!-- LIST SEARCH NEARBY -->
+    <string name="error_get_list_restos">Error to get list of restaurants</string>
 
     <!-- RESTOVIEW -->
     <string name="call">CALL</string>
     <string name="like">LIKE</string>
     <string name="website">WEBSITE</string>
     <string name="joining"> is joining!</string>
+    <string name="website_unavailable">No website for this restaurant</string>
+    <string name="phone_number_unavailable">No phone number for this restaurant</string>
 
     <!-- LISTRESTOVIEW -->
     <string name="open_until">Open until </string>
@@ -70,6 +81,8 @@
     <string name="settings">SETTINGS</string>
     <string name="logout">LOGOUT</string>
 
+    <!-- FIREBASE -->
+    <string name="firebase_database_err">Error connection database Firebase</string>
 
     <!-- COMMON TEXTS FOR BOTH LANGUAGES -->
     <string name="app_name">Go4Lunch</string>
@@ -90,5 +103,6 @@
     <string name="image_current_user">image_current_user</string>
     <string name="icon_button_search">icon_button_search</string>
     <string name="icon_button_hamburger">icon_button_hamburger</string>
+    <string name="image_main_page">image_main_page</string>
 
 </resources>

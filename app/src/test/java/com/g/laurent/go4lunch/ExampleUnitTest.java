@@ -1,8 +1,8 @@
 package com.g.laurent.go4lunch;
 
 import com.g.laurent.go4lunch.Controllers.Fragments.ListRestoFragment;
-import com.g.laurent.go4lunch.Models.List_Search_Nearby;
-import com.g.laurent.go4lunch.Models.Place_Nearby;
+import com.g.laurent.go4lunch.Models.ListSearchNearby;
+import com.g.laurent.go4lunch.Models.PlaceNearby;
 import com.g.laurent.go4lunch.Models.Workmate;
 import com.g.laurent.go4lunch.Utils.DetailsPlace.Geometry;
 import com.g.laurent.go4lunch.Utils.DetailsPlace.Location;
@@ -25,7 +25,7 @@ public class ExampleUnitTest {
         List<String> list_id = new ArrayList<>();
 
         // sort by distance
-        List<Place_Nearby> new_list_places_nearby = build_fake_list_place_nearby();
+        List<PlaceNearby> new_list_places_nearby = build_fake_list_place_nearby();
         listRestoFragment.setList_places_nearby(new_list_places_nearby);
 
         listRestoFragment.sort_list_places_nearby("distance");
@@ -78,7 +78,7 @@ public class ExampleUnitTest {
         String api_key = "AIzaSyBiRkG6clZcF-KhwQIPGq5t8h-KBk-8ldA";
         LatLng latLng = new LatLng(48.6102599, 2.474805);
 
-        List_Search_Nearby list_search_nearby = new List_Search_Nearby(api_key,latLng,radius,type,null);
+        ListSearchNearby list_search_nearby = new ListSearchNearby(api_key,latLng,radius,type,null);
 
         waiting_time(5000);
         Assert.assertTrue(list_search_nearby.getList_places_nearby().size()>0);
@@ -100,9 +100,9 @@ public class ExampleUnitTest {
     }
 
 
-    private List<Place_Nearby> build_fake_list_place_nearby(){
+    private List<PlaceNearby> build_fake_list_place_nearby(){
 
-        List<Place_Nearby> new_list_places_nearby = new ArrayList<>();
+        List<PlaceNearby> new_list_places_nearby = new ArrayList<>();
 
         String id1 = "ID1";
         Geometry geometry1 = new Geometry();
@@ -152,10 +152,10 @@ public class ExampleUnitTest {
         List<Workmate> list_workmates4 = new ArrayList<>();
         list_workmates4.add(new Workmate("Jean",null,null,null,null,null,null,null,null));
 
-        new_list_places_nearby.add(new Place_Nearby(null,id4,geometry4,null,rating4,null,null,null,null,null,null));
-        new_list_places_nearby.add(new Place_Nearby(null,id1,geometry1,null,rating1,null,null,null,null,null,null));
-        new_list_places_nearby.add(new Place_Nearby(null,id2,geometry2,null,rating2,null,null,null,null,null,null));
-        new_list_places_nearby.add(new Place_Nearby(null,id3,geometry3,null,rating3,null,null,null,null,null,null));
+        new_list_places_nearby.add(new PlaceNearby(null,id4,geometry4,null,rating4,null,null,null,null,null,null));
+        new_list_places_nearby.add(new PlaceNearby(null,id1,geometry1,null,rating1,null,null,null,null,null,null));
+        new_list_places_nearby.add(new PlaceNearby(null,id2,geometry2,null,rating2,null,null,null,null,null,null));
+        new_list_places_nearby.add(new PlaceNearby(null,id3,geometry3,null,rating3,null,null,null,null,null,null));
 
         return new_list_places_nearby;
     }

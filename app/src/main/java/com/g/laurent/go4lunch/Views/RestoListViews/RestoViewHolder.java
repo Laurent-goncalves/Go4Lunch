@@ -12,7 +12,7 @@ import android.widget.TextView;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
 import com.g.laurent.go4lunch.Controllers.Activities.RestoActivity;
-import com.g.laurent.go4lunch.Models.Place_Nearby;
+import com.g.laurent.go4lunch.Models.PlaceNearby;
 import com.g.laurent.go4lunch.Models.Workmate;
 import com.g.laurent.go4lunch.R;
 import com.g.laurent.go4lunch.Utils.DistanceCalculation;
@@ -34,7 +34,7 @@ public class RestoViewHolder extends RecyclerView.ViewHolder implements View.OnC
     @BindView(R.id.linearlayout_rating) LinearLayout rating;
     @BindView(R.id.image_restaurant) ImageView picture_resto;
     private View view;
-    private Place_Nearby place_nearby;
+    private PlaceNearby mPlace_nearby;
     private List<Workmate> list_workmates;
     private LatLng current_loc;
     private Context context;
@@ -46,9 +46,9 @@ public class RestoViewHolder extends RecyclerView.ViewHolder implements View.OnC
         ButterKnife.bind(this, itemView);
     }
 
-    public void configure_restaurant(LatLng current_loc, Place_Nearby place_nearby, List<Workmate> list_workmates, Context context){
+    public void configure_restaurant(LatLng current_loc, PlaceNearby place_nearby, List<Workmate> list_workmates, Context context){
 
-        this.place_nearby=place_nearby;
+        this.mPlace_nearby =place_nearby;
         this.current_loc=current_loc;
         this.view.setOnClickListener(this);
         this.context=context;
@@ -77,7 +77,7 @@ public class RestoViewHolder extends RecyclerView.ViewHolder implements View.OnC
     }
 
     // ---------------------------------- NAME RESTO ----------------------------------------------
-    private void name_restaurant(Place_Nearby place_nearby) {
+    private void name_restaurant(PlaceNearby place_nearby) {
 
         if(place_nearby!=null){
             if(place_nearby.getName_restaurant()!=null){
@@ -92,7 +92,7 @@ public class RestoViewHolder extends RecyclerView.ViewHolder implements View.OnC
     }
 
     // ---------------------------------- ADDRESS RESTO ----------------------------------------------
-    private void address_restaurant(Place_Nearby place_nearby) {
+    private void address_restaurant(PlaceNearby place_nearby) {
 
         if(place_nearby!=null){
             if(place_nearby.getAddress()!=null){
@@ -111,8 +111,8 @@ public class RestoViewHolder extends RecyclerView.ViewHolder implements View.OnC
 
         int numStars;
 
-        if(place_nearby.getRating()!=null)
-            numStars = Math.round(place_nearby.getRating().floatValue());
+        if(mPlace_nearby.getRating()!=null)
+            numStars = Math.round(mPlace_nearby.getRating().floatValue());
         else
             numStars = 0;
 
@@ -131,7 +131,7 @@ public class RestoViewHolder extends RecyclerView.ViewHolder implements View.OnC
 
     private void apply_picture_restaurant() {
 
-        String link = "https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&photoreference=" + place_nearby.getPhoto_reference()
+        String link = "https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&photoreference=" + mPlace_nearby.getPhoto_reference()
                 + "&key=" + context.getResources().getString(R.string.google_maps_key);
 
         // Load the image using Glide
@@ -149,12 +149,12 @@ public class RestoViewHolder extends RecyclerView.ViewHolder implements View.OnC
 
         int count = 0;
         // Count number of workmates choosing this restaurant
-        if(list_workmates!=null && place_nearby.getPlaceId()!=null){
+        if(list_workmates!=null && mPlace_nearby.getPlaceId()!=null){
 
             for(Workmate workmate : list_workmates){
                 if(workmate!=null){
                     if(workmate.getResto_id()!=null){
-                        if(workmate.getResto_id().equals(place_nearby.getPlaceId()))
+                        if(workmate.getResto_id().equals(mPlace_nearby.getPlaceId()))
                             count++;
                     }
                 }
@@ -173,12 +173,12 @@ public class RestoViewHolder extends RecyclerView.ViewHolder implements View.OnC
 
     private void display_opening_hours() {
         String opening = null;
-        if (place_nearby.getOpeningHours() != null) {
-            if (place_nearby.getOpeningHours().getOpenNow()!=null) {
-                if (place_nearby.getOpeningHours().getOpenNow()){
+        if (mPlace_nearby.getOpeningHours() != null) {
+            if (mPlace_nearby.getOpeningHours().getOpenNow()!=null) {
+                if (mPlace_nearby.getOpeningHours().getOpenNow()){
 
                     TimeCalculation timeCalculation = new TimeCalculation(context);
-                    opening = timeCalculation.getTextOpeningHours(place_nearby);
+                    opening = timeCalculation.getTextOpeningHours(mPlace_nearby);
 
                 }else
                     opening = context.getResources().getString(R.string.closed_now);
@@ -191,16 +191,16 @@ public class RestoViewHolder extends RecyclerView.ViewHolder implements View.OnC
 
     private void display_distance_to_restaurant(){
 
-        if(current_loc!=null && place_nearby.getGeometry()!=null) {
+        if(current_loc!=null && mPlace_nearby.getGeometry()!=null) {
 
-            if(place_nearby.getGeometry().getLocation()!=null){
+            if(mPlace_nearby.getGeometry().getLocation()!=null){
 
                 DistanceCalculation tool_distance_calcul = new DistanceCalculation();
 
                 String text = tool_distance_calcul.calulate_distance(current_loc.latitude,
                         current_loc.longitude,
-                        place_nearby.getGeometry().getLocation().getLat(),
-                        place_nearby.getGeometry().getLocation().getLng());
+                        mPlace_nearby.getGeometry().getLocation().getLat(),
+                        mPlace_nearby.getGeometry().getLocation().getLng());
 
                 distance.setText(text);
             }
@@ -212,7 +212,7 @@ public class RestoViewHolder extends RecyclerView.ViewHolder implements View.OnC
         Intent intent = new Intent(context,RestoActivity.class);
 
         Gson gson = new Gson();
-        String resto_json = gson.toJson(place_nearby);
+        String resto_json = gson.toJson(mPlace_nearby);
         intent.putExtra(EXTRA_RESTO_DETAILS,resto_json);
         context.startActivity(intent);
     }

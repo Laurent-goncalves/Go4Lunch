@@ -6,7 +6,7 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import com.g.laurent.go4lunch.Models.Place_Nearby;
+import com.g.laurent.go4lunch.Models.PlaceNearby;
 import com.g.laurent.go4lunch.Models.Workmate;
 import com.g.laurent.go4lunch.R;
 import com.google.android.gms.maps.model.LatLng;
@@ -15,11 +15,11 @@ import java.util.List;
 public class ListViewAdapter extends RecyclerView.Adapter<RestoViewHolder> {
 
     private Context context;
-    private List<Place_Nearby> list_search_nearby;
+    private List<PlaceNearby> list_search_nearby;
     private List<Workmate> list_workmates;
     private LatLng current_loc;
 
-    public ListViewAdapter(Context context, List<Place_Nearby> list_search_nearby, List<Workmate> list_workmates, LatLng current_loc){
+    public ListViewAdapter(Context context, List<PlaceNearby> list_search_nearby, List<Workmate> list_workmates, LatLng current_loc){
         this.context=context;
         this.list_search_nearby=list_search_nearby;
         this.list_workmates=list_workmates;

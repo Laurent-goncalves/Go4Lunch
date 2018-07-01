@@ -4,7 +4,7 @@ import com.g.laurent.go4lunch.Utils.DetailsPlace.Geometry;
 import com.g.laurent.go4lunch.Utils.DetailsPlace.OpeningHours;
 import java.util.List;
 
-public class Place_Nearby {
+public class PlaceNearby {
 
     private String name_restaurant;
     private String placeId;
@@ -18,9 +18,9 @@ public class Place_Nearby {
     private String website;
     private String icon_url;
 
-    public Place_Nearby(String name_restaurant, String placeId, Geometry geometry, OpeningHours openingHours,
-                        Double rating, List<String> types, String address, String phone_number, String photo_reference,
-                        String website, String icon_url) {
+    public PlaceNearby(String name_restaurant, String placeId, Geometry geometry, OpeningHours openingHours,
+                       Double rating, List<String> types, String address, String phone_number, String photo_reference,
+                       String website, String icon_url) {
         this.name_restaurant = name_restaurant;
         this.placeId=placeId;
         this.geometry=geometry;
@@ -126,70 +126,3 @@ public class Place_Nearby {
         this.icon_url = icon_url;
     }
 }
-
-
-
-
-
-  /*  public Place_Nearby(String api_key,String placeId, RestoFragment restofragment) {
-        this.restofragment=restofragment;
-        this.placeId=placeId;
-        disposable = Maps_API_stream.streamFetchgetDetailsPlaces(api_key, placeId)
-                .subscribeWith(getSubscriber());
-    }
-
-    private DisposableObserver<DetailsPlace> getSubscriber(){
-        return new DisposableObserver<DetailsPlace>() {
-            @Override
-            public void onNext(DetailsPlace detailsPlace) {
-                build_list_places_nearby(detailsPlace);
-            }
-
-            @Override
-            public void onError(Throwable e) {
-                Log.e("TAG","On Error"+Log.getStackTraceString(e));
-            }
-
-            @Override
-            public void onComplete() {
-                restofragment.recover_list_workmates();
-                Log.e("TAG","On Complete !!");
-            }
-        };
-    }
-
-    private void build_list_places_nearby(DetailsPlace detailsPlace){
-
-        if(detailsPlace!=null){
-            if(detailsPlace.getResult()!=null){
-
-                Result result = detailsPlace.getResult();
-
-                // Get photo reference
-                String photo_ref = null;
-                if(result.getPhotos()!=null){
-
-                    for(Photo photo : result.getPhotos()){
-                        if(photo!=null){
-                            photo_ref = photo.getPhotoReference();
-                            if(photo_ref!=null)
-                                break;
-                        }
-                    }
-                }
-
-
-                // Create Place_Nearby
-                name_restaurant=result.getName();
-                geometry=result.getGeometry();
-                openingHours=result.getOpeningHours();
-                rating=result.getRating();
-                types=result.getTypes();
-                address=result.getVicinity();
-                phone_number=result.getFormattedPhoneNumber();
-                photo_reference=photo_ref;
-                website=result.getWebsite();
-                icon_url=result.getIcon();
-            }
-        }
-    }*/

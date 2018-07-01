@@ -1,12 +1,14 @@
 package com.g.laurent.go4lunch.Models;
 
-import android.util.Log;
+import android.content.Context;
+import android.widget.Toast;
 import com.g.laurent.go4lunch.Controllers.Fragments.ListRestoFragment;
 import com.g.laurent.go4lunch.Controllers.Fragments.MapsFragment;
+import com.g.laurent.go4lunch.R;
 import com.g.laurent.go4lunch.Utils.DetailsPlace.DetailsPlace;
 import com.g.laurent.go4lunch.Utils.DetailsPlace.Photo;
 import com.g.laurent.go4lunch.Utils.DetailsPlace.Result;
-import com.g.laurent.go4lunch.Utils.Maps_API_stream;
+import com.g.laurent.go4lunch.Utils.MapsAPIstream;
 import com.google.android.gms.maps.model.LatLng;
 import java.util.ArrayList;
 import java.util.List;
@@ -14,18 +16,20 @@ import io.reactivex.Observable;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.observers.DisposableObserver;
 
-public class List_Search_Nearby implements Disposable {
 
-    private List<Place_Nearby> list_places_nearby;
+public class ListSearchNearby implements Disposable {
+
+    private List<PlaceNearby> list_places_nearby;
     private Disposable disposable;
     private MapsFragment mapsFragment;
     private ListRestoFragment listRestoFragment;
     private final static String CALLBACK_MAPS_FRAGMENT = "callbasck_maps_fragment";
     private final static String CALLBACK_LIST_RESTO_FRAGMENT = "callbasck_list_resto_fragment";
+    private Context context;
 
-
-    public List_Search_Nearby(String api_key, LatLng latLng, String radius, String type, CallbackMultiActivity callbackMultiActivity) {
+    public ListSearchNearby(Context context, String api_key, LatLng latLng, String radius, String type, CallbackMultiActivity callbackMultiActivity) {
         list_places_nearby = new ArrayList<>();
+        this.context=context;
         launch_request_search_nearby_places(api_key, latLng, radius, type, callbackMultiActivity);
     }
 
@@ -49,8 +53,8 @@ public class List_Search_Nearby implements Disposable {
                     }
                 }
 
-                // Create Place_Nearby
-                list_places_nearby.add(new Place_Nearby(result.getName(),
+                // Create PlaceNearby
+                list_places_nearby.add(new PlaceNearby(result.getName(),
                         result.getPlaceId(),
                         result.getGeometry(),
                         result.getOpeningHours(),
@@ -69,10 +73,10 @@ public class List_Search_Nearby implements Disposable {
 
         String location = String.valueOf(latLng.latitude) + "," + String.valueOf(latLng.longitude);
 
-        disposable = Maps_API_stream.streamFetchgetSearchNearbyPlaces(api_key,type,radius,location)
+        disposable = MapsAPIstream.streamFetchgetSearchNearbyPlaces(api_key,type,radius,location)
                 .flatMap(userResponse -> Observable.just(userResponse.getResults()))
                 .flatMapIterable(ids -> ids)
-                .flatMap(result -> Maps_API_stream.streamFetchgetDetailsPlaces(api_key,result))
+                .flatMap(result -> MapsAPIstream.streamFetchgetDetailsPlaces(api_key,result))
                 .subscribeWith(getSubscriber(callbackMultiActivity));
     }
 
@@ -85,20 +89,18 @@ public class List_Search_Nearby implements Disposable {
 
             @Override
             public void onError(Throwable e) {
-                Log.e("TAG","On Error"+Log.getStackTraceString(e));
+                Toast toast = Toast.makeText(context,context.getResources().getString(R.string.error_get_list_restos) +"\n"
+                        + e.toString(),Toast.LENGTH_LONG);
+                toast.show();
             }
 
             @Override
             public void onComplete() {
-
                 if(callbackMultiActivity!=null)
                     callbackMultiActivity.configureViewPagerAndTabs(list_places_nearby);
-
-                Log.e("TAG","On Complete !!");
             }
         };
     }
-
 
     @Override
     public void dispose() {
@@ -114,25 +116,26 @@ public class List_Search_Nearby implements Disposable {
     // ------------------------------ AUTOCOMPLETE ----------------------------------------------------
     // ------------------------------------------------------------------------------------------------
 
-    public List_Search_Nearby(String api_key, List<String> list_placeId, MapsFragment mapsFragment) {
+    public ListSearchNearby(Context context, String api_key, List<String> list_placeId, MapsFragment mapsFragment) {
         // CONSTRUCTOR FOR AUTOCOMPLETE METHOD
         this.mapsFragment=mapsFragment;
+        this.context=context;
         list_places_nearby = new ArrayList<>();
         launch_request_search_nearby_places_autocomplete(api_key, list_placeId, CALLBACK_MAPS_FRAGMENT);
     }
 
-    public List_Search_Nearby(String api_key, List<String> list_placeId, ListRestoFragment listRestoFragment) {
+    public ListSearchNearby(Context context, String api_key, List<String> list_placeId, ListRestoFragment listRestoFragment) {
         // CONSTRUCTOR FOR AUTOCOMPLETE METHOD
         this.listRestoFragment=listRestoFragment;
+        this.context=context;
         list_places_nearby = new ArrayList<>();
         launch_request_search_nearby_places_autocomplete(api_key, list_placeId, CALLBACK_LIST_RESTO_FRAGMENT);
     }
 
     private void launch_request_search_nearby_places_autocomplete(String api_key, List<String> list_places_Id, String callback){
-
-        disposable = Observable.just(list_places_Id)
-                .flatMapIterable(ids -> ids)
-                .flatMap(result -> Maps_API_stream.streamFetchgetDetailsPlaces(api_key,result))
+        disposable = Observable.just(list_places_Id) // observable = list of ID's
+                .flatMapIterable(ids -> ids) // for each ID of the list
+                .flatMap(result -> MapsAPIstream.streamFetchgetDetailsPlaces(api_key,result)) // get details infos on this ID
                 .subscribeWith(getSubscriberAutocomplete(callback));
     }
 
@@ -145,7 +148,9 @@ public class List_Search_Nearby implements Disposable {
 
             @Override
             public void onError(Throwable e) {
-                Log.e("TAG","On Error"+Log.getStackTraceString(e));
+                Toast toast = Toast.makeText(context,context.getResources().getString(R.string.error_get_list_restos) +"\n"
+                        + e.toString(),Toast.LENGTH_LONG);
+                toast.show();
             }
 
             @Override
@@ -162,8 +167,6 @@ public class List_Search_Nearby implements Disposable {
                             break;
                     }
                 }
-
-                Log.e("TAG","On Complete !!");
             }
         };
     }
@@ -172,7 +175,7 @@ public class List_Search_Nearby implements Disposable {
     // ------------------------------ GETTER and SETTER -----------------------------------------------
     // ------------------------------------------------------------------------------------------------
 
-    public List<Place_Nearby> getList_places_nearby() {
+    public List<PlaceNearby> getList_places_nearby() {
         return list_places_nearby;
     }
 

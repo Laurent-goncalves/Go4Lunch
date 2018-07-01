@@ -4,6 +4,6 @@ import java.util.List;
 
 public interface CallbackMultiActivity {
 
-    void configureViewPagerAndTabs(List<Place_Nearby> list_restos);
+    void configureViewPagerAndTabs(List<PlaceNearby> list_restos);
 
 }

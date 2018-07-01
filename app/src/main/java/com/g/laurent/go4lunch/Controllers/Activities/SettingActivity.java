@@ -16,7 +16,7 @@ import butterknife.ButterKnife;
 public class SettingActivity extends AppCompatActivity {
 
     @BindView(R.id.activity_setting_toolbar) Toolbar toolbar;
-    SettingsFragment settingsFragment;
+    private SettingsFragment settingsFragment;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,7 +43,7 @@ public class SettingActivity extends AppCompatActivity {
             setSupportActionBar(toolbar);
             android.support.v7.app.ActionBar actionBar = getSupportActionBar();
             if(actionBar!=null) {
-                actionBar.setTitle("Settings");
+                actionBar.setTitle(getApplicationContext().getResources().getString(R.string.settings));
                 actionBar.setDisplayHomeAsUpEnabled(false);
             }
         });

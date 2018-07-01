@@ -2,34 +2,26 @@ package com.g.laurent.go4lunch;
 
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
-import android.support.annotation.NonNull;
 import android.support.design.widget.TabLayout;
 import android.support.test.espresso.ViewInteraction;
-import android.support.test.espresso.contrib.RecyclerViewActions;
 import android.support.test.filters.LargeTest;
 import android.support.test.rule.ActivityTestRule;
 import android.support.test.rule.GrantPermissionRule;
 import android.support.test.runner.AndroidJUnit4;
 import android.support.test.runner.lifecycle.ActivityLifecycleMonitorRegistry;
 import android.support.test.runner.lifecycle.Stage;
-import android.support.v4.view.ViewPager;
-import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewParent;
 import android.widget.Switch;
-import android.widget.Toast;
 
-import com.firebase.ui.auth.AuthUI;
 import com.g.laurent.go4lunch.Controllers.Activities.MultiActivity;
 import com.g.laurent.go4lunch.Controllers.Activities.RestoActivity;
 import com.g.laurent.go4lunch.Controllers.Activities.SettingActivity;
-import com.g.laurent.go4lunch.Controllers.Fragments.ListRestoFragment;
 import com.g.laurent.go4lunch.Controllers.Fragments.MapsFragment;
 import com.g.laurent.go4lunch.Controllers.Fragments.SettingsFragment;
-import com.g.laurent.go4lunch.Models.List_Search_Nearby;
-import com.g.laurent.go4lunch.Models.Place_Nearby;
+import com.g.laurent.go4lunch.Models.ListSearchNearby;
+import com.g.laurent.go4lunch.Models.PlaceNearby;
 import com.g.laurent.go4lunch.Models.Workmate;
 import com.g.laurent.go4lunch.Utils.DetailsPlace.Close;
 import com.g.laurent.go4lunch.Utils.DetailsPlace.Geometry;
@@ -37,10 +29,7 @@ import com.g.laurent.go4lunch.Utils.DetailsPlace.Location;
 import com.g.laurent.go4lunch.Utils.DetailsPlace.Open;
 import com.g.laurent.go4lunch.Utils.DetailsPlace.OpeningHours;
 import com.g.laurent.go4lunch.Utils.DetailsPlace.Period;
-import com.g.laurent.go4lunch.Utils.Firebase_recover;
-import com.g.laurent.go4lunch.Utils.Firebase_update;
 import com.g.laurent.go4lunch.Utils.TimeCalculation;
-import com.g.laurent.go4lunch.Views.MultiFragAdapter;
 import com.google.android.gms.common.data.DataBufferUtils;
 import com.google.android.gms.location.places.AutocompletePrediction;
 import com.google.android.gms.location.places.AutocompletePredictionBufferResponse;
@@ -48,15 +37,9 @@ import com.google.android.gms.location.places.GeoDataClient;
 import com.google.android.gms.location.places.Places;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
-import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.RuntimeExecutionException;
 import com.google.android.gms.tasks.Task;
 import com.google.android.gms.tasks.Tasks;
-import com.google.firebase.FirebaseApp;
-import com.google.firebase.auth.AuthResult;
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseAuthException;
-import com.google.firebase.auth.FirebaseUser;
 import com.google.gson.Gson;
 
 import junit.framework.Assert;
@@ -64,7 +47,6 @@ import junit.framework.Assert;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
 import org.hamcrest.TypeSafeMatcher;
-import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -81,7 +63,6 @@ import static android.support.test.espresso.Espresso.onView;
 import static android.support.test.espresso.Espresso.pressBack;
 import static android.support.test.espresso.action.ViewActions.click;
 import static android.support.test.espresso.matcher.ViewMatchers.isDisplayed;
-import static android.support.test.espresso.matcher.ViewMatchers.withClassName;
 import static android.support.test.espresso.matcher.ViewMatchers.withId;
 import static android.support.test.espresso.matcher.ViewMatchers.withText;
 import static org.hamcrest.Matchers.allOf;
@@ -102,7 +83,7 @@ public class MainActivityTest {
 
         mActivityTestRule.launchActivity(null);
 
-        List<Place_Nearby> list_places = build_fake_list_place_nearby();
+        List<PlaceNearby> list_places = build_fake_list_place_nearby();
 
         waiting_time(10000);
         mActivityTestRule.getActivity().configureViewPagerAndTabs(list_places);
@@ -146,7 +127,7 @@ public class MainActivityTest {
         String EXTRA_RESTO_DETAILS = "resto_details";
         mActivityTestRule.launchActivity(null);
 
-        List<Place_Nearby> list_places = build_fake_list_place_nearby();
+        List<PlaceNearby> list_places = build_fake_list_place_nearby();
 
         waiting_time(10000);
 
@@ -351,9 +332,9 @@ public class MainActivityTest {
         return currentActivity[0];
     }
 
-    private List<Place_Nearby> build_fake_list_place_nearby(){
+    private List<PlaceNearby> build_fake_list_place_nearby(){
 
-        List<Place_Nearby> new_list_places_nearby = new ArrayList<>();
+        List<PlaceNearby> new_list_places_nearby = new ArrayList<>();
 
         String id1 = "ID1";
         Geometry geometry1 = new Geometry();
@@ -403,10 +384,10 @@ public class MainActivityTest {
         List<Workmate> list_workmates4 = new ArrayList<>();
         list_workmates4.add(new Workmate("Jean",null,null,null,null,null,null,null,null));
 
-        new_list_places_nearby.add(new Place_Nearby("Resto 4",id4,geometry4,null,rating4,null,"rue saint nicolas",null,null,null,null));
-        new_list_places_nearby.add(new Place_Nearby("Resto 1",id1,geometry1,null,rating1,null,"rue leo lagrange",null,null,null,null));
-        new_list_places_nearby.add(new Place_Nearby("Resto 2",id2,geometry2,null,rating2,null,"rue Kennedy",null,null,null,null));
-        new_list_places_nearby.add(new Place_Nearby("Resto 3",id3,geometry3,null,rating3,null,"rue Johnny Hallyday",null,null,null,null));
+        new_list_places_nearby.add(new PlaceNearby("Resto 4",id4,geometry4,null,rating4,null,"rue saint nicolas",null,null,null,null));
+        new_list_places_nearby.add(new PlaceNearby("Resto 1",id1,geometry1,null,rating1,null,"rue leo lagrange",null,null,null,null));
+        new_list_places_nearby.add(new PlaceNearby("Resto 2",id2,geometry2,null,rating2,null,"rue Kennedy",null,null,null,null));
+        new_list_places_nearby.add(new PlaceNearby("Resto 3",id3,geometry3,null,rating3,null,"rue Johnny Hallyday",null,null,null,null));
 
         return new_list_places_nearby;
     }
@@ -473,7 +454,7 @@ public class MainActivityTest {
 
             MapsFragment mapsFragment = mActivityTestRule.getActivity().getPageAdapter().getMapsFragment();
 
-            List_Search_Nearby list_search_nearby = new List_Search_Nearby("AIzaSyCAzX1ILkJlqSsTMkRJHSGEMAQWuqxSxKA",list_places_nearby,mapsFragment);
+            ListSearchNearby list_search_nearby = new ListSearchNearby("AIzaSyCAzX1ILkJlqSsTMkRJHSGEMAQWuqxSxKA",list_places_nearby,mapsFragment);
 
             waiting_time(5000);
 
@@ -538,7 +519,7 @@ public class MainActivityTest {
                         if (task.isSuccessful()) {
                             // Sign in success, update UI with the signed-in user's information
 
-                            firebase_recover = new Firebase_recover(mActivityTestRule.getActivity().getApplicationContext(),
+                            firebase_recover = new FirebaseRecover(mActivityTestRule.getActivity().getApplicationContext(),
                                     "ID1");
 
                             firebase_recover.recover_workmate_chosen_resto();
@@ -567,7 +548,7 @@ public class MainActivityTest {
     @Test
     public void check_liked_and_chosen_resto() {
 
-        Firebase_update firebase_update = new Firebase_update(mActivityTestRule.getActivity().getApplicationContext());
+        FirebaseUpdate firebase_update = new FirebaseUpdate(mActivityTestRule.getActivity().getApplicationContext());
         firebase_update.initialize_like_status_and_chosen_restaurant("UXKUE5wPVUfwqgkeSelNRi0MoQU2");
 
         waiting_time(1000);
@@ -645,7 +626,7 @@ public class MainActivityTest {
         waiting_time(2000);
 
         // Recover the list of liked restos and the resto chosen by the user
-        Firebase_recover firebase_recover = new Firebase_recover(mActivityTestRule.getActivity().getApplicationContext(),
+        FirebaseRecover firebase_recover = new FirebaseRecover(mActivityTestRule.getActivity().getApplicationContext(),
                 "UXKUE5wPVUfwqgkeSelNRi0MoQU2");
 
         firebase_recover.recover_workmate_liked_restos();
@@ -697,7 +678,7 @@ public class MainActivityTest {
         appCompatButton3.perform(scrollTo(), click());
 
         waiting_time(2000);
-        Firebase_recover firebase_recover = new Firebase_recover(mActivityTestRule.getActivity().getApplicationContext(),
+        FirebaseRecover firebase_recover = new FirebaseRecover(mActivityTestRule.getActivity().getApplicationContext(),
                 list_restos_fragment);
 
         firebase_recover.recover_workmate_restoId("UXKUE5wPVUfwqgkeSelNRi0MoQU2");
@@ -718,7 +699,7 @@ public class MainActivityTest {
         LatLngBounds bounds = tool_calcul_distance.create_LatLngBounds(radius, current_location);
 
 
-        //Google_Maps_Utils google_maps_utils = new Google_Maps_Utils(context);
+        //GoogleMapsUtils google_maps_utils = new GoogleMapsUtils(context);
 
         googleplacespredictions("Starbuck",context);
 
@@ -786,7 +767,7 @@ public class MainActivityTest {
         sharedPreferences.edit().putFloat(EXTRA_LONG_CURRENT,2.333333f).apply();
 
 
-        Firebase_update firebase_update = new Firebase_update(mActivityTestRule.getActivity().getApplicationContext());
+        FirebaseUpdate firebase_update = new FirebaseUpdate(mActivityTestRule.getActivity().getApplicationContext());
 
         waiting_time(5000);
 

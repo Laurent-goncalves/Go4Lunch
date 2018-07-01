@@ -12,15 +12,15 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
-import com.g.laurent.go4lunch.Models.Place_Nearby;
+
+import com.g.laurent.go4lunch.Models.PlaceNearby;
 import com.g.laurent.go4lunch.Models.Workmate;
 import com.g.laurent.go4lunch.R;
-import com.g.laurent.go4lunch.Utils.Firebase_recover;
+import com.g.laurent.go4lunch.Utils.FirebaseRecover;
 import com.g.laurent.go4lunch.Views.RestoListViews.ListViewAdapter;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
-import java.io.IOException;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
@@ -39,8 +39,7 @@ public class ListRestoFragment extends BaseRestoFragment {
     @BindView(R.id.sort_by_number_workmates) Button button_workmates;
     @BindView(R.id.sort_by_number_stars) Button button_stars;
     @BindView(R.id.sort_by_distance) Button button_distance;
-    private String placeId;
-    private Firebase_recover firebase_recover;
+    private FirebaseRecover mFirebase_recover;
     private Context context;
     FragmentActivity activity;
 
@@ -48,7 +47,7 @@ public class ListRestoFragment extends BaseRestoFragment {
         // Required empty public constructor
     }
 
-    public static ListRestoFragment newInstance(List<Place_Nearby> list_restos) {
+    public static ListRestoFragment newInstance(List<PlaceNearby> list_restos) {
 
         // Create new fragment
         ListRestoFragment frag = new ListRestoFragment();
@@ -74,7 +73,7 @@ public class ListRestoFragment extends BaseRestoFragment {
         activity=getActivity();
 
         // Recover list of restaurants on firebase
-        firebase_recover = new Firebase_recover(context,this);
+        mFirebase_recover = new FirebaseRecover(context,this);
 
         // Recover list of restos nearby
         currentPlaceLatLng =new LatLng(48.866667,2.333333);
@@ -85,7 +84,7 @@ public class ListRestoFragment extends BaseRestoFragment {
 
             Gson gson = new Gson();
             String json = getArguments().getString(EXTRA_LIST_RESTOS_JSON,null);
-            Type list_places = new TypeToken<ArrayList<Place_Nearby>>(){}.getType();
+            Type list_places = new TypeToken<ArrayList<PlaceNearby>>(){}.getType();
             list_places_nearby = gson.fromJson(json,list_places);
         }
 
@@ -98,35 +97,23 @@ public class ListRestoFragment extends BaseRestoFragment {
     @Override
     public void onResume() {
         super.onResume();
-        if(firebase_recover!=null)
-            firebase_recover.recover_list_workmates();
+        if(mFirebase_recover !=null)
+            mFirebase_recover.recover_list_workmates();
     }
 
     public void configure_recycler_view(){
-
         try {
-            runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    if (context != null) {
-                        // Create adapter passing in the sample user data
-                        ListViewAdapter adapter = new ListViewAdapter(context, list_places_nearby, list_workmates, currentPlaceLatLng);
-                        // Attach the adapter to the recyclerview to populate items
-                        recyclerView.setAdapter(adapter);
-                        // Set layout manager to position the items
-                        recyclerView.setLayoutManager(new LinearLayoutManager(context));
-                    } else {
-                        try {
-                            throw new IOException("context null dans configure recyclerView");
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
-
-                    }
+            runOnUiThread(() -> {
+                if (context != null) {
+                    // Create adapter passing in the sample user data
+                    ListViewAdapter adapter = new ListViewAdapter(context, list_places_nearby, list_workmates, currentPlaceLatLng);
+                    // Attach the adapter to the recyclerview to populate items
+                    recyclerView.setAdapter(adapter);
+                    // Set layout manager to position the items
+                    recyclerView.setLayoutManager(new LinearLayoutManager(context));
                 }
             });
         } catch(Throwable ignored){}
-
     }
 
     public void recover_previous_state(){
@@ -170,26 +157,33 @@ public class ListRestoFragment extends BaseRestoFragment {
         });
     }
 
-    private void change_color_button_if_selected(Button button_selected){
+    public void change_color_button_if_selected(Button button_selected){
 
-        if(button_selected.getTag().equals(button_workmates.getTag())){
-            button_workmates.setBackgroundColor(getResources().getColor(R.color.colorPrimaryDark));
+        if(button_selected!=null){
+
+            if(button_selected.getTag().equals(button_workmates.getTag())){
+                button_workmates.setBackgroundColor(getResources().getColor(R.color.colorPrimaryDark));
+                button_stars.setBackgroundColor(getResources().getColor(R.color.colorPrimary));
+                button_distance.setBackgroundColor(getResources().getColor(R.color.colorPrimary));
+            } else if(button_selected.getTag().equals(button_stars.getTag())) {
+                button_workmates.setBackgroundColor(getResources().getColor(R.color.colorPrimary));
+                button_stars.setBackgroundColor(getResources().getColor(R.color.colorPrimaryDark));
+                button_distance.setBackgroundColor(getResources().getColor(R.color.colorPrimary));
+            } else if(button_selected.getTag().equals(button_distance.getTag())) {
+                button_workmates.setBackgroundColor(getResources().getColor(R.color.colorPrimary));
+                button_stars.setBackgroundColor(getResources().getColor(R.color.colorPrimary));
+                button_distance.setBackgroundColor(getResources().getColor(R.color.colorPrimaryDark));
+            }
+        } else {
+            button_workmates.setBackgroundColor(getResources().getColor(R.color.colorPrimary));
             button_stars.setBackgroundColor(getResources().getColor(R.color.colorPrimary));
             button_distance.setBackgroundColor(getResources().getColor(R.color.colorPrimary));
-        } else if(button_selected.getTag().equals(button_stars.getTag())) {
-            button_workmates.setBackgroundColor(getResources().getColor(R.color.colorPrimary));
-            button_stars.setBackgroundColor(getResources().getColor(R.color.colorPrimaryDark));
-            button_distance.setBackgroundColor(getResources().getColor(R.color.colorPrimary));
-        } else if(button_selected.getTag().equals(button_distance.getTag())) {
-            button_workmates.setBackgroundColor(getResources().getColor(R.color.colorPrimary));
-            button_stars.setBackgroundColor(getResources().getColor(R.color.colorPrimary));
-            button_distance.setBackgroundColor(getResources().getColor(R.color.colorPrimaryDark));
         }
     }
 
     public void sort_list_places_nearby(String type_sorting) {
 
-        List<Place_Nearby> new_list_place_nearby;
+        List<PlaceNearby> new_list_place_nearby;
         List<Double> list_to_sort_dbl;
 
         if(list_places_nearby!=null){
@@ -210,7 +204,7 @@ public class ListRestoFragment extends BaseRestoFragment {
         this.currentPlaceLatLng = current_location;
     }
 
-    public void recover_list_workmates(List<Place_Nearby> list_resto) {
+    public void recover_list_workmates(List<PlaceNearby> list_resto) {
 
         if(list_places_nearby_OLD!=null && list_places_nearby!=null){
             if(list_places_nearby_OLD.size()==0){ // if there is no place nearby in the old list, it means this method is called for the search
@@ -220,21 +214,13 @@ public class ListRestoFragment extends BaseRestoFragment {
 
         this.list_places_nearby = list_resto;
 
-        firebase_recover = new Firebase_recover(context,this);
-        firebase_recover.recover_list_workmates();
+        mFirebase_recover = new FirebaseRecover(context,this);
+        mFirebase_recover.recover_list_workmates();
     }
 
     public void set_list_of_workmates(List<Workmate> list_workmates){
         this.list_workmates=list_workmates;
         configure_recycler_view();
-    }
-
-    public String getPlaceId() {
-        return placeId;
-    }
-
-    public void setPlaceId(String placeId) {
-        this.placeId = placeId;
     }
 
     public Button getButton_workmates() {

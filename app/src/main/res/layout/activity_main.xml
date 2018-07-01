@@ -1,19 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
 <android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:id="@+id/window_sign_in"
     tools:context=".Controllers.Activities.MainActivity">
 
-    <!-- IMAGE MAIN PAGE
+    <!-- IMAGE MAIN PAGE -->
     <ImageView
         android:id="@+id/image_main_page"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        />-->
-
+        android:adjustViewBounds="false"
+        android:contentDescription="@string/image_main_page"
+        android:cropToPadding="false"
+        android:scaleType="centerCrop"
+        android:src="@drawable/mainpage"
+        android:visibility="visible" />
 
     <!-- BUTTONS CONTAINER -->
     <LinearLayout

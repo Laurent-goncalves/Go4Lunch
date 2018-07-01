@@ -9,10 +9,10 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 import com.g.laurent.go4lunch.Controllers.Activities.RestoActivity;
-import com.g.laurent.go4lunch.Models.Place_Nearby;
+import com.g.laurent.go4lunch.Models.PlaceNearby;
 import com.g.laurent.go4lunch.Models.Workmate;
 import com.g.laurent.go4lunch.R;
-import com.g.laurent.go4lunch.Utils.Firebase_recover;
+import com.g.laurent.go4lunch.Utils.FirebaseRecover;
 import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -38,7 +38,7 @@ public class MapsFragment extends BaseRestoFragment  {
     private final static String EXTRA_RESTO_DETAILS = "resto_details";
     private final static String EXTRA_LAT_CURRENT = "latitude_current_location";
     private final static String EXTRA_LONG_CURRENT = "longitude_current_location";
-    private Firebase_recover firebase_recover;
+    private FirebaseRecover mFirebase_recover;
     private Context context;
     private List<Workmate> list_workmates;
     private LatLng current_place;
@@ -47,7 +47,7 @@ public class MapsFragment extends BaseRestoFragment  {
         // Required empty public constructor
     }
 
-    public static MapsFragment newInstance(List<Place_Nearby> list_restos, LatLng current_place) {
+    public static MapsFragment newInstance(List<PlaceNearby> list_restos, LatLng current_place) {
 
         // Create new fragment
         MapsFragment frag = new MapsFragment();
@@ -81,7 +81,7 @@ public class MapsFragment extends BaseRestoFragment  {
 
             Gson gson = new Gson();
             String json = getArguments().getString(EXTRA_LIST_RESTOS_JSON,null);
-            Type list_places = new TypeToken<ArrayList<Place_Nearby>>(){}.getType();
+            Type list_places = new TypeToken<ArrayList<PlaceNearby>>(){}.getType();
             list_places_nearby = gson.fromJson(json,list_places);
 
             current_place = new LatLng(getArguments().getDouble(EXTRA_LAT_CURRENT,48.866667),
@@ -93,7 +93,7 @@ public class MapsFragment extends BaseRestoFragment  {
         return view;
     }
 
-    public void recover_list_workmates(List<Place_Nearby> list_resto) {
+    public void recover_list_workmates(List<PlaceNearby> list_resto) {
 
         if(list_places_nearby_OLD!=null && list_places_nearby!=null){
             if(list_places_nearby_OLD.size()==0){ // if there is no place nearby in the old list, it means this method is called for the search
@@ -103,8 +103,8 @@ public class MapsFragment extends BaseRestoFragment  {
 
         this.list_places_nearby = list_resto;
 
-        firebase_recover = new Firebase_recover(context,this);
-        firebase_recover.recover_list_workmates();
+        mFirebase_recover = new FirebaseRecover(context,this);
+        mFirebase_recover.recover_list_workmates();
     }
 
     private void launch_map_view(){
@@ -158,13 +158,13 @@ public class MapsFragment extends BaseRestoFragment  {
         });
     }
 
-    private void create_marker_for_each_place_nearby(List<Place_Nearby> list_places_nearby,GoogleMap mMap){
+    private void create_marker_for_each_place_nearby(List<PlaceNearby> list_places_nearby, GoogleMap mMap){
 
         Gson gson = new Gson();
         mMap.clear();
         MarkerOptions markerOptions;
 
-        for(Place_Nearby place_nearby : list_places_nearby){
+        for(PlaceNearby place_nearby : list_places_nearby){
 
             if(place_nearby!=null){
                 if(place_nearby.getGeometry()!=null){
@@ -213,8 +213,8 @@ public class MapsFragment extends BaseRestoFragment  {
     @Override
     public void onResume() {
         super.onResume();
-        if(firebase_recover!=null)
-            firebase_recover.recover_list_workmates();
+        if(mFirebase_recover !=null)
+            mFirebase_recover.recover_list_workmates();
     }
 }
 
@@ -232,6 +232,6 @@ public class MapsFragment extends BaseRestoFragment  {
             String api_key = getArguments().getString(EXTRA_API_KEY, null);
 
             if (api_key != null)
-                new List_Search_Nearby(api_key, currentPlaceLatLng, radius, type, this);
+                new ListSearchNearby(api_key, currentPlaceLatLng, radius, type, this);
         }*/
 

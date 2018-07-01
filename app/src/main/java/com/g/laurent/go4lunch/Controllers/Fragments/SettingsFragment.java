@@ -23,7 +23,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 import com.g.laurent.go4lunch.Controllers.Activities.SettingActivity;
 import com.g.laurent.go4lunch.R;
-import com.g.laurent.go4lunch.Utils.Firebase_update;
+import com.g.laurent.go4lunch.Utils.FirebaseUpdate;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import java.util.ArrayList;
@@ -53,7 +53,7 @@ public class SettingsFragment extends Fragment implements AdapterView.OnItemSele
     @BindView(R.id.setting_type_place) TextView type_place__textview;
     private SharedPreferences sharedPreferences;
     private Context context;
-    private Firebase_update firebase_update;
+    private FirebaseUpdate mFirebase_update;
     private FirebaseUser mCurrentUser;
     private static final String EXTRA_PREFERENCES = "preferences";
     private static final String EXTRA_PREF_LANG = "language_preferences";
@@ -73,7 +73,7 @@ public class SettingsFragment extends Fragment implements AdapterView.OnItemSele
         View view = inflater.inflate(R.layout.fragment_settings, container, false);
         ButterKnife.bind(this, view);
         sharedPreferences = getActivity().getSharedPreferences(EXTRA_PREFERENCES,MODE_PRIVATE);
-        firebase_update = new Firebase_update(context);
+        mFirebase_update = new FirebaseUpdate(context);
         configure_settings_areas();
         configureOnClickListener();
         mCurrentUser = FirebaseAuth.getInstance().getCurrentUser();
@@ -118,7 +118,7 @@ public class SettingsFragment extends Fragment implements AdapterView.OnItemSele
             builder.setPositiveButton(context.getResources().getString(R.string.confirm),
                     (dialog, which) -> {
                         if(mCurrentUser!=null) {
-                            firebase_update.initialize_chosen_restaurant(mCurrentUser.getUid());
+                            mFirebase_update.initialize_chosen_restaurant(mCurrentUser.getUid());
                             sharedPreferences.edit().putString(EXTRA_RESTO_JSON, null).apply();
                             message_to_display(true);
                         } else
@@ -142,7 +142,7 @@ public class SettingsFragment extends Fragment implements AdapterView.OnItemSele
             builder.setPositiveButton(context.getResources().getString(R.string.confirm),
                     (dialog, which) -> {
                         if(mCurrentUser!=null) {
-                            firebase_update.initialize_like_list_restaurant(mCurrentUser.getUid());
+                            mFirebase_update.initialize_like_list_restaurant(mCurrentUser.getUid());
                             message_to_display(true);
                         } else
                             message_to_display(false);

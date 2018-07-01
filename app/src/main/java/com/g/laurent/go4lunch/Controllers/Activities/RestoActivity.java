@@ -15,6 +15,7 @@ public class RestoActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_resto);
 
+        // Recover resto details and show restoFragment
         String resto_details = getIntent().getStringExtra(EXTRA_RESTO_DETAILS);
         configure_and_show_restofragment(resto_details);
     }

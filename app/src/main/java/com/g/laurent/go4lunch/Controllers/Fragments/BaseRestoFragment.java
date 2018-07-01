@@ -1,7 +1,8 @@
 package com.g.laurent.go4lunch.Controllers.Fragments;
 
 import android.support.v4.app.Fragment;
-import com.g.laurent.go4lunch.Models.Place_Nearby;
+
+import com.g.laurent.go4lunch.Models.PlaceNearby;
 import com.g.laurent.go4lunch.Models.Workmate;
 import com.google.android.gms.maps.model.LatLng;
 import java.util.ArrayList;
@@ -14,9 +15,8 @@ import static java.lang.Double.compare;
 public abstract class BaseRestoFragment extends Fragment {
 
     protected LatLng currentPlaceLatLng;
-    protected List<Place_Nearby> list_places_nearby;
-    protected List<Place_Nearby> list_places_nearby_OLD;
-
+    protected List<PlaceNearby> list_places_nearby;
+    protected List<PlaceNearby> list_places_nearby_OLD;
     protected List<Workmate> list_workmates;
     protected static final String EXTRA_LIST_RESTOS_JSON = "list_restos_json";
 
@@ -24,7 +24,7 @@ public abstract class BaseRestoFragment extends Fragment {
         // Required empty public constructor
     }
 
-    protected Boolean is_resto_chosen_by_workmates(Place_Nearby resto, List<Workmate> workmateList){
+    protected Boolean is_resto_chosen_by_workmates(PlaceNearby resto, List<Workmate> workmateList){
 
         Boolean answer = false;
 
@@ -43,7 +43,7 @@ public abstract class BaseRestoFragment extends Fragment {
         return answer;
     }
 
-    protected Double calculate_distance(LatLng current_location, Place_Nearby location) {
+    protected Double calculate_distance(LatLng current_location, PlaceNearby location) {
 
         if(current_location!=null && location!=null){
 
@@ -72,9 +72,9 @@ public abstract class BaseRestoFragment extends Fragment {
         return null;
     }
 
-    protected List<Place_Nearby> create_list_place_nearby_sorted(List<Integer> list_index){
+    protected List<PlaceNearby> create_list_place_nearby_sorted(List<Integer> list_index){
 
-        List<Place_Nearby> new_list = new ArrayList<>();
+        List<PlaceNearby> new_list = new ArrayList<>();
 
         for(Integer index:list_index)
             new_list.add(list_places_nearby.get(index));
@@ -82,11 +82,11 @@ public abstract class BaseRestoFragment extends Fragment {
         return new_list;
     }
 
-    protected List<Double> create_list_to_sort(List<Place_Nearby> new_list_places_nearby, String type_sorting, LatLng current_location){
+    protected List<Double> create_list_to_sort(List<PlaceNearby> new_list_places_nearby, String type_sorting, LatLng current_location){
 
         List<Double> list_to_sort = new ArrayList<>();
 
-        for(Place_Nearby place : new_list_places_nearby){
+        for(PlaceNearby place : new_list_places_nearby){
 
             if(place!=null) {
                 switch (type_sorting) {
@@ -157,10 +157,10 @@ public abstract class BaseRestoFragment extends Fragment {
 
             String[][] tab_number_workmates = create_tab_restoId_by_workmate_number();
             List<String> list_sorted = sort_by_workmates_number(tab_number_workmates);
-            List<Place_Nearby> new_list_places_nearby = new ArrayList<>();
+            List<PlaceNearby> new_list_places_nearby = new ArrayList<>();
 
             for(String restoId : list_sorted){
-                for(Place_Nearby resto : list_places_nearby){
+                for(PlaceNearby resto : list_places_nearby){
                     if(resto!=null && restoId!=null){
                         if(resto.getPlaceId()!=null){
                             if(resto.getPlaceId().equals(restoId)){
@@ -180,7 +180,7 @@ public abstract class BaseRestoFragment extends Fragment {
         List<String> list_to_single_restoID = new ArrayList<>();
 
         // create list of restoId without double id's
-        for(Place_Nearby resto : list_places_nearby){
+        for(PlaceNearby resto : list_places_nearby){
             if(resto!=null) {
                 if (!is_restoId_in_tab(resto.getPlaceId(), list_to_single_restoID)) {
                     list_to_single_restoID.add(resto.getPlaceId());
@@ -280,11 +280,11 @@ public abstract class BaseRestoFragment extends Fragment {
 
     // -------------------------- GETTER and SETTER ----------------------------------------------------
 
-    public void setList_places_nearby(List<Place_Nearby> list_places_nearby) {
+    public void setList_places_nearby(List<PlaceNearby> list_places_nearby) {
         this.list_places_nearby = list_places_nearby;
     }
 
-    public List<Place_Nearby> getList_places_nearby() {
+    public List<PlaceNearby> getList_places_nearby() {
         return list_places_nearby;
     }
 
@@ -295,91 +295,4 @@ public abstract class BaseRestoFragment extends Fragment {
     public void setList_workmates(List<Workmate> list_workmates) {
         this.list_workmates = list_workmates;
     }
-
 }
-
-
-/*
-
-    protected List<String> create_list_workmates_to_sort(){
-
-        List<String> list_to_sort = new ArrayList<>();
-
-        for(Workmate workmate : list_workmates){
-            if(workmate!=null) {
-                if(workmate.getResto_id()!=null)
-                    list_to_sort.add(workmate.getResto_id());
-            }
-        }
-
-        return list_to_sort;
-    }
-
-
-    protected List<Integer> create_list_to_sort(List<Place_Nearby> new_list_places_nearby){
-
-        List<Integer> list_to_sort = new ArrayList<>();
-
-        for(Place_Nearby place : new_list_places_nearby){
-            if(place!=null) {
-                if(list_workmates!=null)
-                    list_to_sort.add(list_workmates.size());
-            }
-        }
-
-        return list_to_sort;
-    }
-
-protected List<Integer> set_list_sorted_int(List<Integer> list_to_sort){
-
-        List<Integer> list_index_sorted = new ArrayList<>();
-
-        for(int i = 0; i<list_to_sort.size();i++){
-
-            int index = 0 ;
-            // Search the first index not in the table
-            for(Integer item : list_to_sort){
-                if(!is_index_in_the_list(index,list_index_sorted))
-                    break;
-                else
-                    index++;
-            }
-
-            int index_to_add = index;
-            Integer item_ref = list_to_sort.get(index);
-            index = -1;
-
-            for(Integer item : list_to_sort) {
-                index++;
-                if (item != null && !is_index_in_the_list(index, list_index_sorted)) {
-                    if (compare(item,item_ref)>=0) {
-                        index_to_add = index;
-                        item_ref = item;
-                    }
-                }
-            }
-
-            list_index_sorted.add(index_to_add);
-        }
-
-        return list_index_sorted;
-    }
-
-    protected Boolean is_id_resto_in_list(String id_to_check){
-
-        Boolean answer = false;
-
-        for(Place_Nearby place_nearby : list_places_nearby){
-            if(place_nearby!=null){
-                if(place_nearby.getPlaceId()!=null){
-                    if(place_nearby.getPlaceId().equals(id_to_check)){
-                        answer=true;
-                        break;
-                    }
-                }
-            }
-        }
-
-        return answer;
-    }
- */

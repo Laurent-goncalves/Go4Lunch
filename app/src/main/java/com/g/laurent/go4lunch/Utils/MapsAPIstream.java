@@ -7,10 +7,10 @@ import io.reactivex.Observable;
 import io.reactivex.schedulers.Schedulers;
 
 
-public class Maps_API_stream {
+public class MapsAPIstream {
 
     public static Observable<SearchNearby> streamFetchgetSearchNearbyPlaces(String api_key, String type, String radius, String location){
-        Maps_API_service search_nearby_request = Maps_API_service.retrofit.create(Maps_API_service.class);
+        MapsAPIservice search_nearby_request = MapsAPIservice.retrofit.create(MapsAPIservice.class);
 
         return search_nearby_request.getNearbyPlaces(api_key,type,radius,location)
                 .subscribeOn(Schedulers.io())
@@ -18,7 +18,7 @@ public class Maps_API_stream {
     }
 
     public static Observable<DetailsPlace> streamFetchgetDetailsPlaces(String api_key, Result result){
-        Maps_API_service details_place_request = Maps_API_service.retrofit.create(Maps_API_service.class);
+        MapsAPIservice details_place_request = MapsAPIservice.retrofit.create(MapsAPIservice.class);
 
         return details_place_request.getDetailsPlaces(api_key,result.getPlaceId())
                 .subscribeOn(Schedulers.io())
@@ -26,7 +26,7 @@ public class Maps_API_stream {
     }
 
     public static Observable<DetailsPlace> streamFetchgetDetailsPlaces(String api_key, String placeId){
-        Maps_API_service details_place_request = Maps_API_service.retrofit.create(Maps_API_service.class);
+        MapsAPIservice details_place_request = MapsAPIservice.retrofit.create(MapsAPIservice.class);
 
         return details_place_request.getDetailsPlaces(api_key,placeId)
                 .subscribeOn(Schedulers.io())

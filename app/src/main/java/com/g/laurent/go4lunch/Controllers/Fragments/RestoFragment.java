@@ -22,12 +22,14 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 import com.bumptech.glide.Glide;
-import com.g.laurent.go4lunch.Models.Place_Nearby;
+import com.g.laurent.go4lunch.Controllers.Activities.WebActivity;
+import com.g.laurent.go4lunch.Models.PlaceNearby;
 import com.g.laurent.go4lunch.Models.Workmate;
 import com.g.laurent.go4lunch.R;
-import com.g.laurent.go4lunch.Utils.Firebase_recover;
-import com.g.laurent.go4lunch.Utils.Firebase_update;
+import com.g.laurent.go4lunch.Utils.FirebaseRecover;
+import com.g.laurent.go4lunch.Utils.FirebaseUpdate;
 import com.g.laurent.go4lunch.Views.WorkmatesViews.WorkmatesViewAdapter;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -58,10 +60,11 @@ public class RestoFragment extends Fragment {
     private final static String INITIAL_LIST_WORKMATES = "initial_list_workmates";
     private static final String EXTRA_PREFERENCES = "preferences";
     private static final String EXTRA_RESTO_JSON = "resto_to_json";
-    private Place_Nearby resto;
+    private static final String EXTRA_LINK = "linkaddress";
+    private PlaceNearby resto;
     private String placeId;
     private Context context;
-    private Firebase_update firebase_update;
+    private FirebaseUpdate mFirebase_update;
     private List<Workmate> list_workmates_joining;
     private List<Workmate> list_workmates_liked;
     private FirebaseUser mCurrentUser;
@@ -82,14 +85,14 @@ public class RestoFragment extends Fragment {
         context = getActivity().getApplicationContext();
         mCurrentUser = FirebaseAuth.getInstance().getCurrentUser();
 
-        // Create Place_Nearby from resto in json format
+        // Create PlaceNearby from resto in json format
         Gson gson = new Gson();
         String resto_json = getArguments().getString(EXTRA_RESTO_DETAILS,null);
-        resto = gson.fromJson(resto_json,Place_Nearby.class);
+        resto = gson.fromJson(resto_json,PlaceNearby.class);
 
         placeId = resto.getPlaceId();
 
-        firebase_update = new Firebase_update(context,this);
+        mFirebase_update = new FirebaseUpdate(context,this);
         api_key = context.getResources().getString(R.string.google_maps_key2);
         recover_list_workmates();
 
@@ -98,13 +101,13 @@ public class RestoFragment extends Fragment {
 
     public void recover_list_workmates() {
 
-        Firebase_recover firebase_recover = new Firebase_recover(context,this);
+        FirebaseRecover firebase_recover = new FirebaseRecover(context,this);
         firebase_recover.recover_list_workmates();
     }
 
     public void renew_list_workmates() {
 
-        Firebase_recover firebase_recover = new Firebase_recover(context,this);
+        FirebaseRecover firebase_recover = new FirebaseRecover(context,this);
         firebase_recover.renew_list_workmates();
     }
 
@@ -237,6 +240,20 @@ public class RestoFragment extends Fragment {
 
         // Button WEBSITE
         setColorButton(website_button,R.color.colorIconSelected);
+        setOnClickListenerButtonWebsite();
+    }
+
+    private void setOnClickListenerButtonWebsite() {
+        website_button.setOnClickListener(v -> {
+            if(resto.getWebsite()!=null){
+                Intent intent = new Intent(context,WebActivity.class);
+                intent.putExtra(EXTRA_LINK,resto.getWebsite());
+                context.startActivity(intent);
+            } else {
+                Toast toast = Toast.makeText(context,context.getResources().getString(R.string.website_unavailable),Toast.LENGTH_LONG);
+                toast.show();
+            }
+        });
     }
 
     private void setColorButton(Button button, int color){
@@ -258,8 +275,13 @@ public class RestoFragment extends Fragment {
             if(ContextCompat.checkSelfPermission(
                     context,android.Manifest.permission.CALL_PHONE) !=
                     PackageManager.PERMISSION_GRANTED) {
+
                 ActivityCompat.requestPermissions(getActivity(), new
                         String[]{android.Manifest.permission.CALL_PHONE}, 0);
+
+                Toast toast = Toast.makeText(context,context.getResources().getString(R.string.phone_number_unavailable),Toast.LENGTH_LONG);
+                toast.show();
+
             } else {
                 startActivity(new Intent(Intent.ACTION_CALL, Uri.parse("tel:" + resto.getPhone_number())));
             }
@@ -321,9 +343,7 @@ public class RestoFragment extends Fragment {
     private void setOnClickListenerButtonLike(){
         like_button.setOnClickListener(v -> {
             if(mCurrentUser!=null)
-                firebase_update.update_like_status_workmates(mCurrentUser.getUid(), resto);
-            else
-                firebase_update.update_like_status_workmates("UXKUE5wPVUfwqgkeSelNRi0MoQU2", resto);
+                mFirebase_update.update_like_status_workmates(mCurrentUser.getUid(), resto);
         });
     }
 
@@ -344,7 +364,7 @@ public class RestoFragment extends Fragment {
 
             SharedPreferences sharedPreferences = context.getSharedPreferences(EXTRA_PREFERENCES,Context.MODE_PRIVATE);
             Gson gson = new Gson();
-            String resto_json = gson.toJson(resto,Place_Nearby.class);
+            String resto_json = gson.toJson(resto,PlaceNearby.class);
             sharedPreferences.edit().putString(EXTRA_RESTO_JSON,resto_json).apply();
 
             setRestoChosen(true);
@@ -398,10 +418,7 @@ public class RestoFragment extends Fragment {
     private void setOnClickListenerButtonRestoValid(){
         button_valid.setOnClickListener(v -> {
             if(mCurrentUser!=null)
-                firebase_update.update_chosen_status_workmate(mCurrentUser.getUid(), resto);
-            else {
-                firebase_update.update_chosen_status_workmate("UXKUE5wPVUfwqgkeSelNRi0MoQU2", resto);
-            }
+                mFirebase_update.update_chosen_status_workmate(mCurrentUser.getUid(), resto);
         });
     }
 

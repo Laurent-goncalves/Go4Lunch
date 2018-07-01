@@ -7,12 +7,12 @@ import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.content.ContextCompat;
-import android.util.Log;
 import android.widget.Toast;
 import com.g.laurent.go4lunch.Controllers.Activities.MultiActivity;
 import com.g.laurent.go4lunch.Controllers.Fragments.ListRestoFragment;
 import com.g.laurent.go4lunch.Controllers.Fragments.MapsFragment;
-import com.g.laurent.go4lunch.Models.List_Search_Nearby;
+import com.g.laurent.go4lunch.Models.ListSearchNearby;
+import com.g.laurent.go4lunch.R;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.data.DataBufferUtils;
@@ -31,11 +31,10 @@ import com.google.android.gms.tasks.RuntimeExecutionException;
 import com.google.android.gms.tasks.Task;
 import java.util.ArrayList;
 import java.util.List;
-import static android.content.ContentValues.TAG;
 
 
 @SuppressLint("Registered")
-public class Google_Maps_Utils extends FragmentActivity implements GoogleApiClient.OnConnectionFailedListener {
+public class GoogleMapsUtils extends FragmentActivity implements GoogleApiClient.OnConnectionFailedListener {
 
     private PlaceDetectionClient mPlaceDetectionClient;
     private static final int PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION = 1;
@@ -45,13 +44,13 @@ public class Google_Maps_Utils extends FragmentActivity implements GoogleApiClie
     private LatLng currentPlaceLatLng;
     private Context context;
     private MultiActivity activity;
-    private Toolbar_navig_Utils toolbar_navig_utils;
+    private ToolbarNavigUtils mToolbar_navig_utils;
 
-    public Google_Maps_Utils(Context context, MultiActivity activity, Toolbar_navig_Utils toolbar_navig_utils) {
+    public GoogleMapsUtils(Context context, MultiActivity activity, ToolbarNavigUtils toolbar_navig_utils) {
 
         this.context = context;
         this.activity = activity;
-        this.toolbar_navig_utils=toolbar_navig_utils;
+        this.mToolbar_navig_utils =toolbar_navig_utils;
 
         // Construct a PlaceDetectionClient.
         mPlaceDetectionClient = Places.getPlaceDetectionClient(context);
@@ -90,37 +89,35 @@ public class Google_Maps_Utils extends FragmentActivity implements GoogleApiClie
                         // Recover the latitude and longitude of current location
                         currentPlaceLatLng=findPlaceHighestLikelihood(task);
 
-                        System.out.println("eee  currentPlaceLatLng="+currentPlaceLatLng);
+                        if(currentPlaceLatLng.longitude==-122.08418830000001)
+                            currentPlaceLatLng=new LatLng(48.866667, 2.333333);
 
                         // Stop swipe to refresh
                         activity.getSwipeRefreshLayout().setEnabled(false);
 
                     } else {
                         currentPlaceLatLng =null;
-                        Toast toast = Toast.makeText(context,"ERROR to find current location" ,Toast.LENGTH_LONG);
+                        Toast toast = Toast.makeText(context,context.getResources().getString(R.string.error_current_location),Toast.LENGTH_LONG);
                         toast.show();
                     }
 
-                    if(currentPlaceLatLng!=null)
+                    if(currentPlaceLatLng!=null) {
                         save_last_current_location(currentPlaceLatLng);
-                    else
-                        currentPlaceLatLng = find_last_current_location();
-
-                    activity.setCurrentPlaceLatLng(currentPlaceLatLng);
+                        activity.setCurrentPlaceLatLng(currentPlaceLatLng);
+                    } else
+                        set_current_location_by_default();
                 });
 
             } catch (SecurityException e) {
 
-                currentPlaceLatLng = find_last_current_location();
-                activity.setCurrentPlaceLatLng(currentPlaceLatLng);
+                set_current_location_by_default();
 
-                Toast toast = Toast.makeText(context,"Error to find current location \n" + e.toString() ,Toast.LENGTH_LONG);
+                Toast toast = Toast.makeText(context,context.getResources().getString(R.string.error_current_location)
+                        + "\n" + e.toString() ,Toast.LENGTH_LONG);
                 toast.show();
             }
-        } else {
-            currentPlaceLatLng = find_last_current_location();
-            activity.setCurrentPlaceLatLng(currentPlaceLatLng);
-        }
+        } else
+            set_current_location_by_default();
 
         activity.getSwipeRefreshLayout().setEnabled(false);
     }
@@ -173,9 +170,14 @@ public class Google_Maps_Utils extends FragmentActivity implements GoogleApiClie
         return current_location;
     }
 
+    private void set_current_location_by_default(){
+        currentPlaceLatLng = find_last_current_location();
+        activity.setCurrentPlaceLatLng(currentPlaceLatLng);
+    }
+
     @Override
     public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
-        Toast toast = Toast.makeText(context,"Problem with geolocalization",Toast.LENGTH_SHORT);
+        Toast toast = Toast.makeText(context,context.getResources().getString(R.string.error_geolocalization),Toast.LENGTH_SHORT);
         toast.show();
     }
 
@@ -203,15 +205,14 @@ public class Google_Maps_Utils extends FragmentActivity implements GoogleApiClie
                 }
 
                 if(listRestoFragment!=null)
-                    new List_Search_Nearby(api_key,list_places_nearby,listRestoFragment);
+                    new ListSearchNearby(context,api_key,list_places_nearby,listRestoFragment);
                 else if(mapsFragment!=null)
-                    new List_Search_Nearby(api_key,list_places_nearby,mapsFragment);
+                    new ListSearchNearby(context, api_key,list_places_nearby,mapsFragment);
 
             } catch (RuntimeExecutionException e) {
-                // If the query did not complete successfully return null
-                Log.e(TAG, "Error getting autocomplete prediction API call", e);
+                Toast toast = Toast.makeText(context,context.getResources().getString(R.string.error_getting_autocomplete_predic),Toast.LENGTH_SHORT);
+                toast.show();
             }
-
         });
     }
 
@@ -232,11 +233,11 @@ public class Google_Maps_Utils extends FragmentActivity implements GoogleApiClie
             try {
                 // Freeze the results immutable representation that can be stored safely.
                 ArrayList<AutocompletePrediction> al = DataBufferUtils.freezeAndClose(autocompletePredictions);
-                toolbar_navig_utils.display_list_predictions(al);
+                mToolbar_navig_utils.display_list_predictions(al);
 
             } catch (RuntimeExecutionException e) {
-                // If the query did not complete successfully return null
-                Log.e(TAG, "Error getting autocomplete prediction API call", e);
+                Toast toast = Toast.makeText(context,context.getResources().getString(R.string.error_getting_autocomplete_predic),Toast.LENGTH_SHORT);
+                toast.show();
             }
 
         });

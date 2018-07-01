@@ -20,8 +20,8 @@ import com.bumptech.glide.request.RequestOptions;
 import com.firebase.ui.auth.AuthUI;
 import com.g.laurent.go4lunch.Controllers.Activities.MultiActivity;
 import com.g.laurent.go4lunch.Controllers.Activities.RestoActivity;
-import com.g.laurent.go4lunch.Models.List_Search_Nearby;
-import com.g.laurent.go4lunch.Models.Place_Nearby;
+import com.g.laurent.go4lunch.Models.ListSearchNearby;
+import com.g.laurent.go4lunch.Models.PlaceNearby;
 import com.g.laurent.go4lunch.R;
 import com.google.android.gms.location.places.AutocompletePrediction;
 import com.google.android.gms.maps.model.LatLng;
@@ -32,7 +32,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 
-public class Toolbar_navig_Utils implements NavigationView.OnNavigationItemSelectedListener{
+public class ToolbarNavigUtils implements NavigationView.OnNavigationItemSelectedListener{
 
     private static final String EXTRA_PREF_RADIUS = "radius_preferences";
     private static final String EXTRA_RESTO_JSON = "resto_to_json";
@@ -49,10 +49,10 @@ public class Toolbar_navig_Utils implements NavigationView.OnNavigationItemSelec
     private SearchView.SearchAutoComplete searchAutoComplete;
     private int radius;
     private String api_key;
-    private List<Place_Nearby> list_place_nearby_autocomplete;
-    private Google_Maps_Utils google_maps_utils;
+    private List<PlaceNearby> mList_place_nearby_autocomplete;
+    private GoogleMapsUtils mGoogle_maps_utils;
 
-    public Toolbar_navig_Utils(MultiActivity activity) {
+    public ToolbarNavigUtils(MultiActivity activity) {
         this.activity = activity;
         this.context = activity.getApplicationContext();
         this.mCurrentUser = activity.getCurrentUser();
@@ -111,9 +111,9 @@ public class Toolbar_navig_Utils implements NavigationView.OnNavigationItemSelec
                     break;
                 case 1:
                     activity.getPageAdapter().getListRestoFragment().recover_previous_state();
+                    activity.getPageAdapter().getListRestoFragment().change_color_button_if_selected(null); // re-initialize buttons sorting
                     break;
             }
-
             return false;
         });
     }
@@ -123,23 +123,22 @@ public class Toolbar_navig_Utils implements NavigationView.OnNavigationItemSelec
         searchAutoComplete.setOnItemClickListener((parent, view, position, id) -> {
 
             List<String> list_placesId = new ArrayList<>();
-            list_placesId.add(list_place_nearby_autocomplete.get(position).getPlaceId());
+            list_placesId.add(mList_place_nearby_autocomplete.get(position).getPlaceId());
 
             if(activity.getCurrentPage()==0) {
-                new List_Search_Nearby(api_key, list_placesId, activity.getPageAdapter().getMapsFragment());
+                new ListSearchNearby(context, api_key, list_placesId, activity.getPageAdapter().getMapsFragment());
             } else if(activity.getCurrentPage()==1) {
-                new List_Search_Nearby(api_key, list_placesId, activity.getPageAdapter().getListRestoFragment());
+                new ListSearchNearby(context, api_key, list_placesId, activity.getPageAdapter().getListRestoFragment());
             }
         });
     }
 
     private void create_setOnQueryTextListener_searchView(){
-        google_maps_utils=null;
+        mGoogle_maps_utils =null;
 
         try{
-            google_maps_utils = new Google_Maps_Utils(context,activity,this);
+            mGoogle_maps_utils = new GoogleMapsUtils(context,activity,this);
         } catch (Throwable ignored){}
-
 
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
@@ -149,17 +148,16 @@ public class Toolbar_navig_Utils implements NavigationView.OnNavigationItemSelec
                 DistanceCalculation distanceCalculation = new DistanceCalculation();
                 bounds = distanceCalculation.toBounds(currentPlaceLatLng,radius);
 
-                if(google_maps_utils!=null){
+                if(mGoogle_maps_utils !=null){
                     switch (activity.getCurrentPage()) {
                         case 0:
-                            google_maps_utils.googleplacespredictions(activity.get_API_KEY(), query, bounds, null, activity.getPageAdapter().getMapsFragment());
+                            mGoogle_maps_utils.googleplacespredictions(activity.get_API_KEY(), query, bounds, null, activity.getPageAdapter().getMapsFragment());
                             break;
                         case 1:
-                            google_maps_utils.googleplacespredictions(activity.get_API_KEY(), query, bounds, activity.getPageAdapter().getListRestoFragment(), null);
+                            mGoogle_maps_utils.googleplacespredictions(activity.get_API_KEY(), query, bounds, activity.getPageAdapter().getListRestoFragment(), null);
                             break;
                     }
                 }
-
                 return false;
             }
 
@@ -167,12 +165,10 @@ public class Toolbar_navig_Utils implements NavigationView.OnNavigationItemSelec
             public boolean onQueryTextChange(String s) {
 
                 if(activity.getCurrentPage()==0 || activity.getCurrentPage()==1) // only for mapsFragment and listRestoFragment
-                    google_maps_utils.get_list_places_prediction(s,bounds);
-
+                    mGoogle_maps_utils.get_list_places_prediction(s,bounds);
                 return false;
             }
         });
-
     }
 
     private void configure_searchView(){
@@ -198,19 +194,18 @@ public class Toolbar_navig_Utils implements NavigationView.OnNavigationItemSelec
 
     public void display_list_predictions(ArrayList<AutocompletePrediction> al) {
 
-        list_place_nearby_autocomplete = new ArrayList<>();
+        mList_place_nearby_autocomplete = new ArrayList<>();
 
         for(AutocompletePrediction place_predic : al){
-            list_place_nearby_autocomplete.add(new Place_Nearby(place_predic.getFullText(null).toString(),place_predic.getPlaceId(),null,null,null,null,null,null,null,null,null));
+            mList_place_nearby_autocomplete.add(new PlaceNearby(place_predic.getFullText(null).toString(),place_predic.getPlaceId(),null,null,null,null,null,null,null,null,null));
         }
 
-        String dataArr[] = new String[list_place_nearby_autocomplete.size()];
-        for(int i = 0; i<list_place_nearby_autocomplete.size();i++)
-            dataArr[i] = list_place_nearby_autocomplete.get(i).getName_restaurant();
+        String dataArr[] = new String[mList_place_nearby_autocomplete.size()];
+        for(int i = 0; i< mList_place_nearby_autocomplete.size(); i++)
+            dataArr[i] = mList_place_nearby_autocomplete.get(i).getName_restaurant();
 
         ArrayAdapter<String> autocomplete_adapter = new ArrayAdapter<>(activity, android.R.layout.simple_dropdown_item_1line, dataArr);
         searchAutoComplete.setAdapter(autocomplete_adapter);
-
     }
 
     // ---------------------------------------------------------------------------------
@@ -221,33 +216,26 @@ public class Toolbar_navig_Utils implements NavigationView.OnNavigationItemSelec
 
         activity.getNavigationView().setNavigationItemSelectedListener(this);
 
-        activity.runOnUiThread(new Runnable() {
-                                   @Override
-                                   public void run() {
+        activity.runOnUiThread(() -> {
 
+           configure_title_menu_navigDrawer();
 
-                                       configure_title_menu_navigDrawer();
+           if (mCurrentUser != null) {
 
-                                       if (mCurrentUser != null) {
+               ImageView picture_user = activity.getNavigationView().getHeaderView(0).findViewById(R.id.current_user_image_drawer);
+               TextView name_user = activity.getNavigationView().getHeaderView(0).findViewById(R.id.current_user_name_drawer);
+               TextView email_user = activity.getNavigationView().getHeaderView(0).findViewById(R.id.current_user_email_drawer);
 
-                                           ImageView picture_user = activity.getNavigationView().getHeaderView(0).findViewById(R.id.current_user_image_drawer);
-                                           TextView name_user = activity.getNavigationView().getHeaderView(0).findViewById(R.id.current_user_name_drawer);
-                                           TextView email_user = activity.getNavigationView().getHeaderView(0).findViewById(R.id.current_user_email_drawer);
+               name_user.setText(mCurrentUser.getDisplayName());
+               email_user.setText(mCurrentUser.getEmail());
 
-                                           name_user.setText(mCurrentUser.getDisplayName());
-                                           email_user.setText(mCurrentUser.getEmail());
-
-                                           if (mCurrentUser.getPhotoUrl() != null)
-                                               Glide.with(context)
-                                                       .load(mCurrentUser.getPhotoUrl().toString())
-                                                       .apply(RequestOptions.circleCropTransform())
-                                                       .into(picture_user);
-
-                                       }
-                                   }
-                               });
-
-
+               if (mCurrentUser.getPhotoUrl() != null)
+                   Glide.with(context)
+                           .load(mCurrentUser.getPhotoUrl().toString())
+                           .apply(RequestOptions.circleCropTransform())
+                           .into(picture_user);
+           }
+        });
     }
 
     private void configure_title_menu_navigDrawer(){
@@ -260,8 +248,6 @@ public class Toolbar_navig_Utils implements NavigationView.OnNavigationItemSelec
 
         MenuItem menuLogOut = activity.getNavigationView().getMenu().findItem(R.id.activity_main_drawer_logout);
         menuLogOut.setTitle(context.getResources().getString(R.string.logout));
-
-
     }
 
     @Override
@@ -328,19 +314,8 @@ public class Toolbar_navig_Utils implements NavigationView.OnNavigationItemSelec
             title_toolbar.setText(context.getResources().getString(R.string.available_workmates));
         else
             title_toolbar.setText(context.getResources().getString(R.string.toolbar_mapview));
-if(searchView!=null)
-        searchView.setQueryHint(context.getResources().getString(R.string.Search_restaurants));
+
+        if(searchView!=null)
+            searchView.setQueryHint(context.getResources().getString(R.string.Search_restaurants));
     }
 }
-
-
-/*
-
-                System.out.println("eee  listRestoFragment ");
-
-                if(activity.get_Page_Adapter().getListRestoFragment()!=null)
-                    System.out.println("eee  getListRestoFragment non null ");
-                else
-                    System.out.println("eee  getListRestoFragment NULL ");
-
- */

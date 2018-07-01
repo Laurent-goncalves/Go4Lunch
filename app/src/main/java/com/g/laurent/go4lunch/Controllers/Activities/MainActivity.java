@@ -8,6 +8,7 @@ import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.widget.Button;
+import android.widget.ImageView;
 import com.firebase.ui.auth.AuthUI;
 import com.firebase.ui.auth.ErrorCodes;
 import com.firebase.ui.auth.IdpResponse;
@@ -27,7 +28,7 @@ public class MainActivity extends AppCompatActivity {
     private static final String EXTRA_PREFERENCES = "preferences";
     private static final String EXTRA_PREF_LANG = "language_preferences";
     @BindView(R.id.window_sign_in) CoordinatorLayout window_sign_in;
-  //  @BindView(R.id.image_main_page) ImageView mImageView;
+    @BindView(R.id.image_main_page) ImageView mImageView;
     @BindView(R.id.main_activity_button_login_google) Button button_google;
     @BindView(R.id.main_activity_button_login_facebook) Button button_facebook;
 
@@ -37,9 +38,6 @@ public class MainActivity extends AppCompatActivity {
         setLanguageForApp();
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
-
-       /* Intent intent = new Intent(this,MultiActivity.class);
-        startActivity(intent);*/
     }
 
     @OnClick(R.id.main_activity_button_login_google)

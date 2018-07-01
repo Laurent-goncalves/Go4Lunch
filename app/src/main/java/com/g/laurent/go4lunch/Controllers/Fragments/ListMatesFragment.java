@@ -11,7 +11,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import com.g.laurent.go4lunch.Models.Workmate;
 import com.g.laurent.go4lunch.R;
-import com.g.laurent.go4lunch.Utils.Firebase_recover;
+import com.g.laurent.go4lunch.Utils.FirebaseRecover;
 import com.g.laurent.go4lunch.Views.WorkmatesViews.WorkmatesViewAdapter;
 import java.util.List;
 import java.util.Objects;
@@ -27,7 +27,7 @@ public class ListMatesFragment extends Fragment {
     private final static String TYPE_DISPLAY_WORKMATES_LIST = "list_of_workmates";
     private List<Workmate> list_workmates;
     private Context context;
-    private Firebase_recover firebase_recover;
+    private FirebaseRecover mFirebase_recover;
 
     public ListMatesFragment() {
         // Required empty public constructor
@@ -48,8 +48,8 @@ public class ListMatesFragment extends Fragment {
         context = Objects.requireNonNull(getActivity()).getApplicationContext();
 
         // Get list of workmates on firebase
-        firebase_recover = new Firebase_recover(context,this);
-        firebase_recover.recover_list_workmates();
+        mFirebase_recover = new FirebaseRecover(context,this);
+        mFirebase_recover.recover_list_workmates();
 
         return view;
     }
@@ -72,7 +72,7 @@ public class ListMatesFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
-        if(firebase_recover!=null)
-            firebase_recover.recover_list_workmates();
+        if(mFirebase_recover !=null)
+            mFirebase_recover.recover_list_workmates();
     }
 }
