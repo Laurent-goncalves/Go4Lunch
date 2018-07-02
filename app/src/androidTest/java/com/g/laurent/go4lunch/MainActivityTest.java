@@ -59,7 +59,9 @@ public class MainActivityTest {
     public void TEST_click_on_tabs() {
 
         mActivityTestRule.launchActivity(null);
-        mActivityTestRule.getActivity().getProgressBar().setVisibility(View.GONE);
+        mActivityTestRule.getActivity().runOnUiThread(() -> {
+            mActivityTestRule.getActivity().getProgressBar().setVisibility(View.GONE);
+        });
         List<PlaceNearby> list_places = build_fake_list_place_nearby();
 
         waiting_time(10000);
@@ -103,7 +105,11 @@ public class MainActivityTest {
 
         String EXTRA_RESTO_DETAILS = "resto_details";
         mActivityTestRule.launchActivity(null);
-        mActivityTestRule.getActivity().getProgressBar().setVisibility(View.GONE);
+
+        mActivityTestRule.getActivity().runOnUiThread(() -> {
+                mActivityTestRule.getActivity().getProgressBar().setVisibility(View.GONE);
+            });
+
         List<PlaceNearby> list_places = build_fake_list_place_nearby();
 
         waiting_time(10000);
@@ -148,7 +154,9 @@ public class MainActivityTest {
     public void TEST_change_language(){
 
         mActivityTestRule.launchActivity(null);
-        mActivityTestRule.getActivity().getProgressBar().setVisibility(View.GONE);
+        mActivityTestRule.getActivity().runOnUiThread(() -> {
+            mActivityTestRule.getActivity().getProgressBar().setVisibility(View.GONE);
+        });
         waiting_time(5000);
 
         mActivityTestRule.getActivity().configureViewPagerAndTabs(build_fake_list_place_nearby());
@@ -211,7 +219,9 @@ public class MainActivityTest {
     public void TEST_text_opening_hours() {
 
         mActivityTestRule.launchActivity(null);
-        mActivityTestRule.getActivity().getProgressBar().setVisibility(View.GONE);
+        mActivityTestRule.getActivity().runOnUiThread(() -> {
+            mActivityTestRule.getActivity().getProgressBar().setVisibility(View.GONE);
+        });
         waiting_time(5000);
 
         OpeningHours openingHours = set_fake_openingHours();
