@@ -75,21 +75,25 @@ public class MultiActivity extends AppCompatActivity implements CallbackMultiAct
         ButterKnife.bind(this);
 
         // Assign and initialize variables
-        if(mProgressBar!=null)
-            mProgressBar.setVisibility(View.VISIBLE);
-
         FirebaseApp.initializeApp(context);
         mCurrentUser = FirebaseAuth.getInstance().getCurrentUser();
         api_key = context.getResources().getString(R.string.google_maps_key2);
         sharedPreferences = getSharedPreferences(EXTRA_PREFERENCES, MODE_PRIVATE);
         current_page = 0;
 
-        // Set the language of the app by getting the settings in sharedpreferrences
-        setLanguageForApp();
 
-        // Recover current location
-        GoogleMapsUtils google_maps_utils = new GoogleMapsUtils(getApplicationContext(), this, null);
-        google_maps_utils.getLocationPermission();
+        if(mCurrentUser!=null){
+
+            if(mProgressBar!=null)
+                mProgressBar.setVisibility(View.VISIBLE);
+
+            // Set the language of the app by getting the settings in sharedpreferrences
+            setLanguageForApp();
+
+            // Recover current location
+            GoogleMapsUtils google_maps_utils = new GoogleMapsUtils(getApplicationContext(), this, null);
+            google_maps_utils.getLocationPermission();
+        }
     }
 
     public void setCurrentPlaceLatLng(LatLng currentPlaceLatLng) {
