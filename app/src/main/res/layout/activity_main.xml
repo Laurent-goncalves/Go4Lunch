@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    xmlns:fb="http://schemas.android.com/apk/res-auto"
     android:id="@+id/window_sign_in"
     tools:context=".Controllers.Activities.MainActivity">
 
@@ -15,44 +16,118 @@
         android:contentDescription="@string/image_main_page"
         android:cropToPadding="false"
         android:scaleType="centerCrop"
-        android:src="@drawable/mainpage"
-        android:visibility="visible" />
+        android:src="@drawable/mainpage" />
 
-    <!-- BUTTONS CONTAINER -->
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <LinearLayout
+            android:id="@+id/title_container"
+            android:layout_alignParentTop="true"
+            android:layout_marginTop="90dp"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical">
+
+            <!-- SYMBOL RESTAURANT MAIN PAGE -->
+            <ImageView
+                android:layout_width="match_parent"
+                android:layout_height="140dp"
+                android:src="@drawable/baseline_fastfood_white_48"
+                android:contentDescription="@string/symbol_restaurant"/>
+
+            <!-- TITLE MAIN PAGE -->
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/go4lunch"
+                android:textColor="@color/colorWhite"
+                android:textStyle="bold"
+                android:textAlignment="center"
+                android:textSize="80sp"
+                android:contentDescription="@string/title_main_page"/>
+
+            <!-- SUBTITLE MAIN PAGE -->
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/find_a_nice_restaurant_and_invite_your_co_workers_for_lunch"
+                android:textColor="@color/colorWhite"
+                android:textStyle="bold"
+                android:textAlignment="center"
+                android:textSize="14sp"
+                android:contentDescription="@string/subtitle_main_page"/>
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/buttons_container"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:layout_marginBottom="20dp"
+            android:orientation="vertical">
+
+            <com.facebook.login.widget.LoginButton
+                xmlns:fb="http://schemas.android.com/apk/res-auto"
+                android:foreground="?attr/selectableItemBackground"
+                android:id="@+id/facebook_loginButton"
+                android:layout_width="300dp"
+                android:layout_height="50dp"
+                android:paddingStart="70dp"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginBottom="@dimen/default_large_margin"
+                android:drawablePadding="15dp"
+                android:drawableStart="@drawable/ic_facebook"
+                fb:com_facebook_login_text ="@string/connect_with_facebook"
+                android:paddingTop="15dp"
+                android:paddingBottom="15dp"
+                style="@style/AppTheme.RoundedCornerFacebookButton"
+                tools:ignore="RtlSymmetry" />
+
+            <!-- BUTTON CONNECT WITH GOOGLE -->
+            <Button
+                android:foreground="?attr/selectableItemBackground"
+                android:id="@+id/main_activity_button_login_google"
+                android:layout_width="300dp"
+                android:layout_height="50dp"
+                android:paddingStart="15dp"
+                android:layout_gravity="center"
+                android:drawableStart="@drawable/ic_google"
+                android:text="@string/connect_with_google"
+                android:textColor="#fff"
+                style="@style/AppTheme.RoundedCornerGoogleButton"
+                android:textSize="14sp"
+                tools:ignore="RtlSymmetry" />
+
+        </LinearLayout>
+
+    </RelativeLayout>
+
+    <!-- PROGRESSBAR for CONNECTION -->
     <LinearLayout
+        android:id="@+id/progress_bar_connection"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:gravity="bottom"
-        android:orientation="vertical"
-        android:layout_margin="@dimen/default_large_margin">
+        android:layout_gravity="center"
+        android:orientation="vertical">
 
+        <ProgressBar
+            android:id="@+id/progressBarConnect"
+            style="?android:attr/progressBarStyleLarge"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:visibility="gone"
+            android:indeterminateDrawable="@drawable/progress" >
+        </ProgressBar>
 
-        <!-- BUTTON CONNECT WITH GOOGLE -->
-        <Button
-            android:id="@+id/main_activity_button_login_google"
-            android:layout_width="match_parent"
+        <TextView
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textColor="#fff"
-            android:background="@color/colorGoogleButton"
-            android:textSize="@dimen/default_text_size"
-            android:drawableStart="@drawable/ic_google"
-            android:text="@string/connect_with_google"
-            android:layout_margin="@dimen/default_large_margin"
-            android:padding="10dp"/>
-
-        <!-- BUTTON CONNECT WITH FACEBOOK -->
-        <Button
-            android:id="@+id/main_activity_button_login_facebook"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:textColor="#fff"
-            android:background="@color/colorFacebookButton"
-            android:textSize="@dimen/default_text_size"
-            android:drawableStart="@drawable/ic_facebook"
-            android:text="@string/connect_with_facebook"
-            android:layout_margin="@dimen/default_large_margin"
-            android:padding="10dp"/>
+            android:text="@string/button_login_text_not_logged"
+            android:layout_marginTop="@dimen/default_margin"/>
 
     </LinearLayout>
 
-</android.support.design.widget.CoordinatorLayout>
+</FrameLayout>

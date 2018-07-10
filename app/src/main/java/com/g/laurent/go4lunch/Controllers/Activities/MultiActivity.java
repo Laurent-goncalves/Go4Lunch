@@ -21,7 +21,6 @@ import android.util.DisplayMetrics;
 import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.Toast;
-
 import com.g.laurent.go4lunch.Controllers.Fragments.ListRestoFragment;
 import com.g.laurent.go4lunch.Models.AlarmReceiver;
 import com.g.laurent.go4lunch.Models.CallbackMultiActivity;
@@ -79,97 +78,67 @@ public class MultiActivity extends AppCompatActivity implements CallbackMultiAct
         mCurrentUser = FirebaseAuth.getInstance().getCurrentUser();
         api_key = context.getResources().getString(R.string.google_maps_key2);
         sharedPreferences = getSharedPreferences(EXTRA_PREFERENCES, MODE_PRIVATE);
+        swipeRefreshLayout.setOnRefreshListener(this);
         current_page = 0;
-
 
         if(mCurrentUser!=null){
 
+            // Start progressBar
             if(mProgressBar!=null)
                 mProgressBar.setVisibility(View.VISIBLE);
 
             // Set the language of the app by getting the settings in sharedpreferrences
             setLanguageForApp();
 
-            // Recover current location
+            // 1 - Recover current location
             GoogleMapsUtils google_maps_utils = new GoogleMapsUtils(getApplicationContext(), this, null);
             google_maps_utils.getLocationPermission();
         }
     }
 
     public void setCurrentPlaceLatLng(LatLng currentPlaceLatLng) {
+
         this.currentPlaceLatLng = currentPlaceLatLng;
 
-        // Configure toolbar and navigation drawer
+        // 2 - Once the location is defined, configure the toolbar and the navigation drawer
         mToolbar_navig_utils = new ToolbarNavigUtils(this);
         mToolbar_navig_utils.configure_toolbar();
         mToolbar_navig_utils.configureNavigationView();
 
+        // 3 - Create new user on Firebase by adding name, id and picture URL (or re-write it)
         if (mCurrentUser != null) {
             FirebaseUpdate firebase_update = new FirebaseUpdate(getApplicationContext());
             firebase_update.create_new_user_firebase(mCurrentUser);
         }
 
-        tabs = findViewById(R.id.activity_multi_tabs);
-
+        // 4 - Launch a new API request to get new list of places nearby based on settings in sharedpreferences
         String radius = String.valueOf(sharedPreferences.getInt(EXTRA_PREF_RADIUS,500));
         String type = sharedPreferences.getString(EXTRA_PREF_TYPE_PLACE,"restaurant");
 
         new ListSearchNearby(getApplicationContext(), api_key, this.currentPlaceLatLng, radius, type, this);
-
-        swipeRefreshLayout.setOnRefreshListener(this);
-    }
-
-    private void setLanguageForApp(){
-
-        String lang = sharedPreferences.getString(EXTRA_PREF_LANG,"en");
-
-        Locale locale = new Locale(lang);
-
-        Resources resources = getResources();
-        Configuration configuration = resources.getConfiguration();
-        DisplayMetrics displayMetrics = resources.getDisplayMetrics();
-        configuration.setLocale(locale);
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N){
-            getApplicationContext().createConfigurationContext(configuration);
-        } else {
-            resources.updateConfiguration(configuration,displayMetrics);
-        }
-        getApplicationContext().getResources().updateConfiguration(configuration, getApplicationContext().getResources().getDisplayMetrics());
-    }
-
-    public void message_error_API_request(String error){
-
-        Toast toast = Toast.makeText(getApplicationContext(),getApplicationContext().getResources().getString(R.string.error_get_list_restos) +"\n"
-                + error,Toast.LENGTH_LONG);
-        toast.show();
-        mProgressBar.setVisibility(View.GONE);
     }
 
     public void configureViewPagerAndTabs(List<PlaceNearby> list_restos) {
 
-        // Get ViewPager from layout
+        // 5 - Get ViewPager from layout, set the limit of pages to refresh to 3
         pager = findViewById(R.id.viewpager);
         pager.setOffscreenPageLimit(3);
 
         runOnUiThread(() -> {
 
+            // 6 - Create the Adapter with the 3 fragments and add it to the viewpager
             if(getApplicationContext()!=null && list_restos!=null){
                 pageAdapter = new MultiFragAdapter(getSupportFragmentManager(), getApplicationContext(), list_restos, currentPlaceLatLng);
                 pager.setAdapter(pageAdapter);
             }
 
-            // Get TabLayout from layout
+            // 7 - Get TabLayout from layout and configure it
             tabs = findViewById(R.id.activity_multi_tabs);
             tabs.setupWithViewPager(pager);
-
-            // Glue TabLayout and ViewPager together
+            tabs.setTabMode(TabLayout.MODE_FIXED); // Tabs have the same width
             configure_tabs();
 
-            // Design purpose. Tabs have the same width
-            tabs.setTabMode(TabLayout.MODE_FIXED);
-
-            // Select the last tab selected before eventual refresh and stop the refresh
+            // 8 - Select the last tab selected before eventual refresh and stop the refresh and the progressBar
             Objects.requireNonNull(tabs.getTabAt(current_page)).select();
             swipeRefreshLayout.setRefreshing(false);
             mProgressBar.setVisibility(View.GONE);
@@ -178,14 +147,13 @@ public class MultiActivity extends AppCompatActivity implements CallbackMultiAct
 
     private void configure_tabs() {
 
-        // Initialize tabs
+        // Initialize tabs (icon and tab color)
         Objects.requireNonNull(tabs.getTabAt(0)).setIcon(R.drawable.baseline_map_white_24);
         Objects.requireNonNull(Objects.requireNonNull(tabs.getTabAt(0)).getIcon()).setColorFilter(getResources().getColor(R.color.colorIconSelected), PorterDuff.Mode.SRC_IN);
         Objects.requireNonNull(tabs.getTabAt(1)).setIcon(R.drawable.baseline_view_list_white_24);
         Objects.requireNonNull(Objects.requireNonNull(tabs.getTabAt(1)).getIcon()).setColorFilter(getResources().getColor(R.color.colorIconNotSelected), PorterDuff.Mode.SRC_IN);
         Objects.requireNonNull(tabs.getTabAt(2)).setIcon(R.drawable.baseline_people_white_24);
         Objects.requireNonNull(Objects.requireNonNull(tabs.getTabAt(2)).getIcon()).setColorFilter(getResources().getColor(R.color.colorIconNotSelected), PorterDuff.Mode.SRC_IN);
-
         swipeRefreshLayout.setEnabled(false);
 
         // Set on Tab selected listener
@@ -196,8 +164,16 @@ public class MultiActivity extends AppCompatActivity implements CallbackMultiAct
                 if (tab.getIcon() != null)
                     tab.getIcon().setColorFilter(getApplicationContext().getResources().getColor(R.color.colorIconSelected), PorterDuff.Mode.SRC_IN);
 
+                // set the current page position
                 current_page = tab.getPosition();
 
+                // if the current page is the ListMatesFragment, remove the searchView
+                if(current_page==2)
+                    mToolbar_navig_utils.getSearchView().setVisibility(View.GONE);
+                else
+                    mToolbar_navig_utils.getSearchView().setVisibility(View.VISIBLE);
+
+                // refresh title toolbar (different according to the page selected)
                 if(mToolbar_navig_utils !=null)
                     mToolbar_navig_utils.refresh_text_toolbar();
 
@@ -241,6 +217,33 @@ public class MultiActivity extends AppCompatActivity implements CallbackMultiAct
         });
     }
 
+    private void setLanguageForApp(){
+
+        // Recover the language selected by the user
+        String lang = sharedPreferences.getString(EXTRA_PREF_LANG,"en");
+
+        Locale locale = new Locale(lang);
+        Resources resources = getResources();
+        Configuration configuration = resources.getConfiguration();
+        DisplayMetrics displayMetrics = resources.getDisplayMetrics();
+        configuration.setLocale(locale);
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N){
+            getApplicationContext().createConfigurationContext(configuration);
+        } else {
+            resources.updateConfiguration(configuration,displayMetrics);
+        }
+        getApplicationContext().getResources().updateConfiguration(configuration, getApplicationContext().getResources().getDisplayMetrics());
+    }
+
+    public void message_error_API_request(String error){
+
+        Toast toast = Toast.makeText(getApplicationContext(),getApplicationContext().getResources().getString(R.string.error_get_list_restos) +"\n"
+                + error,Toast.LENGTH_LONG);
+        toast.show();
+        mProgressBar.setVisibility(View.GONE);
+    }
+
     // ---------------------------------------------------------------------------------
     // -------------------         CONFIGURATION OF SETTINGS         -------------------
     // ---------------------------------------------------------------------------------
@@ -274,17 +277,19 @@ public class MultiActivity extends AppCompatActivity implements CallbackMultiAct
             }
         }
         // recreate activity to refresh texts (useful in case of change of language)
-        recreate();
+        GoogleMapsUtils google_maps_utils = new GoogleMapsUtils(getApplicationContext(), this, null);
+        google_maps_utils.getLocationPermission();
     }
 
     public void configureAlarmManager() {
 
+        // Recover in the sharedpreferences if the user has enabled or not notifications
         Boolean enable = sharedPreferences.getBoolean(EXTRA_ENABLE_NOTIF,false);
 
         if(enable){
             alarmMgr = (AlarmManager) getApplicationContext().getSystemService(Context.ALARM_SERVICE);
             Intent intent = new Intent(getApplicationContext(), AlarmReceiver.class);
-            intent.putExtra(EXTRA_USER_ID, mCurrentUser.getUid());
+            intent.putExtra(EXTRA_USER_ID, mCurrentUser.getUid()); // attach the userId to the intent
             alarmIntent = PendingIntent.getBroadcast(getApplicationContext(), 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
 
             // Set the alarm to start at 12:00 p.m.
@@ -302,7 +307,8 @@ public class MultiActivity extends AppCompatActivity implements CallbackMultiAct
 
     @Override
     public void onRefresh() {
-        GoogleMapsUtils google_maps_utils = new GoogleMapsUtils(getApplicationContext(), this, null);
+        // When refreshing, we launch a new API request starting by defining current location
+        GoogleMapsUtils google_maps_utils = new GoogleMapsUtils(getApplicationContext(), this, mToolbar_navig_utils);
         google_maps_utils.getLocationPermission();
 
         // Launch progressBar

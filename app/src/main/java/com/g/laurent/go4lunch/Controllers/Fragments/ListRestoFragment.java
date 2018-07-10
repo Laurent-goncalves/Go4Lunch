@@ -4,7 +4,6 @@ import android.app.Fragment;
 import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
-import android.support.v4.app.FragmentActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -12,7 +11,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
-
 import com.g.laurent.go4lunch.Models.PlaceNearby;
 import com.g.laurent.go4lunch.Models.Workmate;
 import com.g.laurent.go4lunch.R;
@@ -39,9 +37,7 @@ public class ListRestoFragment extends BaseRestoFragment {
     @BindView(R.id.sort_by_number_workmates) Button button_workmates;
     @BindView(R.id.sort_by_number_stars) Button button_stars;
     @BindView(R.id.sort_by_distance) Button button_distance;
-    private FirebaseRecover mFirebase_recover;
     private Context context;
-    FragmentActivity activity;
 
     public ListRestoFragment() {
         // Required empty public constructor
@@ -70,7 +66,6 @@ public class ListRestoFragment extends BaseRestoFragment {
         View view =inflater.inflate(R.layout.fragment_list_resto, container, false);
         ButterKnife.bind(this,view);
         context = Objects.requireNonNull(getActivity()).getApplicationContext();
-        activity=getActivity();
 
         // Recover list of restaurants on firebase
         mFirebase_recover = new FirebaseRecover(context,this);
@@ -80,6 +75,7 @@ public class ListRestoFragment extends BaseRestoFragment {
 
         list_places_nearby_OLD = new ArrayList<>();
 
+        // Recover the list of restos in the bundle
         if(getArguments()!=null) {
 
             Gson gson = new Gson();
@@ -88,17 +84,11 @@ public class ListRestoFragment extends BaseRestoFragment {
             list_places_nearby = gson.fromJson(json,list_places);
         }
 
+        // recover the list of workmates
         recover_list_workmates(list_places_nearby);
 
         configure_sorting_buttons();
         return view;
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
-        if(mFirebase_recover !=null)
-            mFirebase_recover.recover_list_workmates();
     }
 
     public void configure_recycler_view(){
@@ -117,7 +107,7 @@ public class ListRestoFragment extends BaseRestoFragment {
     }
 
     public void recover_previous_state(){
-
+        // recover the list of restos created before using the search functionality
         if(list_places_nearby_OLD!=null){
             if(list_places_nearby_OLD.size()>0){
                 this.list_places_nearby = new ArrayList<>();
@@ -128,28 +118,48 @@ public class ListRestoFragment extends BaseRestoFragment {
         }
     }
 
+    // --------------------------------------------------------------------------------------------------------
+    // ---------------------------- RECOVER WORKMATES LIST ----------------------------------------------------
+    // --------------------------------------------------------------------------------------------------------
+
+    @Override
+    public void recover_list_workmates(List<PlaceNearby> list_resto) {
+        super.recover_list_workmates(list_resto);
+        mFirebase_recover = new FirebaseRecover(context,this);
+        mFirebase_recover.recover_list_workmates();
+    }
+
+    public void set_list_of_workmates(List<Workmate> list_workmates){
+        this.list_workmates=list_workmates;
+        configure_recycler_view();
+    }
+
+    // --------------------------------------------------------------------------------------------------------
+    // ---------------------------- SORTING FUNCTIONALITY -----------------------------------------------------
+    // --------------------------------------------------------------------------------------------------------
+
     private void configure_sorting_buttons(){
 
         title_sort.setText(context.getResources().getString(R.string.sort_by));
 
+        // BUTTON "sort by workmates number"
         button_workmates.setText(context.getResources().getString(R.string.colleague));
-
         button_workmates.setOnClickListener(v -> {
             sort_list_places_nearby("workmates");
             change_color_button_if_selected(button_workmates);
             configure_recycler_view();
         });
 
+        // BUTTON "sort by stars number"
         button_stars.setText(context.getResources().getString(R.string.stars));
-
         button_stars.setOnClickListener(v -> {
             sort_list_places_nearby("stars");
             change_color_button_if_selected(button_stars);
             configure_recycler_view();
         });
 
+        // BUTTON "sort by distance"
         button_distance.setText(context.getResources().getString(R.string.distance));
-
         button_distance.setOnClickListener(v -> {
             sort_list_places_nearby("distance");
             change_color_button_if_selected(button_distance);
@@ -200,28 +210,9 @@ public class ListRestoFragment extends BaseRestoFragment {
         }
     }
 
-    public void setCurrent_location(LatLng current_location) {
-        this.currentPlaceLatLng = current_location;
-    }
-
-    public void recover_list_workmates(List<PlaceNearby> list_resto) {
-
-        if(list_places_nearby_OLD!=null && list_places_nearby!=null){
-            if(list_places_nearby_OLD.size()==0){ // if there is no place nearby in the old list, it means this method is called for the search
-                list_places_nearby_OLD.addAll(list_places_nearby);
-            }
-        }
-
-        this.list_places_nearby = list_resto;
-
-        mFirebase_recover = new FirebaseRecover(context,this);
-        mFirebase_recover.recover_list_workmates();
-    }
-
-    public void set_list_of_workmates(List<Workmate> list_workmates){
-        this.list_workmates=list_workmates;
-        configure_recycler_view();
-    }
+    // --------------------------------------------------------------------------------------------------------
+    // --------------------------------- GETTER and SETTERS --------------------------------------------------
+    // --------------------------------------------------------------------------------------------------------
 
     public Button getButton_workmates() {
         return button_workmates;
@@ -235,6 +226,7 @@ public class ListRestoFragment extends BaseRestoFragment {
         return button_distance;
     }
 
-// ------------------------ UNUSED METHODS -----------------------------------
-
+    public void setCurrent_location(LatLng current_location) {
+        this.currentPlaceLatLng = current_location;
+    }
 }

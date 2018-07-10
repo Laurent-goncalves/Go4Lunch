@@ -38,7 +38,6 @@ public class MapsFragment extends BaseRestoFragment  {
     private final static String EXTRA_RESTO_DETAILS = "resto_details";
     private final static String EXTRA_LAT_CURRENT = "latitude_current_location";
     private final static String EXTRA_LONG_CURRENT = "longitude_current_location";
-    private FirebaseRecover mFirebase_recover;
     private Context context;
     private List<Workmate> list_workmates;
     private LatLng current_place;
@@ -57,6 +56,7 @@ public class MapsFragment extends BaseRestoFragment  {
         Gson gson = new Gson();
         String list_restos_json = gson.toJson(list_restos);
         bundle.putString(EXTRA_LIST_RESTOS_JSON, list_restos_json);
+
         if(current_place!=null) {
             bundle.putDouble(EXTRA_LAT_CURRENT, current_place.latitude);
             bundle.putDouble(EXTRA_LONG_CURRENT, current_place.longitude);
@@ -77,6 +77,7 @@ public class MapsFragment extends BaseRestoFragment  {
         context = Objects.requireNonNull(getActivity()).getApplicationContext();
         list_places_nearby_OLD = new ArrayList<>();
 
+        // Recover the list of restos and the current place localization
         if(getArguments()!=null) {
 
             Gson gson = new Gson();
@@ -93,19 +94,38 @@ public class MapsFragment extends BaseRestoFragment  {
         return view;
     }
 
-    public void recover_list_workmates(List<PlaceNearby> list_resto) {
+    public void recover_previous_state(){
+        // recover the list of restos created before using the search functionality
+        if(list_places_nearby_OLD!=null){
+            if(list_places_nearby_OLD.size()>0){
 
-        if(list_places_nearby_OLD!=null && list_places_nearby!=null){
-            if(list_places_nearby_OLD.size()==0){ // if there is no place nearby in the old list, it means this method is called for the search
-                list_places_nearby_OLD.addAll(list_places_nearby);
+                this.list_places_nearby = new ArrayList<>();
+                this.list_places_nearby.addAll(list_places_nearby_OLD);
+                list_places_nearby_OLD.clear();
+                launch_map_view();
             }
         }
+    }
 
-        this.list_places_nearby = list_resto;
+    // ---------------------------------------------------------------------------------------------
+    // ------------------------------------- RECOVER WORKMATES LIST --------------------------------
+    // ---------------------------------------------------------------------------------------------
 
+    public void set_list_of_workmates(List<Workmate> list_workmates){
+        this.list_workmates=list_workmates;
+        launch_map_view();
+    }
+
+    @Override
+    public void recover_list_workmates(List<PlaceNearby> list_resto) {
+        super.recover_list_workmates(list_resto);
         mFirebase_recover = new FirebaseRecover(context,this);
         mFirebase_recover.recover_list_workmates();
     }
+
+    // ---------------------------------------------------------------------------------------------
+    // ------------------------------------- MAPVIEW -----------------------------------------------
+    // ---------------------------------------------------------------------------------------------
 
     private void launch_map_view(){
 
@@ -124,15 +144,7 @@ public class MapsFragment extends BaseRestoFragment  {
                 create_marker_for_each_place_nearby(list_places_nearby,mMap);
 
                 // Set on click listener for markers of the map
-                mMap.setOnMarkerClickListener(marker -> {
-
-                    String resto_json = (String) marker.getTag();
-                    Intent intent = new Intent(context, RestoActivity.class);
-                    intent.putExtra(EXTRA_RESTO_DETAILS,resto_json);
-                    startActivity(intent);
-
-                    return false;
-                });
+                create_marker_listener(mMap);
 
                 // zoom on current location if number of resto > 1
                 if(list_places_nearby.size()>1){
@@ -158,6 +170,19 @@ public class MapsFragment extends BaseRestoFragment  {
         });
     }
 
+    private void create_marker_listener(GoogleMap mMap){
+        mMap.setOnMarkerClickListener(marker -> {
+
+            // in case of click on the marker, start RestoActivity
+            String resto_json = (String) marker.getTag();
+            Intent intent = new Intent(context, RestoActivity.class);
+            intent.putExtra(EXTRA_RESTO_DETAILS,resto_json);
+            startActivity(intent);
+
+            return false;
+        });
+    }
+
     private void create_marker_for_each_place_nearby(List<PlaceNearby> list_places_nearby, GoogleMap mMap){
 
         Gson gson = new Gson();
@@ -176,12 +201,12 @@ public class MapsFragment extends BaseRestoFragment  {
                             markerOptions = new MarkerOptions()
                                 .position(city)
                                 .title(text)
-                                .icon(BitmapDescriptorFactory.fromResource(R.drawable.icon_resto_1));
+                                .icon(BitmapDescriptorFactory.fromResource(R.drawable.icon_resto_1)); // use green marker in case the resto has been chosen by at least one workmate
                         } else {
                             markerOptions = new MarkerOptions()
                                 .position(city)
                                 .title(text)
-                                .icon(BitmapDescriptorFactory.fromResource(R.drawable.icon_resto_0));
+                                .icon(BitmapDescriptorFactory.fromResource(R.drawable.icon_resto_0)); // use red marker in case no colleague has chosen the resto
                         }
                         Marker marker = mMap.addMarker(markerOptions);
                         String resto_json = gson.toJson(place_nearby);
@@ -191,47 +216,5 @@ public class MapsFragment extends BaseRestoFragment  {
             }
         }
     }
-
-    public void set_list_of_workmates(List<Workmate> list_workmates){
-        this.list_workmates=list_workmates;
-        launch_map_view();
-    }
-
-    public void recover_previous_state(){
-
-        if(list_places_nearby_OLD!=null){
-            if(list_places_nearby_OLD.size()>0){
-
-                this.list_places_nearby = new ArrayList<>();
-                this.list_places_nearby.addAll(list_places_nearby_OLD);
-                list_places_nearby_OLD.clear();
-                launch_map_view();
-            }
-        }
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
-        if(mFirebase_recover !=null)
-            mFirebase_recover.recover_list_workmates();
-    }
 }
-
-
-
-
-        // Recover list of restos nearby
-        /*if(getArguments()!=null) {
-
-            // String radius = String.valueOf(sharedPreferences.getInt(EXTRA_PREF_RADIUS, 500));
-            // String type = sharedPreferences.getString(EXTRA_PREF_TYPE_PLACE, "restaurant");
-
-            String radius = "500";
-            String type = "restaurant";
-            String api_key = getArguments().getString(EXTRA_API_KEY, null);
-
-            if (api_key != null)
-                new ListSearchNearby(api_key, currentPlaceLatLng, radius, type, this);
-        }*/
 

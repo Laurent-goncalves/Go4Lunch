@@ -126,6 +126,17 @@
 
         </LinearLayout>
 
+        <!-- TEXTVIEW in case 0 workmate joining  -->
+        <TextView
+            android:id="@+id/text_nobody_joining"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingStart="@dimen/default_large_margin"
+            android:text="@string/nobody_joining"
+            android:textSize="18sp"
+            android:textStyle="italic"
+            tools:ignore="RtlSymmetry" />
+
         <!-- LIST WORKMATES JOINING  -->
         <android.support.v7.widget.RecyclerView
             android:layout_width="match_parent"

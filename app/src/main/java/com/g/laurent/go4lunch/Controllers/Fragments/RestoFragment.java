@@ -53,6 +53,7 @@ public class RestoFragment extends Fragment {
     @BindView(R.id.call_button) Button call_button;
     @BindView(R.id.like_button) Button like_button;
     @BindView(R.id.website_button) Button website_button;
+    @BindView(R.id.text_nobody_joining) TextView text_nobody;
     @BindView(R.id.list_workmates_joining_resto) RecyclerView list_workmates_recycler;
     private final static String TYPE_DISPLAY_WORKMATES_BY_RESTO = "list_of_workmates_by_resto";
     private final static String EXTRA_RESTO_DETAILS = "resto_details";
@@ -90,7 +91,7 @@ public class RestoFragment extends Fragment {
         String resto_json = getArguments().getString(EXTRA_RESTO_DETAILS,null);
         resto = gson.fromJson(resto_json,PlaceNearby.class);
 
-        placeId = resto.getPlaceId();
+        placeId = resto.getPlaceId(); // recover the id of the resto
 
         mFirebase_update = new FirebaseUpdate(context,this);
         api_key = context.getResources().getString(R.string.google_maps_key2);
@@ -99,14 +100,16 @@ public class RestoFragment extends Fragment {
         return view;
     }
 
-    public void recover_list_workmates() {
+    // ----------------------------------------------------------------------------------------------
+    // ---------------------------------------- WORKMATES -------------------------------------------
+    // ----------------------------------------------------------------------------------------------
 
+    public void recover_list_workmates() {
         FirebaseRecover firebase_recover = new FirebaseRecover(context,this);
         firebase_recover.recover_list_workmates();
     }
 
     public void renew_list_workmates() {
-
         FirebaseRecover firebase_recover = new FirebaseRecover(context,this);
         firebase_recover.renew_list_workmates();
     }
@@ -152,6 +155,29 @@ public class RestoFragment extends Fragment {
                 break;
         }
     }
+
+    private void configure_recycler_view(){
+
+        // check is anyone is joining the restaurant
+        if(list_workmates_joining!=null){
+            if(list_workmates_joining.size()!=0){
+                // Remove the textView for indicating nobody is joining
+                text_nobody.setVisibility(View.GONE);
+                // Create adapter passing in the sample user data
+                WorkmatesViewAdapter adapter = new WorkmatesViewAdapter(context, list_workmates_joining, TYPE_DISPLAY_WORKMATES_BY_RESTO);
+                // Attach the adapter to the recyclerview to populate items
+                list_workmates_recycler.setAdapter(adapter);
+                // Set layout manager to position the items
+                list_workmates_recycler.setLayoutManager(new LinearLayoutManager(context));
+            } else
+                text_nobody.setVisibility(View.VISIBLE);
+        } else
+            text_nobody.setVisibility(View.VISIBLE);
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    // ---------------------------------------- CONFIGURE VIEWS -------------------------------------
+    // ----------------------------------------------------------------------------------------------
 
     public void configure_views_with_resto(){
 
@@ -199,7 +225,7 @@ public class RestoFragment extends Fragment {
         int numStars;
 
         if (rating != null)
-            numStars = Math.round(rating.floatValue());
+            numStars = Math.round(rating.floatValue()); // round the value of rating
         else
             numStars = 0;
 
@@ -213,20 +239,6 @@ public class RestoFragment extends Fragment {
                 rating_resto.addView(imgView);
             }
         }
-    }
-
-    // ----------------------------------------------------------------------------------------------
-    // ---------------------------------- CONFIG LIST WORKMATES -------------------------------------
-    // ----------------------------------------------------------------------------------------------
-
-    private void configure_recycler_view(){
-
-        // Create adapter passing in the sample user data
-        WorkmatesViewAdapter adapter = new WorkmatesViewAdapter(context, list_workmates_joining, TYPE_DISPLAY_WORKMATES_BY_RESTO);
-        // Attach the adapter to the recyclerview to populate items
-        list_workmates_recycler.setAdapter(adapter);
-        // Set layout manager to position the items
-        list_workmates_recycler.setLayoutManager(new LinearLayoutManager(context));
     }
 
     // ----------------------------------------------------------------------------------------------
@@ -245,7 +257,7 @@ public class RestoFragment extends Fragment {
 
     private void setOnClickListenerButtonWebsite() {
         website_button.setOnClickListener(v -> {
-            if(resto.getWebsite()!=null){
+            if(resto.getWebsite()!=null){ // if the user clicks on button website, a webview opens
                 Intent intent = new Intent(context,WebActivity.class);
                 intent.putExtra(EXTRA_LINK,resto.getWebsite());
                 context.startActivity(intent);
@@ -362,6 +374,7 @@ public class RestoFragment extends Fragment {
         // Button choose resto
         if(did_I_choose_resto(list_workmates_joining)) {
 
+            // save in sharedpreferences the resto chosen in Json format
             SharedPreferences sharedPreferences = context.getSharedPreferences(EXTRA_PREFERENCES,Context.MODE_PRIVATE);
             Gson gson = new Gson();
             String resto_json = gson.toJson(resto,PlaceNearby.class);

@@ -16,19 +16,24 @@
 
 
     <style name="SearchViewStyle" parent="Widget.AppCompat.SearchView">
-        <!-- Gets rid of the search icon
-        <item name="searchIcon">@drawable/ic_search_white_24dp</item>
-
-        <item name="closeIcon">@drawable/baseline_close_black_24</item> -->
-
         <item name="searchHintIcon">@drawable/baseline_search_black_24</item>
-            <!-- Gets rid of the "underline" in the text -->
+        <!-- Gets rid of the "underline" in the text -->
         <item name="queryBackground">@color/colorWhite</item>
-        <!-- Gets rid of the search icon when the SearchView is expanded -->
-
         <!-- The hint text that appears when the user has not typed anything -->
         <item name="queryHint">@string/search_hint</item>
     </style>
+
+    <!-- Button Google style with rounded shape -->
+    <style name="AppTheme.RoundedCornerGoogleButton" parent="Widget.AppCompat.Button.Colored">
+        <item name="android:background">@drawable/rounded_shape_google_button</item>
+    </style>
+
+    <!-- Button Facebook style with rounded shape -->
+    <style name="AppTheme.RoundedCornerFacebookButton" parent="Widget.AppCompat.Button.Colored">
+        <item name="android:background">@drawable/rounded_shape_fb_button</item>
+        <item name="android:paddingStart">15dp</item>
+    </style>
+
 
     <!-- STYLE SIGN-IN ACTIVITY -->
     <style name="LoginTheme" parent="AppTheme">
@@ -42,7 +47,12 @@
         <item name="android:textColor">@android:color/white</item>
         <item name="android:textColorPrimary">@android:color/darker_gray</item>
         <item name="android:textColorSecondary">@android:color/darker_gray</item>
-        <item name="android:windowBackground">@android:color/white</item>
+
+        <item name="android:windowBackground">@drawable/mainpage</item>
+        <item name="android:adjustViewBounds">false</item>
+        <item name="android:cropToPadding">false</item>
+        <item name="android:scaleType">centerCrop</item>
+
         <item name="windowActionBar">false</item>
         <item name="windowNoTitle">true</item>
         <item name="android:textColorHint">@android:color/white</item>

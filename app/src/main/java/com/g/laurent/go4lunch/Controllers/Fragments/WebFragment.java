@@ -1,6 +1,5 @@
 package com.g.laurent.go4lunch.Controllers.Fragments;
 
-
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
@@ -19,8 +18,7 @@ import butterknife.ButterKnife;
  */
 public class WebFragment extends Fragment {
 
-    @BindView(R.id.webview)
-    WebView mWebView;
+    @BindView(R.id.webview) WebView mWebView;
 
     public WebFragment() {
         // Required empty public constructor

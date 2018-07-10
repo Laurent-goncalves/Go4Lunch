@@ -8,9 +8,12 @@
     <string name="error_authentication_canceled">Authentication cancelled&#8230;</string>
     <string name="error_no_internet">No internet connection !</string>
     <string name="error_unknown_error">An unknown error occurred&#8230;</string>
+    <string name="error_connection">Connection failed</string>
     <string name="connection_succeed">Authentication succeed !</string>
     <string name="button_login_text_logged">Display profile</string>
     <string name="button_login_text_not_logged">Connection</string>
+    <string name="find_a_nice_restaurant_and_invite_your_co_workers_for_lunch">Find a nice restaurant and invite your co-workers for lunch!</string>
+
 
     <!-- MAPVIEW & LISTVIEW -->
     <string name="toolbar_mapview">I\'m hungry</string>
@@ -35,6 +38,7 @@
     <string name="joining"> is joining!</string>
     <string name="website_unavailable">No website for this restaurant</string>
     <string name="phone_number_unavailable">No phone number for this restaurant</string>
+    <string name="nobody_joining">No workmate are joining this restaurant</string>
 
     <!-- LISTRESTOVIEW -->
     <string name="open_until">Open until </string>
@@ -104,5 +108,8 @@
     <string name="icon_button_search">icon_button_search</string>
     <string name="icon_button_hamburger">icon_button_hamburger</string>
     <string name="image_main_page">image_main_page</string>
+    <string name="title_main_page">title_main_page</string>
+    <string name="subtitle_main_page">subtitle_main_page</string>
+    <string name="symbol_restaurant">symbol_restaurant</string>
 
 </resources>

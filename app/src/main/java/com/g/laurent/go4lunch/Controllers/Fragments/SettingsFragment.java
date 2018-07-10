@@ -71,13 +71,17 @@ public class SettingsFragment extends Fragment implements AdapterView.OnItemSele
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_settings, container, false);
+
+        // Assign views and initialize variables
         ButterKnife.bind(this, view);
         sharedPreferences = getActivity().getSharedPreferences(EXTRA_PREFERENCES,MODE_PRIVATE);
         mFirebase_update = new FirebaseUpdate(context);
-        configure_settings_areas();
-        configureOnClickListener();
         mCurrentUser = FirebaseAuth.getInstance().getCurrentUser();
         context = getActivity().getApplicationContext();
+
+        // configure views
+        configure_settings_areas();
+        configureOnClickListener();
         return view;
     }
 
@@ -117,7 +121,7 @@ public class SettingsFragment extends Fragment implements AdapterView.OnItemSele
             builder.setMessage(context.getResources().getString(R.string.confirmation_reset_chosen_resto));
             builder.setPositiveButton(context.getResources().getString(R.string.confirm),
                     (dialog, which) -> {
-                        if(mCurrentUser!=null) {
+                        if(mCurrentUser!=null) { // reset the choice of resto
                             mFirebase_update.initialize_chosen_restaurant(mCurrentUser.getUid());
                             sharedPreferences.edit().putString(EXTRA_RESTO_JSON, null).apply();
                             message_to_display(true);
@@ -141,7 +145,7 @@ public class SettingsFragment extends Fragment implements AdapterView.OnItemSele
             builder.setMessage(context.getResources().getString(R.string.confirmation_reset_liked_resto));
             builder.setPositiveButton(context.getResources().getString(R.string.confirm),
                     (dialog, which) -> {
-                        if(mCurrentUser!=null) {
+                        if(mCurrentUser!=null) { // reset the list of like restos
                             mFirebase_update.initialize_like_list_restaurant(mCurrentUser.getUid());
                             message_to_display(true);
                         } else
@@ -153,17 +157,6 @@ public class SettingsFragment extends Fragment implements AdapterView.OnItemSele
             AlertDialog dialog = builder.create();
             dialog.show();
         });
-    }
-
-    private void message_to_display(Boolean success){
-        Toast toast;
-
-        if(success)
-            toast = Toast.makeText(context,context.getResources().getString(R.string.confirm_message_reset),Toast.LENGTH_SHORT);
-        else
-            toast = Toast.makeText(context,context.getResources().getString(R.string.alert_message_not_reset),Toast.LENGTH_SHORT);
-
-        toast.show();
     }
 
     private void configure_notification_switch() {
@@ -231,7 +224,6 @@ public class SettingsFragment extends Fragment implements AdapterView.OnItemSele
     }
 
     private void configure_radius_seekbar(){
-
         int radius = sharedPreferences.getInt(EXTRA_PREF_RADIUS,500);
         String text = String.valueOf(radius) + " m";
         this.radius.setProgress(radius);
@@ -272,8 +264,19 @@ public class SettingsFragment extends Fragment implements AdapterView.OnItemSele
         }
     }
 
+    private void message_to_display(Boolean success){
+        Toast toast;
+
+        if(success)
+            toast = Toast.makeText(context,context.getResources().getString(R.string.confirm_message_reset),Toast.LENGTH_SHORT);
+        else
+            toast = Toast.makeText(context,context.getResources().getString(R.string.alert_message_not_reset),Toast.LENGTH_SHORT);
+
+        toast.show();
+    }
+
     // ----------------------------------------------------------------------------------------------
-    // ------------------------------------ ON CLICK LISTENER ---------------------------------------
+    // ------------------------------------ LISTENERS -----------------------------------------------
     // ----------------------------------------------------------------------------------------------
 
     private void configureOnClickListener(){
@@ -316,13 +319,14 @@ public class SettingsFragment extends Fragment implements AdapterView.OnItemSele
     }
 
     @Override
-    public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-    }
+    public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {}
 
     @Override
-    public void onNothingSelected(AdapterView<?> parent) {
+    public void onNothingSelected(AdapterView<?> parent) {}
 
-    }
+    // ----------------------------------------------------------------------------------------------
+    // ------------------------------------ LANGUAGES -----------------------------------------------
+    // ----------------------------------------------------------------------------------------------
 
     private void setLanguageForApp(){
 

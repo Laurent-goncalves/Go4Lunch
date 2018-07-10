@@ -1,9 +1,11 @@
 package com.g.laurent.go4lunch.Controllers.Fragments;
 
+import android.content.Context;
 import android.support.v4.app.Fragment;
-
+import com.g.laurent.go4lunch.Controllers.Activities.MultiActivity;
 import com.g.laurent.go4lunch.Models.PlaceNearby;
 import com.g.laurent.go4lunch.Models.Workmate;
+import com.g.laurent.go4lunch.Utils.FirebaseRecover;
 import com.google.android.gms.maps.model.LatLng;
 import java.util.ArrayList;
 import java.util.List;
@@ -14,11 +16,13 @@ import static java.lang.Double.compare;
  */
 public abstract class BaseRestoFragment extends Fragment {
 
+    protected MultiActivity activity;
     protected LatLng currentPlaceLatLng;
     protected List<PlaceNearby> list_places_nearby;
     protected List<PlaceNearby> list_places_nearby_OLD;
     protected List<Workmate> list_workmates;
     protected static final String EXTRA_LIST_RESTOS_JSON = "list_restos_json";
+    protected FirebaseRecover mFirebase_recover;
 
     public BaseRestoFragment() {
         // Required empty public constructor
@@ -26,29 +30,24 @@ public abstract class BaseRestoFragment extends Fragment {
 
     protected Boolean is_resto_chosen_by_workmates(PlaceNearby resto, List<Workmate> workmateList){
 
-        Boolean answer = false;
-
+        // For each workmate of the list, check the resto id is present
         if(workmateList!=null && resto!=null){
             for(Workmate workmate : workmateList) {
                 if (workmate != null) {
-
                     if (workmate.getResto_id() != null) {
                         if (workmate.getResto_id().equals(resto.getPlaceId()))
-                            answer = true;
+                            return true;
                     }
                 }
             }
         }
-
-        return answer;
+        return false;
     }
 
     protected Double calculate_distance(LatLng current_location, PlaceNearby location) {
 
         if(current_location!=null && location!=null){
-
             if(location.getGeometry()!=null){
-
                 if(location.getGeometry().getLocation()!=null){
 
                     Double lat1 = current_location.latitude;
@@ -56,21 +55,23 @@ public abstract class BaseRestoFragment extends Fragment {
                     Double lat2 = location.getGeometry().getLocation().getLat();
                     Double lon2 = location.getGeometry().getLocation().getLng();
 
-                    Double latitude1 = lat1 * Math.PI / 180;
-                    Double latitude2 = lat2 * Math.PI / 180;
-                    Double longitude1 = lon1 * Math.PI / 180;
-                    Double longitude2 = lon2 * Math.PI / 180;
+                    Double latitude1 = lat1 * Math.PI / 180; // calculate latitude in radians
+                    Double latitude2 = lat2 * Math.PI / 180; // calculate latitude in radians
+                    Double longitude1 = lon1 * Math.PI / 180; // calculate longitude in radians
+                    Double longitude2 = lon2 * Math.PI / 180; // calculate longitude in radians
 
-                    Double Radius = 6371d;
+                    Double Radius = 6371d; // radius of the Earth
 
                     return 1000 * Radius * Math.acos(Math.cos(latitude1) * Math.cos(latitude2) *
                             Math.cos(longitude2 - longitude1) + Math.sin(latitude1) *
-                            Math.sin(latitude2));
+                            Math.sin(latitude2)); // distance calculation
                 }
             }
         }
         return null;
     }
+
+    // -------------------------------- SORTING FUNCTIONALITY ----------------------------------------------
 
     protected List<PlaceNearby> create_list_place_nearby_sorted(List<Integer> list_index){
 
@@ -87,7 +88,6 @@ public abstract class BaseRestoFragment extends Fragment {
         List<Double> list_to_sort = new ArrayList<>();
 
         for(PlaceNearby place : new_list_places_nearby){
-
             if(place!=null) {
                 switch (type_sorting) {
                     case "stars":
@@ -99,7 +99,6 @@ public abstract class BaseRestoFragment extends Fragment {
                 }
             }
         }
-
         return list_to_sort;
     }
 
@@ -148,8 +147,6 @@ public abstract class BaseRestoFragment extends Fragment {
 
         return list_index_sorted;
     }
-
-    // -------------------------------- SORT BY WORKMATE ----------------------------------------------
 
     public void sort_list_places_nearby_by_workmates(){
 
@@ -276,6 +273,31 @@ public abstract class BaseRestoFragment extends Fragment {
             }
         }
         return answer;
+    }
+
+    public void recover_list_workmates(List<PlaceNearby> list_resto) {
+        if(list_places_nearby_OLD!=null && list_places_nearby!=null){
+            if(list_places_nearby_OLD.size()==0){ // if there is no place nearby in the old list, it means this method is called for the search
+                list_places_nearby_OLD.addAll(list_places_nearby);
+            }
+        }
+
+        this.list_places_nearby = list_resto;
+    }
+
+    @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+        if (context instanceof MultiActivity){
+            activity=(MultiActivity) context;
+        }
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        if(mFirebase_recover !=null)
+            mFirebase_recover.recover_list_workmates();
     }
 
     // -------------------------- GETTER and SETTER ----------------------------------------------------

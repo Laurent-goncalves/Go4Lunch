@@ -121,13 +121,12 @@ public class ToolbarNavigUtils implements NavigationView.OnNavigationItemSelecte
     private void create_onClickListener_Select_Item_searchView(){
         // when clicking on an item from the list autocomplete
         searchAutoComplete.setOnItemClickListener((parent, view, position, id) -> {
-
             List<String> list_placesId = new ArrayList<>();
             list_placesId.add(mList_place_nearby_autocomplete.get(position).getPlaceId());
 
-            if(activity.getCurrentPage()==0) {
+            if (activity.getCurrentPage() == 0) {
                 new ListSearchNearby(context, api_key, list_placesId, activity.getPageAdapter().getMapsFragment());
-            } else if(activity.getCurrentPage()==1) {
+            } else if (activity.getCurrentPage() == 1) {
                 new ListSearchNearby(context, api_key, list_placesId, activity.getPageAdapter().getListRestoFragment());
             }
         });

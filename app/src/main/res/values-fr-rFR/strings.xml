@@ -8,9 +8,11 @@
     <string name="error_authentication_canceled">Authentification annulée&#8230;</string>
     <string name="error_no_internet">Aucune connexion internet !</string>
     <string name="error_unknown_error">Une erreur inconnue s\'est produite&#8230;</string>
+    <string name="error_connection">Erreur Connexion</string>
     <string name="connection_succeed">Authentification réussie !</string>
     <string name="button_login_text_logged">Afficher le profil</string>
     <string name="button_login_text_not_logged">Connexion</string>
+    <string name="find_a_nice_restaurant_and_invite_your_co_workers_for_lunch">Trouvez un bon restaurant et invitez vos collègues pour déjeuner!</string>
 
     <!-- MAPVIEW & LISTVIEW -->
     <string name="toolbar_mapview">J\'ai faim</string>
@@ -35,6 +37,7 @@
     <string name="joining"> sera présent!</string>
     <string name="website_unavailable">Pas de site web pour ce restaurant</string>
     <string name="phone_number_unavailable">Pas de numéro de téléphone pour ce restaurant</string>
+    <string name="nobody_joining">Aucun collègue ne va à ce restaurant</string>
 
     <!-- LISTRESTOVIEW -->
     <string name="open_until">Ouvert jusqu\'à </string>
@@ -104,5 +107,8 @@
     <string name="icon_button_search">icon_button_search</string>
     <string name="icon_button_hamburger">icon_button_hamburger</string>
     <string name="image_main_page">image_main_page</string>
+    <string name="title_main_page">title_main_page</string>
+    <string name="subtitle_main_page">subtitle_main_page</string>
+    <string name="symbol_restaurant">symbol_restaurant</string>
 
 </resources>

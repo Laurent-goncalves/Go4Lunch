@@ -12,30 +12,30 @@ import android.view.ViewGroup;
 import com.g.laurent.go4lunch.Models.Workmate;
 import com.g.laurent.go4lunch.R;
 import com.g.laurent.go4lunch.Utils.FirebaseRecover;
+import com.g.laurent.go4lunch.Views.RestoListViews.ListViewAdapter;
 import com.g.laurent.go4lunch.Views.WorkmatesViews.WorkmatesViewAdapter;
 import java.util.List;
 import java.util.Objects;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
+import static android.support.test.internal.runner.junit4.statement.UiThreadStatement.runOnUiThread;
+
 /**
  * A simple {@link Fragment} subclass.
  */
-public class ListMatesFragment extends Fragment {
+public class ListMatesFragment extends BaseRestoFragment {
 
     @BindView(R.id.list_workmates) RecyclerView list_workmates_recycler;
     private final static String TYPE_DISPLAY_WORKMATES_LIST = "list_of_workmates";
     private List<Workmate> list_workmates;
     private Context context;
-    private FirebaseRecover mFirebase_recover;
 
     public ListMatesFragment() {
         // Required empty public constructor
     }
 
     public static ListMatesFragment newInstance() {
-
-        // Create new fragment
         return new ListMatesFragment();
     }
 
@@ -55,24 +55,22 @@ public class ListMatesFragment extends Fragment {
     }
 
     private void configure_recycler_view(){
-
-        // Create adapter passing in the sample user data
-        WorkmatesViewAdapter adapter = new WorkmatesViewAdapter(context, list_workmates, TYPE_DISPLAY_WORKMATES_LIST);
-        // Attach the adapter to the recyclerview to populate items
-        list_workmates_recycler.setAdapter(adapter);
-        // Set layout manager to position the items
-        list_workmates_recycler.setLayoutManager(new LinearLayoutManager(context));
+        try {
+            runOnUiThread(() -> {
+                if (context != null) {
+                    // Create adapter passing in the sample user data
+                    WorkmatesViewAdapter adapter = new WorkmatesViewAdapter(context, list_workmates, TYPE_DISPLAY_WORKMATES_LIST);
+                    // Attach the adapter to the recyclerview to populate items
+                    list_workmates_recycler.setAdapter(adapter);
+                    // Set layout manager to position the items
+                    list_workmates_recycler.setLayoutManager(new LinearLayoutManager(context));
+                }
+            });
+        } catch(Throwable ignored){}
     }
 
     public void set_list_of_workmates(List<Workmate> list_workmates){
         this.list_workmates=list_workmates;
         configure_recycler_view();
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
-        if(mFirebase_recover !=null)
-            mFirebase_recover.recover_list_workmates();
     }
 }

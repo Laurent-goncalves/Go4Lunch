@@ -4,6 +4,8 @@ import android.content.Context;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentStatePagerAdapter;
+
 import com.g.laurent.go4lunch.Controllers.Fragments.ListMatesFragment;
 import com.g.laurent.go4lunch.Controllers.Fragments.ListRestoFragment;
 import com.g.laurent.go4lunch.Controllers.Fragments.MapsFragment;
@@ -14,7 +16,7 @@ import com.google.android.gms.maps.model.LatLng;
 import java.util.List;
 
 
-public class MultiFragAdapter extends FragmentPagerAdapter {
+public class MultiFragAdapter extends FragmentStatePagerAdapter {
 
     private Context context;
     private MapsFragment mapsFragment;
