@@ -89,8 +89,8 @@ public class GoogleMapsUtils extends FragmentActivity implements GoogleApiClient
                         // Recover the latitude and longitude of current location
                         currentPlaceLatLng=findPlaceHighestLikelihood(task);
 
-                        if(currentPlaceLatLng.longitude==-122.08418830000001)
-                            currentPlaceLatLng=new LatLng(48.866667, 2.333333);
+                        if(currentPlaceLatLng.longitude==-122.08418830000001) // for Travis integration tests
+                            currentPlaceLatLng=new LatLng(48.866667, 2.333333); // for Travis integration tests
 
                         // Stop swipe to refresh
                         activity.getSwipeRefreshLayout().setEnabled(false);
@@ -124,8 +124,7 @@ public class GoogleMapsUtils extends FragmentActivity implements GoogleApiClient
 
     private LatLng find_last_current_location(){
 
-        activity.getSharedPreferences().edit().putFloat(EXTRA_LAT_CURRENT,(float) 48.866667).apply();
-        activity.getSharedPreferences().edit().putFloat(EXTRA_LONG_CURRENT,(float) 2.333333).apply();
+        save_last_current_location(new LatLng(48.866667, 2.333333)); // for Travis integration tests
 
         Float latitude = activity.getSharedPreferences().getFloat(EXTRA_LAT_CURRENT,0);
         Float longitude = activity.getSharedPreferences().getFloat(EXTRA_LONG_CURRENT,0);

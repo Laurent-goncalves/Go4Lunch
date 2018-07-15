@@ -29,10 +29,8 @@ import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthCredential;
-import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FacebookAuthProvider;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -91,12 +89,12 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 
             @Override
             public void onCancel() {
-                Toast.makeText(getApplicationContext(), "cancel login", Toast.LENGTH_SHORT).show();
+                Toast.makeText(getApplicationContext(), getApplicationContext().getResources().getString(R.string.login_error), Toast.LENGTH_SHORT).show();
             }
 
             @Override
             public void onError(FacebookException error) {
-                Toast.makeText(getApplicationContext(), "error login", Toast.LENGTH_SHORT).show();
+                Toast.makeText(getApplicationContext(), getApplicationContext().getResources().getString(R.string.login_error), Toast.LENGTH_SHORT).show();
             }
         });
     }
@@ -106,7 +104,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
         AuthCredential credential = FacebookAuthProvider.getCredential(accessToken.getToken());
         firebaseAuth.signInWithCredential(credential).addOnCompleteListener(this, task -> {
             if (task.isSuccessful()) {
-                Toast.makeText(getApplicationContext(), "login successful", Toast.LENGTH_SHORT).show();
+                Toast.makeText(getApplicationContext(),getApplicationContext().getResources().getString(R.string.connection_succeed), Toast.LENGTH_SHORT).show();
             }
             group_progress_bar.setVisibility(View.GONE);
             goToMultiActivity();
@@ -209,8 +207,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
         Locale locale;
         if(lang.equals("not-set")){ //use any value for default
             locale = Locale.getDefault();
-        }
-        else {
+        } else {
             locale = new Locale(lang);
         }
 
@@ -223,6 +220,6 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 
     @Override
     public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
-
+        showSnackBar(this.window_sign_in,connectionResult.getErrorMessage());
     }
 }

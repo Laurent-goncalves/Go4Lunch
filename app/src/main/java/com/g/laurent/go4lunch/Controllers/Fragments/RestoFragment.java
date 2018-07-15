@@ -364,6 +364,8 @@ public class RestoFragment extends Fragment {
         setColorButton(like_button, R.color.colorStars);
         like_button.setEnabled(false);
         renew_list_workmates();
+        Toast toast = Toast.makeText(context,context.getResources().getString(R.string.now_like),Toast.LENGTH_LONG);
+        toast.show();
     }
 
     // ----------------------------------------------------------------------------------------------
@@ -440,5 +442,7 @@ public class RestoFragment extends Fragment {
         setRestoChosen(true);
         button_valid.setEnabled(false);
         renew_list_workmates();
+        Toast toast = Toast.makeText(context,context.getResources().getString(R.string.now_joining),Toast.LENGTH_LONG);
+        toast.show();
     }
 }

@@ -12,7 +12,6 @@ import android.view.ViewGroup;
 import com.g.laurent.go4lunch.Models.Workmate;
 import com.g.laurent.go4lunch.R;
 import com.g.laurent.go4lunch.Utils.FirebaseRecover;
-import com.g.laurent.go4lunch.Views.RestoListViews.ListViewAdapter;
 import com.g.laurent.go4lunch.Views.WorkmatesViews.WorkmatesViewAdapter;
 import java.util.List;
 import java.util.Objects;

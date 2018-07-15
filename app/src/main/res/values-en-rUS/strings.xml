@@ -13,6 +13,7 @@
     <string name="button_login_text_logged">Display profile</string>
     <string name="button_login_text_not_logged">Connection</string>
     <string name="find_a_nice_restaurant_and_invite_your_co_workers_for_lunch">Find a nice restaurant and invite your co-workers for lunch!</string>
+    <string name="login_error">Login error</string>
 
 
     <!-- MAPVIEW & LISTVIEW -->
@@ -39,6 +40,8 @@
     <string name="website_unavailable">No website for this restaurant</string>
     <string name="phone_number_unavailable">No phone number for this restaurant</string>
     <string name="nobody_joining">No workmate are joining this restaurant</string>
+    <string name="now_joining">You are now joining this restaurant</string>
+    <string name="now_like">You are now liking this restaurant</string>
 
     <!-- LISTRESTOVIEW -->
     <string name="open_until">Open until </string>

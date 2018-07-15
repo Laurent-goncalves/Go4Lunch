@@ -216,5 +216,9 @@ public class MapsFragment extends BaseRestoFragment  {
             }
         }
     }
+
+    public MapView getMapView() {
+        return mMapView;
+    }
 }
 

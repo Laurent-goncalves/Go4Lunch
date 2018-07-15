@@ -1,6 +1,7 @@
 package com.g.laurent.go4lunch.Utils;
 
 import android.content.Context;
+import android.support.annotation.NonNull;
 import android.widget.Toast;
 import com.g.laurent.go4lunch.Controllers.Fragments.ListMatesFragment;
 import com.g.laurent.go4lunch.Controllers.Fragments.ListRestoFragment;
@@ -92,44 +93,42 @@ public class FirebaseRecover {
 
         databaseReferenceWorkmates.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
-            public void onDataChange(DataSnapshot datas) {
-                if(datas!=null) {
-                    list_workmates = new ArrayList<>();
+            public void onDataChange(@NonNull DataSnapshot datas) {
+                list_workmates = new ArrayList<>();
 
-                    for(DataSnapshot id : datas.getChildren()){
+                for(DataSnapshot id : datas.getChildren()){
 
-                        Workmate workmate = create_workmate_with_firebase_datas(id);
-                        if(!is_workmate_in_list(workmate.getId(),list_workmates))
-                            list_workmates.add(workmate);
-                    }
+                    Workmate workmate = create_workmate_with_firebase_datas(id);
+                    if(!is_workmate_in_list(workmate.getId(),list_workmates))
+                        list_workmates.add(workmate);
+                }
 
-                    switch(callback){
-                        case CALLBACK_RESTOFRAGMENT:
-                            if(restoFragment!=null)
-                                restoFragment.set_list_of_workmates(list_workmates,INITIAL_LIST_WORKMATES);
-                            break;
-                        case CALLBACK_LISTRESTOFRAGMENT:
-                            if(listRestoFragment!=null)
-                                listRestoFragment.set_list_of_workmates(list_workmates);
-                            break;
-                        case CALLBACK_LISTMATESFRAGMENT:
-                            if(listMatesFragment!=null)
-                                listMatesFragment.set_list_of_workmates(list_workmates);
-                            break;
-                        case CALLBACK_MAPSFRAGMENT:
-                            if(mapsFragment!=null)
-                                mapsFragment.set_list_of_workmates(list_workmates);
-                            break;
-                        case CALLBACK_ALARM:
-                            if(callback_alarm!=null)
-                                callback_alarm.send_notification(list_workmates);
-                            break;
-                    }
+                switch(callback){
+                    case CALLBACK_RESTOFRAGMENT:
+                        if(restoFragment!=null)
+                            restoFragment.set_list_of_workmates(list_workmates,INITIAL_LIST_WORKMATES);
+                        break;
+                    case CALLBACK_LISTRESTOFRAGMENT:
+                        if(listRestoFragment!=null)
+                            listRestoFragment.set_list_of_workmates(list_workmates);
+                        break;
+                    case CALLBACK_LISTMATESFRAGMENT:
+                        if(listMatesFragment!=null)
+                            listMatesFragment.set_list_of_workmates(list_workmates);
+                        break;
+                    case CALLBACK_MAPSFRAGMENT:
+                        if(mapsFragment!=null)
+                            mapsFragment.set_list_of_workmates(list_workmates);
+                        break;
+                    case CALLBACK_ALARM:
+                        if(callback_alarm!=null)
+                            callback_alarm.send_notification(list_workmates);
+                        break;
                 }
             }
 
             @Override
-            public void onCancelled(DatabaseError databaseError) {
+            public void onCancelled(@NonNull DatabaseError databaseError) {
                 Toast toast = Toast.makeText(context,context.getResources().getString(R.string.firebase_database_err) + "\n"
                         + databaseError.toString(),Toast.LENGTH_LONG);
                 toast.show();
@@ -158,10 +157,8 @@ public class FirebaseRecover {
 
         List<String> list_resto_liked = new ArrayList<>();
 
-        if (datas.child("list_resto_liked") != null) {
-            for (DataSnapshot datas_child : datas.child("list_resto_liked").getChildren())
-                list_resto_liked.add((String) datas_child.getValue());
-        }
+        for (DataSnapshot datas_child : datas.child("list_resto_liked").getChildren())
+            list_resto_liked.add((String) datas_child.getValue());
 
         return new Workmate(
                 (String) datas.child("name").getValue(),
@@ -183,119 +180,26 @@ public class FirebaseRecover {
 
         databaseReferenceWorkmates.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
-            public void onDataChange(DataSnapshot datas) {
-                if(datas!=null) {
-                    list_workmates = new ArrayList<>();
+            public void onDataChange(@NonNull DataSnapshot datas) {
+                list_workmates = new ArrayList<>();
 
-                    for(DataSnapshot id : datas.getChildren()){
+                for(DataSnapshot id : datas.getChildren()){
 
-                        Workmate workmate = create_workmate_with_firebase_datas(id);
+                    Workmate workmate = create_workmate_with_firebase_datas(id);
 
-                        if(!is_workmate_in_list(workmate.getId(),list_workmates))
-                            list_workmates.add(workmate);
-                    }
-
-                    restoFragment.set_list_of_workmates(list_workmates,RENEW_LIST_WORKMATES);
+                    if(!is_workmate_in_list(workmate.getId(),list_workmates))
+                        list_workmates.add(workmate);
                 }
+
+                restoFragment.set_list_of_workmates(list_workmates,RENEW_LIST_WORKMATES);
             }
 
             @Override
-            public void onCancelled(DatabaseError databaseError) {
-                System.out.println("eee Cancellation");
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+                Toast toast = Toast.makeText(context,context.getResources().getString(R.string.firebase_database_err) + "\n"
+                        + databaseError.toString(),Toast.LENGTH_LONG);
+                toast.show();
             }
         });
-
     }
 }
-
-
-/*
-
-
-    public FirebaseRecover(Context context, String userId) {
-        FirebaseApp.initializeApp(context);
-        this.context = context;
-        list_restos_liked = new ArrayList<>();
-        DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference();
-        databaseReferenceWorkmates= databaseReference.child("workmates").child(userId);
-    }
-
-    public FirebaseRecover(Context context, MultiActivity multiActivity, String userId) {
-        FirebaseApp.initializeApp(context);
-        this.multiActivity=multiActivity;
-        this.context = context;
-        DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference();
-        databaseReferenceWorkmates= databaseReference.child("workmates").child(userId).child("resto_id");
-    }
-
-    public FirebaseRecover(Context context, String userId) {
-        FirebaseApp.initializeApp(context);
-        this.context = context;
-        list_restos_liked = new ArrayList<>();
-        DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference();
-        databaseReferenceWorkmates= databaseReference.child("workmates").child(userId);
-    }
-
- */
-
-
-
-    /*
-
-
-    public void recover_workmate_restoId(String userId){
-
-        databaseReferenceWorkmates= databaseReferenceWorkmates.child(userId).child("resto_id");
-
-        databaseReferenceWorkmates.addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot data) {
-                if(data!=null) {
-                    listRestoFragment.setPlaceId((String) data.getValue());
-                }
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-                System.out.println("eee Cancellation");
-            }
-        });
-    }
-
-    public void recover_workmate_liked_restos(){
-
-        DatabaseReference databaseReferenceListResto= databaseReferenceWorkmates.child("list_resto_liked");
-
-        databaseReferenceListResto.addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot data) {
-                if(data!=null) {
-                    for(DataSnapshot datas : data.getChildren())
-                        list_restos_liked.add((String) datas.getValue());
-                }
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-            }
-        });
-    }
-
-    public void recover_workmate_chosen_resto(){
-
-        DatabaseReference databaseReferenceChosenResto= databaseReferenceWorkmates.child("resto_id");
-
-        databaseReferenceChosenResto.addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot data) {
-
-                if(data!=null) {
-                    resto_id_chosen = (String) data.getValue();
-                }
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-            }
-        });
-    }*/

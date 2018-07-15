@@ -37,8 +37,6 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-
-import java.io.IOException;
 import java.util.Calendar;
 import java.util.List;
 import java.util.Locale;
@@ -172,10 +170,12 @@ public class MultiActivity extends AppCompatActivity implements CallbackMultiAct
                 current_page = tab.getPosition();
 
                 // if the current page is the ListMatesFragment, remove the searchView
-                if(current_page==2)
-                    mToolbar_navig_utils.getSearchView().setVisibility(View.GONE);
-                else
-                    mToolbar_navig_utils.getSearchView().setVisibility(View.VISIBLE);
+                if(mToolbar_navig_utils!=null){
+                    if(current_page==2)
+                        mToolbar_navig_utils.getSearchView().setVisibility(View.GONE);
+                    else
+                        mToolbar_navig_utils.getSearchView().setVisibility(View.VISIBLE);
+                }
 
                 // refresh title toolbar (different according to the page selected)
                 if(mToolbar_navig_utils !=null)
@@ -281,12 +281,20 @@ public class MultiActivity extends AppCompatActivity implements CallbackMultiAct
             }
         }
 
-        if(mProgressBar!=null)
-            mProgressBar.setVisibility(View.VISIBLE);
+        recreate_fragments();
+    }
 
-        // recreate activity to refresh texts (useful in case of change of language)
-        GoogleMapsUtils google_maps_utils = new GoogleMapsUtils(getApplicationContext(), this, null);
+    private void recreate_fragments(){
+        // When refreshing, we launch a new API request starting by defining current location
+        GoogleMapsUtils google_maps_utils = new GoogleMapsUtils(getApplicationContext(), this, mToolbar_navig_utils);
         google_maps_utils.getLocationPermission();
+
+        getPageAdapter().getMapsFragment().getMapView().removeAllViews();
+
+        // Launch progressBar
+        if(mProgressBar!=null) {
+            runOnUiThread(() -> mProgressBar.setVisibility(View.VISIBLE));
+        }
     }
 
     public void configureAlarmManager() {
@@ -317,14 +325,7 @@ public class MultiActivity extends AppCompatActivity implements CallbackMultiAct
     public void onRefresh() {
 
         if(isNetworkAvailable(getApplicationContext())){ // check if there is internet connection
-            // When refreshing, we launch a new API request starting by defining current location
-            GoogleMapsUtils google_maps_utils = new GoogleMapsUtils(getApplicationContext(), this, mToolbar_navig_utils);
-            google_maps_utils.getLocationPermission();
-
-            // Launch progressBar
-            if(mProgressBar!=null)
-                mProgressBar.setVisibility(View.VISIBLE);
-
+            recreate_fragments();
         } else {
             swipeRefreshLayout.setRefreshing(false);
             Toast toast = Toast.makeText(getApplicationContext(),getApplicationContext().getResources().getString(R.string.error_no_internet),Toast.LENGTH_LONG);

@@ -2,19 +2,15 @@ package com.g.laurent.go4lunch.Views;
 
 import android.content.Context;
 import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentStatePagerAdapter;
-
 import com.g.laurent.go4lunch.Controllers.Fragments.ListMatesFragment;
 import com.g.laurent.go4lunch.Controllers.Fragments.ListRestoFragment;
 import com.g.laurent.go4lunch.Controllers.Fragments.MapsFragment;
 import com.g.laurent.go4lunch.Models.PlaceNearby;
 import com.g.laurent.go4lunch.R;
 import com.google.android.gms.maps.model.LatLng;
-
 import java.util.List;
-
 
 public class MultiFragAdapter extends FragmentStatePagerAdapter {
 
@@ -78,4 +74,5 @@ public class MultiFragAdapter extends FragmentStatePagerAdapter {
     public ListRestoFragment getListRestoFragment() {
         return listRestoFragment;
     }
+
 }
