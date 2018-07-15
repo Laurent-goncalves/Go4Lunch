@@ -214,6 +214,7 @@ public class RestoFragment extends Fragment {
                 + "&key=" + api_key;
 
         // Load the image using Glide
+        if(getActivity()!=null)
         Glide.with(getActivity().getApplicationContext())
                 .load(link)
                 .into(picture_resto);

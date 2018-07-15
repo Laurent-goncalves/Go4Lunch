@@ -75,7 +75,6 @@
                 android:id="@+id/facebook_loginButton"
                 android:layout_width="300dp"
                 android:layout_height="50dp"
-                android:paddingStart="70dp"
                 android:layout_gravity="center_horizontal"
                 android:layout_marginBottom="@dimen/default_large_margin"
                 android:drawablePadding="15dp"
@@ -83,8 +82,9 @@
                 fb:com_facebook_login_text ="@string/connect_with_facebook"
                 android:paddingTop="15dp"
                 android:paddingBottom="15dp"
+                android:paddingLeft="25dp"
                 style="@style/AppTheme.RoundedCornerFacebookButton"
-                tools:ignore="RtlSymmetry" />
+                tools:ignore="RtlHardcoded,RtlSymmetry" />
 
             <!-- BUTTON CONNECT WITH GOOGLE -->
             <Button
@@ -93,7 +93,8 @@
                 android:layout_width="300dp"
                 android:layout_height="50dp"
                 android:paddingStart="15dp"
-                android:layout_gravity="center"
+                android:gravity="center"
+                android:layout_gravity="center_horizontal"
                 android:drawableStart="@drawable/ic_google"
                 android:text="@string/connect_with_google"
                 android:textColor="#fff"

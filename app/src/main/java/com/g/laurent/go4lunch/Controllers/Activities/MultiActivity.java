@@ -1,6 +1,8 @@
 package com.g.laurent.go4lunch.Controllers.Activities;
 
 import android.app.AlarmManager;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.support.v4.app.FragmentTransaction;
 import android.app.PendingIntent;
 import android.content.Context;
@@ -35,6 +37,8 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+
+import java.io.IOException;
 import java.util.Calendar;
 import java.util.List;
 import java.util.Locale;
@@ -83,10 +87,6 @@ public class MultiActivity extends AppCompatActivity implements CallbackMultiAct
 
         if(mCurrentUser!=null){
 
-            // Start progressBar
-            if(mProgressBar!=null)
-                mProgressBar.setVisibility(View.VISIBLE);
-
             // Set the language of the app by getting the settings in sharedpreferrences
             setLanguageForApp();
 
@@ -99,6 +99,10 @@ public class MultiActivity extends AppCompatActivity implements CallbackMultiAct
     public void setCurrentPlaceLatLng(LatLng currentPlaceLatLng) {
 
         this.currentPlaceLatLng = currentPlaceLatLng;
+
+        // Start progressBar
+        if(mProgressBar!=null)
+            mProgressBar.setVisibility(View.VISIBLE);
 
         // 2 - Once the location is defined, configure the toolbar and the navigation drawer
         mToolbar_navig_utils = new ToolbarNavigUtils(this);
@@ -276,6 +280,10 @@ public class MultiActivity extends AppCompatActivity implements CallbackMultiAct
                 configureAlarmManager();
             }
         }
+
+        if(mProgressBar!=null)
+            mProgressBar.setVisibility(View.VISIBLE);
+
         // recreate activity to refresh texts (useful in case of change of language)
         GoogleMapsUtils google_maps_utils = new GoogleMapsUtils(getApplicationContext(), this, null);
         google_maps_utils.getLocationPermission();
@@ -292,7 +300,7 @@ public class MultiActivity extends AppCompatActivity implements CallbackMultiAct
             intent.putExtra(EXTRA_USER_ID, mCurrentUser.getUid()); // attach the userId to the intent
             alarmIntent = PendingIntent.getBroadcast(getApplicationContext(), 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
 
-            // Set the alarm to start at 12:00 p.m.
+            // Set the alarm to start at 12:00.
             Calendar calendar = Calendar.getInstance();
             calendar.setTimeInMillis(System.currentTimeMillis());
             calendar.set(Calendar.HOUR_OF_DAY, 12);
@@ -307,13 +315,33 @@ public class MultiActivity extends AppCompatActivity implements CallbackMultiAct
 
     @Override
     public void onRefresh() {
-        // When refreshing, we launch a new API request starting by defining current location
-        GoogleMapsUtils google_maps_utils = new GoogleMapsUtils(getApplicationContext(), this, mToolbar_navig_utils);
-        google_maps_utils.getLocationPermission();
 
-        // Launch progressBar
-        if(mProgressBar!=null)
-            mProgressBar.setVisibility(View.VISIBLE);
+        if(isNetworkAvailable(getApplicationContext())){ // check if there is internet connection
+            // When refreshing, we launch a new API request starting by defining current location
+            GoogleMapsUtils google_maps_utils = new GoogleMapsUtils(getApplicationContext(), this, mToolbar_navig_utils);
+            google_maps_utils.getLocationPermission();
+
+            // Launch progressBar
+            if(mProgressBar!=null)
+                mProgressBar.setVisibility(View.VISIBLE);
+
+        } else {
+            swipeRefreshLayout.setRefreshing(false);
+            Toast toast = Toast.makeText(getApplicationContext(),getApplicationContext().getResources().getString(R.string.error_no_internet),Toast.LENGTH_LONG);
+            toast.show();
+        }
+    }
+
+    public static boolean isNetworkAvailable(Context context) {
+        if (context == null) {
+            return false;
+        }
+        ConnectivityManager connectivityManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo activeNetworkInfo = null;
+        if (connectivityManager != null) {
+            activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
+        }
+        return activeNetworkInfo != null && activeNetworkInfo.isConnected();
     }
 
     // ----------------------------------------------------------------------------------------------------
