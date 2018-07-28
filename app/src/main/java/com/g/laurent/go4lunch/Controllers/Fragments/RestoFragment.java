@@ -360,7 +360,7 @@ public class RestoFragment extends Fragment {
         });
     }
 
-    public void modify_state_button_like() {
+    public void modifyStateButtonLike() {
         setColorButton(like_button, R.color.colorStars);
         like_button.setEnabled(false);
         renew_list_workmates();
@@ -423,11 +423,11 @@ public class RestoFragment extends Fragment {
 
     private void setRestoChosen(Boolean select){
 
-        if(getActivity().getApplicationContext()!=null){
+        if(context!=null){
             if(select)
-                button_valid.setImageDrawable(getResources().getDrawable(R.drawable.baseline_check_circle_green_24));
+                button_valid.setImageResource(R.drawable.baseline_check_circle_green_24);
             else
-                button_valid.setImageDrawable(getResources().getDrawable(R.drawable.baseline_check_circle_black_24));
+                button_valid.setImageResource(R.drawable.baseline_check_circle_black_24);
         }
     }
 

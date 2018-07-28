@@ -102,29 +102,7 @@ public class FirebaseRecover {
                     if(!is_workmate_in_list(workmate.getId(),list_workmates))
                         list_workmates.add(workmate);
                 }
-
-                switch(callback){
-                    case CALLBACK_RESTOFRAGMENT:
-                        if(restoFragment!=null)
-                            restoFragment.set_list_of_workmates(list_workmates,INITIAL_LIST_WORKMATES);
-                        break;
-                    case CALLBACK_LISTRESTOFRAGMENT:
-                        if(listRestoFragment!=null)
-                            listRestoFragment.set_list_of_workmates(list_workmates);
-                        break;
-                    case CALLBACK_LISTMATESFRAGMENT:
-                        if(listMatesFragment!=null)
-                            listMatesFragment.set_list_of_workmates(list_workmates);
-                        break;
-                    case CALLBACK_MAPSFRAGMENT:
-                        if(mapsFragment!=null)
-                            mapsFragment.set_list_of_workmates(list_workmates);
-                        break;
-                    case CALLBACK_ALARM:
-                        if(callback_alarm!=null)
-                            callback_alarm.send_notification(list_workmates);
-                        break;
-                }
+                callback_list_workmates();
             }
 
             @Override
@@ -132,8 +110,34 @@ public class FirebaseRecover {
                 Toast toast = Toast.makeText(context,context.getResources().getString(R.string.firebase_database_err) + "\n"
                         + databaseError.toString(),Toast.LENGTH_LONG);
                 toast.show();
+                callback_list_workmates();
             }
         });
+    }
+
+    private void callback_list_workmates(){
+        switch(callback){
+            case CALLBACK_RESTOFRAGMENT:
+                if(restoFragment!=null)
+                    restoFragment.set_list_of_workmates(list_workmates,INITIAL_LIST_WORKMATES);
+                break;
+            case CALLBACK_LISTRESTOFRAGMENT:
+                if(listRestoFragment!=null)
+                    listRestoFragment.set_list_of_workmates(list_workmates);
+                break;
+            case CALLBACK_LISTMATESFRAGMENT:
+                if(listMatesFragment!=null)
+                    listMatesFragment.set_list_of_workmates(list_workmates);
+                break;
+            case CALLBACK_MAPSFRAGMENT:
+                if(mapsFragment!=null)
+                    mapsFragment.set_list_of_workmates(list_workmates);
+                break;
+            case CALLBACK_ALARM:
+                if(callback_alarm!=null)
+                    callback_alarm.send_notification(list_workmates);
+                break;
+        }
     }
 
     private Boolean is_workmate_in_list(String user_id, List<Workmate> list_workmates){

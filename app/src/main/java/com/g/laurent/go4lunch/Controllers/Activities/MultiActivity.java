@@ -96,7 +96,7 @@ public class MultiActivity extends AppCompatActivity implements CallbackMultiAct
 
     public void setCurrentPlaceLatLng(LatLng currentPlaceLatLng) {
 
-        this.currentPlaceLatLng = currentPlaceLatLng;
+        this.currentPlaceLatLng = currentPlaceLatLng;//new LatLng(48.609855726691116,2.485482611937641);
 
         // Start progressBar
         if(mProgressBar!=null)

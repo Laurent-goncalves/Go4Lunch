@@ -1,6 +1,5 @@
 package com.g.laurent.go4lunch.Utils;
 
-import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.support.annotation.NonNull;
@@ -32,8 +31,6 @@ import com.google.android.gms.tasks.Task;
 import java.util.ArrayList;
 import java.util.List;
 
-
-@SuppressLint("Registered")
 public class GoogleMapsUtils extends FragmentActivity implements GoogleApiClient.OnConnectionFailedListener {
 
     private PlaceDetectionClient mPlaceDetectionClient;
@@ -45,6 +42,8 @@ public class GoogleMapsUtils extends FragmentActivity implements GoogleApiClient
     private Context context;
     private MultiActivity activity;
     private ToolbarNavigUtils mToolbar_navig_utils;
+
+    public GoogleMapsUtils(){ }
 
     public GoogleMapsUtils(Context context, MultiActivity activity, ToolbarNavigUtils toolbar_navig_utils) {
 
@@ -89,7 +88,8 @@ public class GoogleMapsUtils extends FragmentActivity implements GoogleApiClient
                         // Recover the latitude and longitude of current location
                         currentPlaceLatLng=findPlaceHighestLikelihood(task);
 
-                        if(currentPlaceLatLng.longitude==-122.08418830000001) // for Travis integration tests
+                        if(currentPlaceLatLng.longitude>=-123 && currentPlaceLatLng.longitude<=-122
+                                && currentPlaceLatLng.latitude>=37 && currentPlaceLatLng.latitude<=38) // for Travis integration tests
                             currentPlaceLatLng=new LatLng(48.866667, 2.333333); // for Travis integration tests
 
                         // Stop swipe to refresh
@@ -124,7 +124,7 @@ public class GoogleMapsUtils extends FragmentActivity implements GoogleApiClient
 
     private LatLng find_last_current_location(){
 
-        save_last_current_location(new LatLng(48.866667, 2.333333)); // for Travis integration tests
+        //save_last_current_location(new LatLng(48.866667, 2.333333)); // for Travis integration tests
 
         Float latitude = activity.getSharedPreferences().getFloat(EXTRA_LAT_CURRENT,0);
         Float longitude = activity.getSharedPreferences().getFloat(EXTRA_LONG_CURRENT,0);

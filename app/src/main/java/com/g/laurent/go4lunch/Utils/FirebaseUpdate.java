@@ -37,7 +37,7 @@ public class FirebaseUpdate {
         databaseReferenceWorkmates.child(user_id).child("list_resto_liked").child(resto.getPlaceId()).setValue(resto.getPlaceId());
 
         if(restoFragment!=null)
-            restoFragment.modify_state_button_like();
+            restoFragment.modifyStateButtonLike();
     }
 
     public void update_chosen_status_workmate(String user_id, PlaceNearby resto){

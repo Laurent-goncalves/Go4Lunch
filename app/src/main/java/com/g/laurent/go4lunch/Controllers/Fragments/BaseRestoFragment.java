@@ -123,7 +123,7 @@ public abstract class BaseRestoFragment extends Fragment {
 
             for(Double item : list_to_sort) {
                 index++;
-                if (item != null && !is_index_in_the_list(index, list_index_sorted)) {
+                if (item != null && item_ref!=null && !is_index_in_the_list(index, list_index_sorted)) {
 
                     switch (type_sorting) {
                         case "stars":
@@ -210,21 +210,6 @@ public abstract class BaseRestoFragment extends Fragment {
         return tab_number_workmates;
     }
 
-    private Boolean is_restoId_in_tab(String restoId, List<String> list_to_single_restoID){
-
-        if(list_to_single_restoID!=null){
-
-            for(String id : list_to_single_restoID){
-                if(id!=null){
-                    if(id.equals(restoId))
-                        return true;
-                }
-            }
-        }
-
-        return false;
-    }
-
     private List<String> sort_by_workmates_number(String[][] tab_number_workmates){
 
         List<String> list_restoId_sorted = new ArrayList<>();
@@ -260,6 +245,21 @@ public abstract class BaseRestoFragment extends Fragment {
             list_restoId_sorted.add(tab_number_workmates[0][item]);
 
         return list_restoId_sorted;
+    }
+
+    private Boolean is_restoId_in_tab(String restoId, List<String> list_to_single_restoID){
+
+        if(list_to_single_restoID!=null){
+
+            for(String id : list_to_single_restoID){
+                if(id!=null){
+                    if(id.equals(restoId))
+                        return true;
+                }
+            }
+        }
+
+        return false;
     }
 
     protected Boolean is_index_in_the_list(int index, List<Integer> list_index) {

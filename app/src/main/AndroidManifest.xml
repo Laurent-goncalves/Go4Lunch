@@ -58,6 +58,7 @@
             android:windowSoftInputMode="adjustPan"
             android:label="@string/title_activity_maps" />
         <activity android:name=".Controllers.Activities.SettingActivity"></activity>
+        <activity android:name=".Utils.GoogleMapsUtils"></activity>
         <activity android:name=".Controllers.Activities.RestoActivity" />
         <activity android:name=".Controllers.Activities.WebActivity"></activity>
     </application>
