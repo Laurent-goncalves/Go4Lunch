@@ -56,8 +56,6 @@ public class MultiActivity extends AppCompatActivity implements CallbackMultiAct
     @BindView(R.id.activity_main_nav_view) NavigationView navigationView;
     @BindView(R.id.swiperefresh) SwipeRefreshLayout swipeRefreshLayout;
     @BindView(R.id.progressBar) ProgressBar mProgressBar;
-    private AlarmManager alarmMgr;
-    private PendingIntent alarmIntent;
     private TabLayout tabs;
     private MultiFragAdapter pageAdapter;
     private ViewPager pager;
@@ -92,6 +90,12 @@ public class MultiActivity extends AppCompatActivity implements CallbackMultiAct
             GoogleMapsUtils google_maps_utils = new GoogleMapsUtils(getApplicationContext(), this, null);
             google_maps_utils.getLocationPermission();
         }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        recreate_fragments();
     }
 
     public void setCurrentPlaceLatLng(LatLng currentPlaceLatLng) {
@@ -271,8 +275,12 @@ public class MultiActivity extends AppCompatActivity implements CallbackMultiAct
         // request code 1 = enable notif ; request code 0 = disable notif
         if (requestCode == 1) {
             if (resultCode == RESULT_CANCELED) { // if the user decided to disable notification, whereas it was enabled when opening settings
-                if (alarmMgr != null) {
-                    alarmMgr.cancel(alarmIntent);
+                AlarmManager alarm = (AlarmManager) getApplicationContext().getSystemService(ALARM_SERVICE);
+                PendingIntent pending = PendingIntent.getBroadcast(getApplicationContext(), 0, new Intent(getApplicationContext(), AlarmReceiver.class), PendingIntent.FLAG_UPDATE_CURRENT);
+
+                if (alarm != null) {
+                    alarm.cancel(pending);
+                    pending.cancel();
                 }
             }
         } else {
@@ -280,7 +288,6 @@ public class MultiActivity extends AppCompatActivity implements CallbackMultiAct
                 configureAlarmManager();
             }
         }
-
         recreate_fragments();
     }
 
@@ -289,7 +296,8 @@ public class MultiActivity extends AppCompatActivity implements CallbackMultiAct
         GoogleMapsUtils google_maps_utils = new GoogleMapsUtils(getApplicationContext(), this, mToolbar_navig_utils);
         google_maps_utils.getLocationPermission();
 
-        getPageAdapter().getMapsFragment().getMapView().removeAllViews();
+        if(getPageAdapter()!=null)
+            getPageAdapter().getMapsFragment().getMapView().removeAllViews();
 
         // Launch progressBar
         if(mProgressBar!=null) {
@@ -303,10 +311,10 @@ public class MultiActivity extends AppCompatActivity implements CallbackMultiAct
         Boolean enable = sharedPreferences.getBoolean(EXTRA_ENABLE_NOTIF,false);
 
         if(enable){
-            alarmMgr = (AlarmManager) getApplicationContext().getSystemService(Context.ALARM_SERVICE);
+            AlarmManager alarmMgr = (AlarmManager) getApplicationContext().getSystemService(Context.ALARM_SERVICE);
             Intent intent = new Intent(getApplicationContext(), AlarmReceiver.class);
             intent.putExtra(EXTRA_USER_ID, mCurrentUser.getUid()); // attach the userId to the intent
-            alarmIntent = PendingIntent.getBroadcast(getApplicationContext(), 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+            PendingIntent alarmIntent = PendingIntent.getBroadcast(getApplicationContext(), 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
 
             // Set the alarm to start at 12:00.
             Calendar calendar = Calendar.getInstance();
